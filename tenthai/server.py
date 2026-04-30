@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 
 from .agents import run_agents, TENTH_MAN
+from .consensus import synthesize_consensus
 from .embed import embed_responses, project_mds
 from .scoping import generate_questions
 from .viz import render
@@ -145,6 +146,9 @@ async def decide(question: str, context: str | None = None, skip_scoping: bool =
     except RuntimeError as exc:
         return {"error": "agents_failed", "reason": str(exc)}
 
+    successful_frames = [(f, r) for f, r, s in results[:9] if s == "ok"]
+    consensus_text = await synthesize_consensus(client, successful_frames, question)
+
     texts = [r[1] for r in results]
     embed_result = embed_responses(texts)
     if not embed_result["ok"]:
@@ -152,11 +156,12 @@ async def decide(question: str, context: str | None = None, skip_scoping: bool =
 
     proj = project_mds(embed_result["embeddings"])
 
-    cost_clp = 550.0  # rough average; range CLP 400-700 with 1000-token frames + 1500-token tenth-man
+    cost_clp = 580.0  # rough avg; range CLP 430-730 with 1500/3500 token cap + Haiku consensus + scoping
 
     viz_path = render(
         question=question,
         results=results,
+        consensus=consensus_text,
         coords_2d=proj["coords_2d"],
         distances=proj["distance_to_centroid_of_9"],
         provider=embed_result["provider"],
@@ -174,7 +179,8 @@ async def decide(question: str, context: str | None = None, skip_scoping: bool =
 
     return {
         "viz_path": viz_path,
-        "viz_note": "Full responses are in the HTML viz. Open it in browser. JSON below contains summaries only (except tenth-man, which is full).",
+        "viz_note": "Full responses are in the HTML viz. Open it in browser. JSON below contains summaries only (consensus + tenth-man are full).",
+        "consensus": consensus_text or "(consensus synthesis failed)",
         "frames": [
             {
                 "frame": frame,

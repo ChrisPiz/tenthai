@@ -1,7 +1,15 @@
-"""HTML viz: editorial-style disagreement map.
+"""HTML viz: editorial-modernist disagreement report.
 
-Layout: hero with question, polished plotly chart with guide rings,
-tenth-man response as pull-quote, 9 frame cards with markdown rendering.
+Design language:
+- Fraunces (serif display) + Inter Tight (UI) + JetBrains Mono (data)
+- Warm paper background (oklch), carbon ink, single terracotta accent for tenth-man
+- Sober ink-blue for the consensus nine
+- Generous whitespace, fine rules, data as first-class citizen
+
+Layout: masthead → headline → question → stats strip → MDS map → consensus →
+9 frames list (sorted by distance, closest open by default) → tenth-man feature →
+colophon. Order honors the user's reading flow: see what the 9 agree on first,
+then individual conclusions, then the dissent as punchline at the end.
 """
 import html as html_mod
 import math
@@ -11,10 +19,8 @@ import webbrowser
 from datetime import datetime
 from pathlib import Path
 
-import plotly.graph_objects as go
 
-
-FRAME_GLYPHS = {
+FRAME_INDEX = {
     "empirical": "01",
     "historical": "02",
     "first-principles": "03",
@@ -28,7 +34,7 @@ FRAME_GLYPHS = {
 
 
 def _md_to_html(text: str) -> str:
-    """Minimal markdown → HTML. Handles headers, bold, italic, hr, paragraphs."""
+    """Minimal markdown → HTML. Headers, bold, italic, hr, paragraphs, blockquote."""
     text = html_mod.escape(text)
     blocks = re.split(r"\n\s*\n", text)
     out = []
@@ -36,7 +42,12 @@ def _md_to_html(text: str) -> str:
         b = block.strip()
         if not b:
             continue
-        if b.startswith("## "):
+        if b.startswith("> "):
+            inner = b[2:].strip()
+            inner = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", inner)
+            inner = re.sub(r"(?<!\*)\*(?!\s)(.+?)(?<!\s)\*(?!\*)", r"<em>\1</em>", inner)
+            out.append(f"<p class=\"pull\">{inner}</p>")
+        elif b.startswith("## "):
             out.append(f"<h3>{b[3:].strip()}</h3>")
         elif b.startswith("### "):
             out.append(f"<h4>{b[4:].strip()}</h4>")
@@ -52,573 +63,940 @@ def _md_to_html(text: str) -> str:
     return "\n".join(out)
 
 
-def _make_chart(question, frames, statuses, coords_2d, distances):
-    """Editorial chart: guide rings, ink-on-paper aesthetic, halo on tenth-man."""
+def _extract_conclusion(text: str, max_chars: int = 360) -> str:
+    """Last paragraph, assumed conclusion per prompt structure."""
+    paragraphs = [p.strip() for p in re.split(r"\n\s*\n", text.strip()) if p.strip()]
+    if not paragraphs:
+        return text[:max_chars]
+    last = paragraphs[-1]
+    if len(last) < 100 and len(paragraphs) >= 2:
+        last = paragraphs[-2] + "\n\n" + last
+    if len(last) > max_chars:
+        truncated = last[:max_chars]
+        last_period = max(truncated.rfind("."), truncated.rfind("?"), truncated.rfind("!"))
+        if last_period > max_chars * 0.5:
+            return truncated[: last_period + 1]
+        return truncated.rsplit(" ", 1)[0] + "..."
+    return last
+
+
+def _map_to_svg(coords_2d):
+    """Map 10 MDS coords into SVG viewBox 1000×700, centered at (500, 350).
+
+    Scale so the max extent fits within radius ~240 (matches design's outer ring).
+    Returns list of (x_svg, y_svg) tuples, length 10.
+    """
+    cx, cy = 500, 350
+    max_radius = 230
+
     xs = [c[0] for c in coords_2d]
     ys = [c[1] for c in coords_2d]
+    max_extent = max(
+        max(abs(x) for x in xs) if xs else 0.001,
+        max(abs(y) for y in ys) if ys else 0.001,
+        0.001,
+    )
+    scale = max_radius / max_extent
 
-    INK = "#1a1a1a"
-    FRAME_COLOR = "#1e3a5f"
-    TENTH_COLOR = "#c0392b"
-    PAPER = "#faf7f2"
-    GUIDE = "rgba(26,26,26,0.08)"
-    GUIDE_TEXT = "rgba(26,26,26,0.35)"
+    return [(cx + x * scale, cy + y * scale) for x, y in zip(xs, ys)]
 
-    colors = [FRAME_COLOR] * 9 + [TENTH_COLOR]
-    sizes = [14 + min(d, 1.5) * 10 for d in distances[:9]] + [22]
 
-    fig = go.Figure()
+def _build_map_svg(coords_2d, frames, distances, statuses, max_frame_dist, min_frame_dist):
+    """Generate the full MDS map SVG with rings, crosshair, centroid, frames, tenth-man."""
+    points = _map_to_svg(coords_2d)
+    cx, cy = 500, 350
 
-    all_dist = [math.hypot(x, y) for x, y in zip(xs, ys)]
-    max_r = max(all_dist) if all_dist else 1.0
-    ring_radii = [max_r * 0.33, max_r * 0.66, max_r]
-
-    for r in ring_radii:
-        theta = [i / 64 * 2 * math.pi for i in range(65)]
-        fig.add_trace(go.Scatter(
-            x=[r * math.cos(t) for t in theta],
-            y=[r * math.sin(t) for t in theta],
-            mode="lines",
-            line=dict(color=GUIDE, width=1, dash="dot"),
-            hoverinfo="skip",
-            showlegend=False,
-        ))
-
-    fig.add_trace(go.Scatter(
-        x=[max_r * 1.02], y=[0],
-        mode="text",
-        text=[f"d≈{max_r:.2f}"],
-        textfont=dict(size=9, color=GUIDE_TEXT, family="JetBrains Mono, monospace"),
-        textposition="middle right",
-        hoverinfo="skip",
-        showlegend=False,
-    ))
-
-    for i in range(10):
-        fig.add_trace(go.Scatter(
-            x=[0, xs[i]],
-            y=[0, ys[i]],
-            mode="lines",
-            line=dict(color="rgba(26,26,26,0.06)", width=0.8),
-            hoverinfo="skip",
-            showlegend=False,
-        ))
-
-    fig.add_trace(go.Scatter(
-        x=[0], y=[0],
-        mode="markers",
-        marker=dict(symbol="diamond-open", size=10, color=INK, line=dict(width=1.2)),
-        hovertext="centroide de los 9",
-        hoverinfo="text",
-        showlegend=False,
-    ))
-
-    # tenth-man halo
-    fig.add_trace(go.Scatter(
-        x=[xs[9]], y=[ys[9]],
-        mode="markers",
-        marker=dict(size=42, color=TENTH_COLOR, opacity=0.12),
-        hoverinfo="skip",
-        showlegend=False,
-    ))
-
-    hover_texts = [
-        f"<b>{frame}</b><br>distance: {dist:.3f}<br><i>{status}</i>"
-        for frame, status, dist in zip(frames, statuses, distances)
+    parts = [
+        '<svg class="map" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet" aria-hidden="true">',
+        '<defs>',
+        '<radialGradient id="halo" cx="50%" cy="50%" r="50%">',
+        '<stop offset="0%" stop-color="oklch(56% 0.165 32 / .22)"/>',
+        '<stop offset="60%" stop-color="oklch(56% 0.165 32 / .04)"/>',
+        '<stop offset="100%" stop-color="oklch(56% 0.165 32 / 0)"/>',
+        '</radialGradient>',
+        '</defs>',
+        # Concentric rings (4 levels)
+        '<g stroke="oklch(86% 0.012 70)" stroke-width="0.6" fill="none" opacity=".7">',
+        f'<circle cx="{cx}" cy="{cy}" r="60"/>',
+        f'<circle cx="{cx}" cy="{cy}" r="120"/>',
+        f'<circle cx="{cx}" cy="{cy}" r="180" stroke-dasharray="2 4"/>',
+        f'<circle cx="{cx}" cy="{cy}" r="240" stroke-dasharray="2 4"/>',
+        '</g>',
+        # Crosshair
+        '<g stroke="oklch(82% 0.012 70)" stroke-width="0.6">',
+        '<line x1="100" y1="350" x2="900" y2="350"/>',
+        '<line x1="500" y1="60" x2="500" y2="640"/>',
+        '</g>',
+        # Centroid label + diamond marker
+        '<g font-family="JetBrains Mono, monospace" font-size="10" fill="oklch(56% 0.012 60)" letter-spacing="1">',
+        '<text x="510" y="346">CENTROIDE</text>',
+        f'<rect x="{cx - 4}" y="{cy - 4}" width="8" height="8" fill="none" stroke="oklch(56% 0.012 60)" stroke-width="1" transform="rotate(45 {cx} {cy})"/>',
+        '</g>',
     ]
 
-    label_text = [f"{FRAME_GLYPHS.get(frames[i], '·')} {frames[i]}" for i in range(9)] + ["10 · tenth-man"]
-
-    fig.add_trace(go.Scatter(
-        x=xs,
-        y=ys,
-        mode="markers+text",
-        marker=dict(
-            size=sizes,
-            color=colors,
-            line=dict(width=2, color=PAPER),
-            opacity=0.95,
-        ),
-        text=label_text,
-        textposition="top center",
-        textfont=dict(size=11, color=INK, family="JetBrains Mono, ui-monospace, monospace"),
-        hovertext=hover_texts,
-        hoverinfo="text",
-        showlegend=False,
-        cliponaxis=False,
-    ))
-
-    pad = max_r * 0.35
-    x_range = [-max_r - pad, max_r + pad]
-    y_range = [-max_r - pad, max_r + pad]
-
-    fig.update_layout(
-        xaxis=dict(
-            range=x_range,
-            showgrid=False,
-            zeroline=False,
-            showticklabels=False,
-            scaleanchor="y",
-            scaleratio=1,
-        ),
-        yaxis=dict(
-            range=y_range,
-            showgrid=False,
-            zeroline=False,
-            showticklabels=False,
-        ),
-        plot_bgcolor=PAPER,
-        paper_bgcolor=PAPER,
-        font=dict(family="Inter, system-ui, sans-serif"),
-        height=560,
-        margin=dict(l=20, r=20, t=20, b=20),
-        hoverlabel=dict(
-            bgcolor="white",
-            bordercolor=INK,
-            font=dict(family="Inter, sans-serif", size=12),
-        ),
+    # Distance lines (9 frames in blue, tenth in accent dashed)
+    parts.append('<g stroke="oklch(34% 0.085 250 / .35)" stroke-width="0.7">')
+    for i in range(9):
+        x, y = points[i]
+        parts.append(f'<line x1="{cx}" y1="{cy}" x2="{x:.1f}" y2="{y:.1f}"/>')
+    parts.append('</g>')
+    tx, ty = points[9]
+    parts.append(
+        f'<line x1="{cx}" y1="{cy}" x2="{tx:.1f}" y2="{ty:.1f}" '
+        f'stroke="oklch(56% 0.165 32 / .55)" stroke-width="1.1" stroke-dasharray="3 3"/>'
     )
 
-    return fig
+    # Nine frame nodes
+    parts.append('<g class="nodes" font-family="JetBrains Mono, monospace" font-size="11" fill="oklch(20% 0.012 60)">')
+    for i in range(9):
+        x, y = points[i]
+        frame = frames[i]
+        idx = FRAME_INDEX.get(frame, f"{i+1:02d}")
+        dist = distances[i]
+        # Label position: anchor right when point is in right half, left otherwise
+        if x >= cx:
+            anchor = "start"
+            lx = x + 17
+        else:
+            anchor = "end"
+            lx = x - 17
+        # Highlight closest + farthest with thicker ring
+        is_closest = abs(dist - min_frame_dist) < 1e-6
+        is_farthest = abs(dist - max_frame_dist) < 1e-6
+        ring_opacity = ".35" if (is_closest or is_farthest) else ".25"
+        ring_radius = 15 if is_closest else 13
+        marker_radius = 9 if is_closest else 8
+        # Tag suffix for closest/farthest
+        suffix = ""
+        if is_closest:
+            suffix = " · más cercano"
+        elif is_farthest:
+            suffix = " · más lejano"
+        parts.append('<g>')
+        parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{marker_radius}" fill="oklch(34% 0.085 250)"/>')
+        parts.append(
+            f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{ring_radius}" fill="none" '
+            f'stroke="oklch(34% 0.085 250 / {ring_opacity})" stroke-width="3"/>'
+        )
+        parts.append(
+            f'<text x="{lx:.1f}" y="{y - 4:.1f}" font-size="11" text-anchor="{anchor}">{idx}</text>'
+        )
+        parts.append(
+            f'<text x="{lx:.1f}" y="{y + 10:.1f}" font-family="Inter Tight, sans-serif" '
+            f'font-weight="500" font-size="13" text-anchor="{anchor}">{html_mod.escape(frame)}</text>'
+        )
+        parts.append(
+            f'<text x="{lx:.1f}" y="{y + 25:.1f}" font-size="9.5" fill="oklch(56% 0.012 60)" '
+            f'text-anchor="{anchor}">d&#160;{dist:.3f}{suffix}</text>'
+        )
+        parts.append('</g>')
+    parts.append('</g>')
+
+    # Tenth-man with halo
+    tx, ty = points[9]
+    tenth_dist = distances[9]
+    parts.append('<g>')
+    parts.append(f'<circle cx="{tx:.1f}" cy="{ty:.1f}" r="42" fill="url(#halo)"/>')
+    parts.append(f'<circle cx="{tx:.1f}" cy="{ty:.1f}" r="11" fill="oklch(56% 0.165 32)"/>')
+    parts.append(
+        f'<circle cx="{tx:.1f}" cy="{ty:.1f}" r="17" fill="none" '
+        f'stroke="oklch(56% 0.165 32 / .35)" stroke-width="3"/>'
+    )
+    label_y_offset = -37 if ty > cy - 50 else 50
+    parts.append(
+        f'<text x="{tx:.1f}" y="{ty + label_y_offset:.1f}" text-anchor="middle" '
+        f'font-family="Inter Tight, sans-serif" font-weight="600" font-size="13" '
+        f'fill="oklch(56% 0.165 32)" letter-spacing="2">10 · TENTH-MAN</text>'
+    )
+    parts.append(
+        f'<text x="{tx:.1f}" y="{ty + label_y_offset + 15:.1f}" text-anchor="middle" '
+        f'font-size="10" fill="oklch(56% 0.165 32)">d&#160;{tenth_dist:.3f} · disenso steel-man</text>'
+    )
+    parts.append('</g>')
+
+    # Axis labels
+    parts.append(
+        '<g font-family="JetBrains Mono, monospace" font-size="9.5" '
+        'fill="oklch(56% 0.012 60)" letter-spacing="2">'
+    )
+    parts.append('<text x="100" y="345">MDS-1</text>')
+    parts.append('<text x="892" y="345" text-anchor="end">→</text>')
+    parts.append('<text x="500" y="55" text-anchor="middle">MDS-2</text>')
+    parts.append('</g>')
+
+    parts.append('</svg>')
+    return "\n".join(parts)
 
 
-def render(question, results, coords_2d, distances, provider, model, cost_estimate_clp):
-    """Render the disagreement map to HTML. Returns absolute path. Auto-opens."""
+def _build_frame_card(frame, response, status, distance, max_dist, idx_str, is_open=False):
+    """Build a frame-list article. Open by default for the closest frame."""
+    body = _md_to_html(response)
+    bar_pct = min(100, (distance / max_dist) * 100) if max_dist > 0 else 0
+    status_tag = "OK" if status == "ok" else "FAILED"
+    open_class = " open" if is_open else ""
+    bar_color_var = "var(--accent)" if is_open else "var(--nine)"
+    return f"""
+    <article class="frame{open_class}" data-frame="{html_mod.escape(frame)}">
+      <div class="frame-row">
+        <span class="f-idx">{idx_str}</span>
+        <span class="f-name">{html_mod.escape(frame)}</span>
+        <span class="f-tag"><b>{status_tag}</b></span>
+        <span class="f-bar"><i style="width:{bar_pct:.0f}%; background:{bar_color_var};"></i></span>
+        <span class="f-d">d&#160;<b>{distance:.3f}</b></span>
+        <span class="f-caret">›</span>
+      </div>
+      <div class="f-body">
+        {body}
+      </div>
+    </article>
+    """
+
+
+def render(question, results, coords_2d, distances, provider, model, cost_estimate_clp, consensus=None):
+    """Render editorial disagreement report. Returns absolute path. Auto-opens.
+
+    Layout order: masthead → headline → question → stats → map → consensus →
+    9 frames (sorted by distance, closest open) → tenth-man feature → colophon.
+    """
     frames = [r[0] for r in results]
     responses = [r[1] for r in results]
     statuses = [r[2] for r in results]
 
-    fig = _make_chart(question, frames, statuses, coords_2d, distances)
-    chart_html = fig.to_html(
-        include_plotlyjs="inline",
-        full_html=False,
-        div_id="tenthai-chart",
-        config={"displaylogo": False, "responsive": True, "displayModeBar": False},
+    tenth_distance = distances[9]
+    frame_distances = distances[:9]
+    max_frame_distance = max(frame_distances)
+    min_frame_distance = min(frame_distances)
+    most_divergent_idx = frame_distances.index(max_frame_distance)
+    closest_frame_idx = frame_distances.index(min_frame_distance)
+    most_divergent_name = frames[most_divergent_idx]
+
+    fragility = (
+        "Disidente vive en otro mundo — consenso frágil que vale la pena romper."
+        if tenth_distance > 2 * max_frame_distance
+        else "Marcos ya dispersos — no había consenso fuerte que romper."
+    )
+
+    # Map SVG (uses real MDS coords)
+    map_svg = _build_map_svg(
+        coords_2d=coords_2d,
+        frames=frames,
+        distances=distances,
+        statuses=statuses,
+        max_frame_dist=max_frame_distance,
+        min_frame_dist=min_frame_distance,
+    )
+
+    # Frames sorted by distance ASC; closest is default open
+    frame_order = sorted(range(9), key=lambda i: frame_distances[i])
+    frame_cards_html = "\n".join(
+        _build_frame_card(
+            frame=frames[i],
+            response=responses[i],
+            status=statuses[i],
+            distance=frame_distances[i],
+            max_dist=max_frame_distance,
+            idx_str=FRAME_INDEX.get(frames[i], f"{i+1:02d}"),
+            is_open=(i == closest_frame_idx),
+        )
+        for i in frame_order
     )
 
     tenth_response_html = _md_to_html(responses[9])
-    tenth_distance = distances[9]
-    max_frame_distance = max(distances[:9])
-    fragility = (
-        "consenso frágil — el disidente vive en otro mundo"
-        if tenth_distance > 2 * max_frame_distance
-        else "marcos ya dispersos — no había consenso fuerte"
-    )
 
-    frame_cards = []
-    for i in range(9):
-        frame = frames[i]
-        glyph = FRAME_GLYPHS.get(frame, "·")
-        resp = _md_to_html(responses[i])
-        status = statuses[i]
-        dist = distances[i]
-        status_badge = "" if status == "ok" else '<span class="badge-failed">FAILED</span>'
-        frame_cards.append(f"""
-        <details class="frame-card">
-          <summary>
-            <span class="frame-glyph">{glyph}</span>
-            <span class="frame-name">{html_mod.escape(frame)}</span>
-            {status_badge}
-            <span class="frame-distance">d {dist:.3f}</span>
-          </summary>
-          <div class="frame-body">{resp}</div>
-        </details>
-        """)
-    frame_cards_html = "\n".join(frame_cards)
+    # Consensus block (optional)
+    consensus_block_html = ""
+    if consensus:
+        consensus_html = _md_to_html(consensus)
+        consensus_block_html = f"""
+  <div class="sec">
+    <span class="glyph">∑</span>
+    <h2>El <em>consenso</em> de los nueve</h2>
+    <span class="rule"></span>
+    <span class="aside">qué creen <b>en común</b> los marcos</span>
+  </div>
 
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+  <article class="consensus">
+    <div class="consensus-body">
+      {consensus_html}
+    </div>
+  </article>
+"""
+
+    timestamp = datetime.now().strftime("%Y·%m·%d · %H:%M CLT")
+    timestamp_short = datetime.now().strftime("%Y·%m·%d")
+    report_id = datetime.now().strftime("%H%M")
     question_safe = html_mod.escape(question)
 
-    page = f"""<!DOCTYPE html>
+    page = f"""<!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TenthAI · {question_safe[:80]}</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TenthAI · {question_safe[:60]}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {{
-    --ink: #1a1a1a;
-    --ink-soft: #2c2c2c;
-    --muted: #6b6660;
-    --muted-soft: #999591;
-    --paper: #faf7f2;
-    --paper-warm: #f5f0e6;
-    --surface: #ffffff;
-    --border: rgba(26, 26, 26, 0.10);
-    --border-soft: rgba(26, 26, 26, 0.06);
-    --tenth: #c0392b;
-    --tenth-soft: #fdf2f0;
-    --frame: #1e3a5f;
-    --serif: "Fraunces", "Source Serif 4", Georgia, serif;
-    --serif-text: "Source Serif 4", Georgia, serif;
-    --sans: "Inter", system-ui, -apple-system, sans-serif;
-    --mono: "JetBrains Mono", ui-monospace, monospace;
+  :root{{
+    --bg:        oklch(96.5% 0.012 78);
+    --paper:     oklch(98.5% 0.008 78);
+    --paper-2:   oklch(94.5% 0.014 78);
+    --ink:       oklch(20% 0.012 60);
+    --ink-2:     oklch(38% 0.012 60);
+    --ink-3:     oklch(56% 0.012 60);
+    --ink-4:     oklch(72% 0.010 70);
+    --rule:      oklch(86% 0.012 70);
+    --rule-2:    oklch(91% 0.012 70);
+
+    --accent:      oklch(56% 0.165 32);
+    --accent-2:    oklch(48% 0.150 30);
+    --accent-soft: oklch(92% 0.045 32);
+
+    --nine:        oklch(34% 0.085 250);
+    --nine-2:      oklch(42% 0.080 250);
+    --nine-soft:   oklch(93% 0.025 250);
+
+    --serif: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+    --sans:  'Inter Tight', system-ui, sans-serif;
+    --mono:  'JetBrains Mono', ui-monospace, monospace;
   }}
-  * {{ box-sizing: border-box; }}
-  html, body {{ background: var(--paper); }}
-  body {{
+  *{{ box-sizing: border-box; }}
+  html, body{{ margin:0; padding:0; }}
+  body{{
     font-family: var(--sans);
+    background: var(--bg);
     color: var(--ink);
-    margin: 0;
-    padding: 0;
-    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    line-height: 1.55;
+    font-feature-settings: "ss01","cv11";
   }}
-  .container {{
-    max-width: 880px;
-    margin: 0 auto;
-    padding: 64px 32px 96px;
-  }}
-  @keyframes fadeUp {{
-    from {{ opacity: 0; transform: translateY(8px); }}
-    to {{ opacity: 1; transform: translateY(0); }}
-  }}
-  .hero {{
-    margin-bottom: 56px;
-    animation: fadeUp 0.5s ease-out;
-  }}
-  .eyebrow {{
+  ::selection{{ background: var(--accent-soft); color: var(--ink); }}
+
+  .page{{ max-width: 1180px; margin: 0 auto; padding: 56px 56px 96px; }}
+
+  .mast{{
+    display:flex; align-items:center; gap:14px;
     font-family: var(--mono);
     font-size: 11px;
-    letter-spacing: 0.18em;
+    letter-spacing: .14em;
     text-transform: uppercase;
-    color: var(--muted);
-    margin: 0 0 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    color: var(--ink-3);
   }}
-  .eyebrow::before {{
-    content: "";
-    width: 24px; height: 1px;
-    background: var(--ink);
-    display: inline-block;
-  }}
-  .eyebrow .brand-dot {{
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--tenth);
-    display: inline-block;
-  }}
-  h1.brand-line {{
+  .mast .rule{{ width: 28px; height:1px; background: var(--ink-3); }}
+  .mast .dot{{ width:7px; height:7px; border-radius:999px; background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft);}}
+  .mast b{{ color: var(--ink); font-weight: 500; letter-spacing: .14em;}}
+  .mast .sep{{ color: var(--ink-4); }}
+
+  .head{{
+    margin: 28px 0 0;
     font-family: var(--serif);
-    font-weight: 600;
-    font-size: clamp(28px, 4vw, 40px);
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-    margin: 0 0 24px;
+    font-weight: 380;
+    font-size: clamp(40px, 5.4vw, 72px);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
     color: var(--ink);
+    font-variation-settings: "SOFT" 30, "opsz" 144;
+    text-wrap: balance;
+    max-width: 16ch;
   }}
-  h1.brand-line em {{
+  .head em{{
     font-style: italic;
-    color: var(--tenth);
-    font-weight: 500;
+    color: var(--accent);
+    font-weight: 360;
+    font-variation-settings: "SOFT" 60, "opsz" 144;
   }}
-  blockquote.question {{
-    font-family: var(--serif-text);
-    font-size: 19px;
-    line-height: 1.5;
-    color: var(--ink-soft);
-    border-left: 3px solid var(--ink);
-    padding: 4px 0 4px 20px;
-    margin: 0 0 28px;
+
+  .question{{
+    margin: 28px 0 0;
+    padding: 4px 0 4px 18px;
+    border-left: 2px solid var(--ink-4);
+    font-family: var(--serif);
     font-style: italic;
+    font-weight: 360;
+    font-size: 20px;
+    line-height: 1.4;
+    color: var(--ink-2);
+    max-width: 64ch;
+    font-variation-settings: "opsz" 60;
+    text-wrap: pretty;
   }}
-  .meta-grid {{
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
-    margin-top: 24px;
+
+  .strip{{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    margin: 40px 0 56px;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--rule);
   }}
-  .meta-chip {{
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 12px 14px;
+  .stat{{
+    padding: 18px 24px 18px 0;
+    border-right: 1px solid var(--rule);
+    display:flex; flex-direction:column; gap:8px;
   }}
-  .meta-chip .label {{
+  .stat:nth-child(2){{ padding-left: 24px; }}
+  .stat:nth-child(3){{ padding-left: 24px; border-right: none;}}
+  .stat .lbl{{
     font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.12em;
+    font-size: 10.5px;
+    letter-spacing: .14em;
     text-transform: uppercase;
-    color: var(--muted);
-    margin: 0 0 4px;
+    color: var(--ink-3);
   }}
-  .meta-chip .value {{
-    font-family: var(--mono);
-    font-size: 14px;
+  .stat .val{{
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 26px;
+    letter-spacing: -0.018em;
     color: var(--ink);
-    font-weight: 500;
+    line-height: 1.1;
   }}
-  .meta-chip.verdict .value {{
-    font-family: var(--serif-text);
+  .stat .val .num{{
+    font-family: var(--mono);
+    font-weight: 500;
     font-size: 13px;
+    color: var(--ink-3);
+    margin-left: 8px;
+    letter-spacing: 0;
+  }}
+  .stat.accent .val{{ color: var(--accent); }}
+  .stat .verdict{{
+    font-family: var(--serif);
     font-style: italic;
-    line-height: 1.35;
-  }}
-  .chart-wrap {{
-    background: var(--paper);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    margin: 0 0 64px;
-    overflow: hidden;
-    box-shadow: 0 1px 2px rgba(26,26,26,0.03), 0 8px 24px -12px rgba(26,26,26,0.08);
-    animation: fadeUp 0.6s ease-out 0.1s both;
-  }}
-  .chart-caption {{
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.10em;
-    text-transform: uppercase;
-    color: var(--muted);
-    text-align: center;
-    padding: 14px 16px;
-    border-top: 1px solid var(--border-soft);
-    background: rgba(255,255,255,0.4);
-  }}
-  section {{ margin-bottom: 56px; }}
-  .section-header {{
-    display: flex;
-    align-items: baseline;
-    gap: 16px;
-    margin-bottom: 20px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--border);
-  }}
-  .section-num {{
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--muted);
-    letter-spacing: 0.10em;
-  }}
-  .section-title {{
-    font-family: var(--serif);
-    font-weight: 600;
-    font-size: 22px;
-    margin: 0;
-    letter-spacing: -0.01em;
-    flex: 1;
-  }}
-  .section-title em {{
-    font-style: italic;
-    font-weight: 500;
-    color: var(--tenth);
-  }}
-  .tenth-man {{
-    background: var(--tenth-soft);
-    border-left: 4px solid var(--tenth);
-    padding: 32px 36px;
-    border-radius: 4px;
-    font-family: var(--serif-text);
-    font-size: 16.5px;
-    line-height: 1.7;
-    color: var(--ink-soft);
-    animation: fadeUp 0.6s ease-out 0.2s both;
-  }}
-  .tenth-man h3 {{
-    font-family: var(--serif);
-    font-weight: 600;
-    font-size: 22px;
-    margin: 28px 0 14px;
-    color: var(--ink);
-    letter-spacing: -0.01em;
-  }}
-  .tenth-man h3:first-child {{ margin-top: 0; }}
-  .tenth-man h4 {{
-    font-family: var(--sans);
-    font-weight: 600;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--muted);
-    margin: 24px 0 10px;
-  }}
-  .tenth-man p {{ margin: 0 0 14px; }}
-  .tenth-man strong {{ color: var(--ink); font-weight: 600; }}
-  .tenth-man em {{ color: var(--tenth); font-style: italic; }}
-  .tenth-man hr {{
-    border: none;
-    border-top: 1px dashed rgba(192, 57, 43, 0.3);
-    margin: 24px 0;
-  }}
-  .tenth-man .distance-stamp {{
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 24px;
-    padding-top: 16px;
-    border-top: 1px dashed rgba(192, 57, 43, 0.3);
-    text-transform: uppercase;
-    letter-spacing: 0.10em;
-  }}
-  .frame-card {{
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    margin-bottom: 10px;
-    background: var(--surface);
-    transition: border-color 0.15s, box-shadow 0.15s;
-  }}
-  .frame-card:hover {{ border-color: rgba(26,26,26,0.20); }}
-  .frame-card[open] {{
-    border-color: var(--frame);
-    box-shadow: 0 1px 2px rgba(30,58,95,0.04), 0 4px 12px -4px rgba(30,58,95,0.08);
-  }}
-  .frame-card summary {{
-    padding: 14px 18px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    user-select: none;
-    list-style: none;
-  }}
-  .frame-card summary::-webkit-details-marker {{ display: none; }}
-  .frame-glyph {{
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted);
-    background: var(--paper-warm);
-    padding: 4px 8px;
-    border-radius: 4px;
-    letter-spacing: 0.05em;
-  }}
-  .frame-card[open] .frame-glyph {{
-    background: var(--frame);
-    color: var(--paper);
-  }}
-  .frame-name {{
-    font-family: var(--serif);
-    font-weight: 600;
+    font-weight: 380;
     font-size: 16px;
-    flex: 1;
+    line-height: 1.4;
+    color: var(--ink-2);
+  }}
+
+  .map-card{{
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }}
+  .map-head{{
+    display:flex; justify-content: space-between; align-items: baseline;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--rule-2);
+  }}
+  .map-head h3{{
+    margin:0;
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 17px;
     letter-spacing: -0.005em;
   }}
-  .frame-distance {{
+  .map-head .meta{{
     font-family: var(--mono);
-    color: var(--muted);
-    font-size: 12px;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0.05em;
+    font-size: 10.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
   }}
-  .frame-card summary::after {{
-    content: "+";
-    font-family: var(--mono);
-    color: var(--muted);
-    font-size: 16px;
-    transition: transform 0.2s;
-    display: inline-block;
+  .map-head .meta b{{ color: var(--ink-2); font-weight:500;}}
+  .map-svg-wrap{{
+    position: relative;
+    aspect-ratio: 16 / 11;
+    background:
+      radial-gradient(circle at 50% 56%, oklch(99% 0.005 78) 0%, var(--paper) 70%);
   }}
-  .frame-card[open] summary::after {{ transform: rotate(45deg); }}
-  .badge-failed {{
-    background: #fee2e2;
-    color: #991b1b;
-    font-family: var(--mono);
-    font-size: 10px;
-    padding: 3px 7px;
-    border-radius: 3px;
-    font-weight: 500;
-    letter-spacing: 0.08em;
+  svg.map{{ position:absolute; inset:0; width:100%; height:100%;}}
+
+  .map-help{{
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 10;
   }}
-  .frame-body {{
-    padding: 4px 22px 22px 22px;
-    font-family: var(--serif-text);
-    font-size: 15px;
-    line-height: 1.65;
-    color: var(--ink-soft);
-    border-top: 1px solid var(--border-soft);
-    margin-top: 0;
-  }}
-  .frame-body h3 {{
+  .map-help summary{{
+    list-style: none;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    color: var(--ink-3);
     font-family: var(--serif);
-    font-size: 17px;
-    margin: 18px 0 8px;
+    font-style: italic;
+    font-size: 16px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    transition: all .15s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  }}
+  .map-help summary::-webkit-details-marker{{ display: none; }}
+  .map-help summary:hover{{
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }}
+  .map-help[open] summary{{
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }}
+  .map-help-popover{{
+    position: absolute;
+    top: 36px;
+    right: 0;
+    width: 320px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 18px 20px;
+    box-shadow: 0 4px 16px -4px rgba(0,0,0,.12), 0 1px 3px rgba(0,0,0,.04);
+  }}
+  .map-help-popover p{{
+    margin: 0 0 10px;
+    font-family: var(--serif);
+    font-weight: 380;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--ink-2);
+    font-variation-settings: "opsz" 24;
+  }}
+  .map-help-popover p:last-child{{ margin-bottom: 0; }}
+  .map-help-popover strong{{ font-weight: 600; color: var(--ink); }}
+  .map-help-popover .map-help-title{{
+    font-family: var(--mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    color: var(--ink-3);
+    font-weight: 500;
+    margin-bottom: 12px;
+  }}
+  .map-foot{{
+    display:flex; justify-content: space-between; align-items: center;
+    padding: 14px 24px;
+    border-top: 1px solid var(--rule-2);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }}
+  .map-foot .legend{{ display:flex; gap:18px; align-items:center;}}
+  .map-foot .legend i{{ display:inline-block; width:8px; height:8px; border-radius:999px; margin-right:8px; vertical-align:middle; transform: translateY(-1px);}}
+  .map-foot .legend i.t{{ background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft);}}
+  .map-foot .legend i.n{{ background: var(--nine); box-shadow: 0 0 0 3px var(--nine-soft);}}
+
+  .sec{{
+    display:flex; align-items: baseline; gap: 14px;
+    margin: 64px 0 22px;
+  }}
+  .sec .glyph{{
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 22px;
+    color: var(--ink-3);
+  }}
+  .sec h2{{
+    margin:0;
+    font-family: var(--serif);
+    font-weight: 420;
+    font-size: 28px;
+    letter-spacing: -0.02em;
     color: var(--ink);
   }}
-  .frame-body h4 {{
-    font-family: var(--sans);
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--muted);
-    margin: 16px 0 6px;
-  }}
-  .frame-body p {{ margin: 0 0 10px; }}
-  .frame-body strong {{ color: var(--ink); }}
-  .frame-body hr {{
-    border: none;
-    border-top: 1px dashed var(--border);
-    margin: 16px 0;
-  }}
-  footer {{
-    border-top: 1px solid var(--border);
-    padding-top: 20px;
-    margin-top: 64px;
+  .sec h2 em{{ font-style: italic; color: var(--accent); font-weight: 380;}}
+  .sec .rule{{ flex: 1; height: 1px; background: var(--rule); transform: translateY(-4px);}}
+  .sec .aside{{
     font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    color: var(--muted);
+    font-size: 10.5px;
+    letter-spacing: .12em;
     text-transform: uppercase;
-    line-height: 1.8;
+    color: var(--ink-3);
   }}
-  footer .signature {{ color: var(--ink); font-weight: 500; }}
+  .sec .aside b{{ color: var(--ink-2); font-weight:500;}}
+
+  .consensus{{
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }}
+  .consensus::before{{
+    content:"";
+    position:absolute; left:0; top:0; bottom:0; width: 3px;
+    background: var(--nine);
+  }}
+  .consensus-body{{
+    padding: 28px 32px;
+    font-family: var(--serif);
+    font-weight: 380;
+    font-size: 16px;
+    line-height: 1.62;
+    color: var(--ink);
+    font-variation-settings: "opsz" 30;
+    max-width: 78ch;
+  }}
+  .consensus-body p{{ margin: 0 0 14px; }}
+  .consensus-body p:last-child{{ margin-bottom: 0; }}
+  .consensus-body strong{{ font-weight: 600; color: var(--ink); }}
+  .consensus-body em{{ font-style: italic; color: var(--ink); }}
+
+  .tenth{{
+    background: var(--paper);
+    border: 1px solid var(--accent-soft);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }}
+  .tenth::before{{
+    content:"";
+    position:absolute; left:0; top:0; bottom:0; width: 3px;
+    background: var(--accent);
+  }}
+  .tenth-top{{
+    display:grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 24px;
+    padding: 24px 28px 22px 32px;
+    border-bottom: 1px solid var(--rule-2);
+  }}
+  .tenth-eyebrow{{
+    display:flex; align-items:center; gap:10px;
+    font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent);
+  }}
+  .tenth-eyebrow i{{ width:6px; height:6px; border-radius:999px; background: var(--accent);}}
+  .tenth-top h2{{
+    margin: 8px 0 0;
+    font-family: var(--serif);
+    font-weight: 420;
+    font-style: italic;
+    font-size: 28px;
+    letter-spacing: -0.012em;
+    color: var(--ink);
+  }}
+  .tenth-top .d{{
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .04em;
+    color: var(--ink-3);
+    text-align: right;
+  }}
+  .tenth-top .d b{{
+    display:block;
+    font-family: var(--serif); font-style: italic;
+    font-weight: 400; font-size: 32px;
+    color: var(--accent);
+    letter-spacing: -0.015em;
+    line-height: 1;
+    margin-bottom: 4px;
+  }}
+  .tenth-body{{
+    padding: 26px 32px;
+    font-family: var(--serif);
+    font-weight: 380;
+    font-size: 16.5px;
+    line-height: 1.62;
+    color: var(--ink);
+    font-variation-settings: "opsz" 30;
+    max-width: 78ch;
+  }}
+  .tenth-body h3{{
+    margin: 22px 0 10px;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }}
+  .tenth-body h3:first-child{{ margin-top: 0; }}
+  .tenth-body h4{{
+    margin: 18px 0 8px;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }}
+  .tenth-body p{{ margin: 0 0 12px; }}
+  .tenth-body strong{{ font-weight: 600; color: var(--ink); }}
+  .tenth-body em{{ font-style: italic; color: var(--ink); }}
+  .tenth-body .pull{{
+    margin: 18px 0;
+    padding: 4px 0 4px 18px;
+    border-left: 2px solid var(--accent);
+    font-family: var(--serif); font-style: italic;
+    font-size: 19px; line-height: 1.4;
+    letter-spacing: -0.005em;
+    color: var(--ink);
+  }}
+  .tenth-foot{{
+    display:flex; justify-content: space-between; gap: 18px;
+    padding: 14px 32px;
+    border-top: 1px solid var(--rule-2);
+    background: oklch(99% 0.005 78);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .04em;
+    color: var(--ink-3);
+  }}
+  .tenth-foot b{{ color: var(--ink-2); font-weight: 500; }}
+
+  .frames{{
+    border-top: 1px solid var(--ink);
+  }}
+  .frame{{
+    border-bottom: 1px solid var(--rule);
+    padding: 20px 4px;
+    cursor: pointer;
+    transition: background .15s ease;
+  }}
+  .frame:hover{{ background: var(--paper); }}
+  .frame-row{{
+    display: grid;
+    grid-template-columns: 36px 200px 1fr 160px 80px 18px;
+    align-items: center;
+    gap: 16px;
+  }}
+  .f-idx{{
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .04em;
+    color: var(--ink-3);
+  }}
+  .f-name{{
+    font-family: var(--serif);
+    font-weight: 440;
+    font-size: 20px;
+    letter-spacing: -0.012em;
+    color: var(--ink);
+  }}
+  .f-tag{{
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }}
+  .f-tag b{{ color: var(--ink-2); font-weight: 500;}}
+  .f-bar{{
+    height: 2px; background: var(--rule); position:relative; border-radius:2px;
+    margin-right: 10px;
+  }}
+  .f-bar > i{{
+    position:absolute; left:0; top:0; bottom:0; border-radius: 2px;
+    background: var(--nine);
+  }}
+  .f-d{{
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-2);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }}
+  .f-d small{{ color: var(--ink-3); }}
+  .f-caret{{
+    font-family: var(--mono);
+    color: var(--ink-3);
+    transition: transform .2s ease;
+    font-size: 12px;
+  }}
+  .frame.open .f-caret{{ transform: rotate(90deg); }}
+  .frame.open .f-name{{ color: var(--accent); }}
+
+  .f-body{{
+    display: none;
+    padding: 18px 0 6px 36px;
+    max-width: 78ch;
+    font-family: var(--serif);
+    font-weight: 380;
+    font-size: 15.5px;
+    line-height: 1.62;
+    color: var(--ink-2);
+    font-variation-settings: "opsz" 24;
+  }}
+  .frame.open .f-body{{ display:block; }}
+  .f-body h3, .f-body h4{{
+    margin: 18px 0 8px;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }}
+  .f-body h3:first-child, .f-body h4:first-child{{ margin-top: 0; }}
+  .f-body p{{ margin: 0 0 12px; }}
+  .f-body strong{{ font-weight: 600; color: var(--ink); }}
+  .f-body em{{ font-style: italic; color: var(--ink); }}
+
+  .colophon{{
+    margin-top: 64px;
+    padding-top: 22px;
+    border-top: 1px solid var(--rule);
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .04em;
+    color: var(--ink-3);
+  }}
+  .colophon b{{ color: var(--ink-2); font-weight: 500; }}
+  .colophon .center{{
+    text-align:center;
+    font-family: var(--serif);
+    font-style: italic;
+    letter-spacing: 0;
+    font-size: 13px;
+    color: var(--ink-2);
+  }}
+  .colophon .right{{ text-align: right; }}
+
+  @media (max-width: 920px){{
+    .page{{ padding: 32px 22px 64px; }}
+    .strip{{ grid-template-columns: 1fr 1fr; }}
+    .strip .stat:nth-child(3){{ grid-column: 1 / -1; padding: 16px 0 0; border-right:none; padding-left: 0; border-top: 1px solid var(--rule); margin-top: 8px;}}
+    .frame-row{{ grid-template-columns: 26px 1fr 80px 16px; }}
+    .frame-row .f-tag, .frame-row .f-bar{{ display:none; }}
+  }}
 </style>
 </head>
 <body>
-<div class="container">
-  <header class="hero">
-    <p class="eyebrow"><span class="brand-dot"></span>TenthAI · disagreement map</p>
-    <h1 class="brand-line">Nine advisors aligned. <em>The tenth must dissent.</em></h1>
-    <blockquote class="question">{question_safe}</blockquote>
-    <div class="meta-grid">
-      <div class="meta-chip">
-        <p class="label">Tenth-man dist</p>
-        <p class="value">{tenth_distance:.3f}</p>
-      </div>
-      <div class="meta-chip">
-        <p class="label">Max frame dist</p>
-        <p class="value">{max_frame_distance:.3f}</p>
-      </div>
-      <div class="meta-chip verdict">
-        <p class="label">Veredicto</p>
-        <p class="value">{fragility}</p>
-      </div>
+<main class="page" data-screen-label="TenthAI Report">
+
+  <header>
+    <div class="mast">
+      <span class="rule"></span>
+      <span class="dot"></span>
+      <b>TenthAI</b>
+      <span class="sep">·</span>
+      <span>Disagreement Map</span>
+      <span class="sep">·</span>
+      <span>Report&nbsp;<b style="font-weight:500;">#{report_id}</b></span>
+      <span class="sep">·</span>
+      <span>{timestamp_short}</span>
     </div>
+
+    <h1 class="head">Nueve consejeros alineados.<br/><em>El décimo debe disentir.</em></h1>
+
+    <p class="question">{question_safe}</p>
   </header>
 
-  <div class="chart-wrap">
-    {chart_html}
-    <p class="chart-caption">10 voces · proyección MDS · distancia al centroide de los 9</p>
-  </div>
-
-  <section>
-    <div class="section-header">
-      <span class="section-num">10</span>
-      <h2 class="section-title">El <em>décimo hombre</em></h2>
-      <span class="frame-distance">d {tenth_distance:.3f}</span>
+  <section class="strip" aria-label="Métricas globales">
+    <div class="stat accent">
+      <div class="lbl">Distancia décimo hombre</div>
+      <div class="val">{tenth_distance:.3f} <span class="num">vs centroide de los 9</span></div>
     </div>
-    <div class="tenth-man">
-      {tenth_response_html}
-      <div class="distance-stamp">disenso steel-man · d {tenth_distance:.3f} vs centroide</div>
+    <div class="stat">
+      <div class="lbl">Marco más divergente</div>
+      <div class="val">{html_mod.escape(most_divergent_name)} <span class="num">d {max_frame_distance:.3f}</span></div>
+    </div>
+    <div class="stat">
+      <div class="lbl">Veredicto</div>
+      <div class="verdict">{fragility}</div>
     </div>
   </section>
 
-  <section>
-    <div class="section-header">
-      <span class="section-num">01—09</span>
-      <h2 class="section-title">Los nueve marcos</h2>
+  <section class="map-card" aria-label="Mapa MDS">
+    <div class="map-head">
+      <h3>Geografía del desacuerdo</h3>
+      <div class="meta">10 voces · MDS sobre <b>cosine distance</b> · centroide de los 9</div>
     </div>
+    <div class="map-svg-wrap">
+      <details class="map-help">
+        <summary aria-label="Cómo leer este mapa">?</summary>
+        <div class="map-help-popover">
+          <p class="map-help-title">Cómo leer este mapa</p>
+          <p>Cada punto es un consejero.</p>
+          <p>El <strong>centroide</strong> al centro es la zona de consenso — donde el grupo coincide.</p>
+          <p>Más <strong>cerca</strong> del centro = más alineado con el resto.<br/>Más <strong>lejos</strong> = piensa distinto.</p>
+          <p>El punto <strong style="color: var(--accent)">rojo (10 · tenth-man)</strong> es el disidente obligado.</p>
+          <p>Los anillos concéntricos marcan distancias iguales al centroide.</p>
+        </div>
+      </details>
+      {map_svg}
+    </div>
+    <div class="map-foot">
+      <div class="legend">
+        <span><i class="t"></i>Décimo hombre</span>
+        <span><i class="n"></i>Marcos consensus</span>
+      </div>
+      <div>Mapa MDS clásico · preserva distancias por pares</div>
+    </div>
+  </section>
+
+  {consensus_block_html}
+
+  <div class="sec">
+    <span class="glyph">¶</span>
+    <h2>Los nueve marcos cognitivos</h2>
+    <span class="rule"></span>
+    <span class="aside">orden por <b>distancia al centroide</b> · click para expandir</span>
+  </div>
+
+  <section class="frames" id="frames">
     {frame_cards_html}
   </section>
 
-  <footer>
-    <span class="signature">TenthAI</span> · classical MDS over cosine distance · preserves pairwise distances<br>
-    {timestamp} · embed {provider}/{model} · ~CLP {cost_estimate_clp:.0f}
+  <div class="sec">
+    <span class="glyph">¶</span>
+    <h2>El décimo hombre — <em>disenso steel-man</em></h2>
+    <span class="rule"></span>
+    <span class="aside">d&nbsp;<b>{tenth_distance:.3f}</b> · obligación de discrepar</span>
+  </div>
+
+  <article class="tenth">
+    <header class="tenth-top">
+      <div>
+        <div class="tenth-eyebrow"><i></i>Frame 10 · Tenth-man</div>
+        <h2>Por qué los nueve podrían estar equivocados</h2>
+      </div>
+      <div class="d"><b>{tenth_distance:.3f}</b>distancia al consenso</div>
+    </header>
+
+    <div class="tenth-body">
+      {tenth_response_html}
+    </div>
+
+    <footer class="tenth-foot">
+      <span>Generado bajo restricción · <b>steel-man</b> obligatorio</span>
+      <span>embed <b>{html_mod.escape(provider)}/{html_mod.escape(model)}</b></span>
+    </footer>
+  </article>
+
+  <footer class="colophon">
+    <div>
+      <b>TenthAI</b><br/>
+      classical MDS · cosine distance<br/>
+      embed: {html_mod.escape(provider)}/{html_mod.escape(model)}
+    </div>
+    <div class="center">
+      «Nueve voces alineadas no son señal — son sólo ruido coherente.»
+    </div>
+    <div class="right">
+      <b>Costo estimado</b> ~CLP {cost_estimate_clp:.0f}<br/>
+      {timestamp}<br/>
+      report&nbsp;#{report_id}
+    </div>
   </footer>
-</div>
+
+</main>
+
+<script>
+  document.querySelectorAll('.frame').forEach(f => {{
+    f.addEventListener('click', () => f.classList.toggle('open'));
+  }});
+</script>
 </body>
 </html>"""
 
