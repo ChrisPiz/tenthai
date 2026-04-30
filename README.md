@@ -1,105 +1,115 @@
-# TenthAI
+# TenthAI MCP · Structured Dissent for AI Agents
 
-> **AI advisors agree too easily.** TenthAI builds disagreement on purpose.
+TenthAI MCP is a Model Context Protocol server that helps AI agents avoid premature consensus.
 
-Ask any decision. **9 advisors** respond — each from a distinct cognitive angle: empirical, historical, ethical, systemic, and six more. A **10th advisor** then reads what the others said and is *required* to dissent, building the most coherent counter-case it can.
+It runs multiple cognitive frames over a decision, measures alignment, and generates structured dissent only when needed.
 
-You don't get an answer. You get a **map** — a 2D projection of the response space where you see at a glance whether the 9 are aligned or divided, with the steel-manned dissent of the 10th in full.
+> Agreement is not a signal. It's just coherent noise — unless you measure it.
 
-## Quick install (5 min)
+---
+
+## What it does
+
+TenthAI MCP gives compatible AI clients a tool for decision stress-testing.
+
+Instead of asking one model for one answer, it:
+
+1. Generates multiple cognitive perspectives
+2. Measures agreement between them
+3. Detects whether consensus is strong, weak, or fragmented
+4. Produces a steel-man dissent when useful
+5. Returns a structured decision report
+
+---
+
+## Why MCP
+
+MCP makes TenthAI available as a reusable reasoning tool inside:
+
+- Claude Desktop
+- Cursor
+- local AI workflows
+- agent builders
+- custom orchestration systems
+
+The goal is not to replace the main AI assistant.
+
+The goal is to give it a specialized tool for:
+
+- avoiding groupthink
+- questioning consensus
+- comparing assumptions
+- improving decision quality
+
+---
+
+## Setup
+
+**1. Clone and install dependencies**
 
 ```bash
 git clone https://github.com/ChrisPiz/TenthAI-MCP.git
 cd TenthAI-MCP
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env
-# Edit .env with ANTHROPIC_API_KEY (required) + OPENAI_API_KEY (default embed)
-python -m tenthai.server  # should print "✓ keys validated"
 ```
 
-Voyage is optional for better Spanish-language quality: uncomment `EMBED_PROVIDER=voyage` and `VOYAGE_API_KEY=...` in `.env`.
+**2. Configure API keys**
 
-## Configure Claude Code
+```bash
+cp .env.example .env
+# Edit .env:
+#   ANTHROPIC_API_KEY  (required — runs the 9 frames + the tenth-man)
+#   OPENAI_API_KEY     (default embedding provider; cheaper, most devs already have one)
+#   VOYAGE_API_KEY     (optional — better quality for Spanish; uncomment EMBED_PROVIDER=voyage)
+```
 
-Edit `~/.config/claude-code/mcp.json`:
+Verify keys:
+
+```bash
+python -m tenthai.server   # should print "✓ keys validated" then wait for stdio
+```
+
+**3. Register the MCP server with Claude Code**
+
+```bash
+claude mcp add -s user tenthai \
+  "$(pwd)/.venv/bin/python" -- -m tenthai.server
+```
+
+The `-s user` flag makes it available globally (any project). Drop the flag to scope it to the current directory only.
+
+Or, if you prefer editing config by hand, add to `~/.claude.json` (or your client's `mcp.json`):
 
 ```json
 {
   "mcpServers": {
     "tenthai": {
-      "command": "python",
-      "args": ["-m", "tenthai.server"],
-      "cwd": "/path/to/TenthAI"
+      "command": "/absolute/path/to/TenthAI-MCP/.venv/bin/python",
+      "args": ["-m", "tenthai.server"]
     }
   }
 }
 ```
 
-Restart Claude Code.
+Restart Claude Code (or your MCP client). Verify with `claude mcp list` — `tenthai` should report `✓ Connected`.
 
-## How to invoke
+**4. Optional: add a `/decidir` slash command**
 
-**Option A — `/decide` slash command (recommended):**
-
-Create `~/.claude/commands/decide.md` with this content:
-
-```markdown
+```bash
+mkdir -p ~/.claude/commands
+cat > ~/.claude/commands/decidir.md <<'MD'
 ---
 description: Invokes TenthAI — disagreement map of 9 advisors + 1 dissenter.
 ---
-Use the `decide` MCP tool from the `tenthai` server to analyze:
+Use the `decide` MCP tool from the `tenthai` server to analyze: $ARGUMENTS
 
-$ARGUMENTS
-
-When you receive the JSON: cite `viz_path`, summarize the consensus of the 9, quote the 10th verbatim, report `tenth_man_distance` and `max_frame_distance`. Do not interpret the decision for the user.
+When the JSON returns: cite `viz_path`, summarize the consensus first,
+list the 9 advisors' conclusions, then quote the tenth-man verbatim.
+MD
 ```
 
-Then from any project in Claude Code:
-
-```
-/decide whether to charge USD 4k or 6k for the Acme contract
-```
-
-**Option B — free-form prompt:**
-
-Since it's an MCP tool, you can also ask Claude to use it without a slash command:
-
-- "**Use TenthAI to help me decide** whether to accept the Acme contract."
-- "**With TenthAI**, evaluate whether this PR's architecture is correct."
-- "**Run TenthAI on**: Postgres or DynamoDB for this workload?"
-
-After ~60-150s, the browser opens with the 2D map showing the 9 advisors + the dissenter.
-
-## What it returns
-
-The `decide()` tool returns JSON with:
-
-- `viz_path` — absolute path to the HTML (auto-opens in browser).
-- `responses` — 10 entries: role, frame, status, distance_to_centroid_of_9, embedding_2d, response.
-- `summary` — tenth_man_distance, max_frame_distance, n_frames_succeeded, embed_provider.
-- `cost_clp` — approximate cost in CLP.
-
-## The 9 advisors + 1 dissenter
-
-Each advisor reasons from a distinct cognitive frame:
-
-1. **Empirical** — data, base rates, evidence.
-2. **Historical** — precedent, analogous cases.
-3. **First principles** — basic physical/economic atoms.
-4. **Analogical** — cross-domain (biology, military, finance).
-5. **Systemic** — second-order effects, feedback loops.
-6. **Ethical** — deontological vs consequentialist.
-7. **Soft-contrarian** — challenges one assumption without inverting everything.
-8. **Radical optimist** — the 10× better case.
-9. **Pre-mortem** — assume it already failed, describe why.
-10. **Tenth man** — steel-man of the dissent against the consensus of the 9.
-
-## Cost
-
-~USD 0.30-0.60 per invocation. Logged in every output.
-
-## Tests
+**5. Run the tests (optional)**
 
 ```bash
 pip install -r requirements-dev.txt
@@ -108,12 +118,131 @@ pytest tests/ -v
 
 5 critical tests on design invariants + 2 smoke tests + provider-error handling. Suite runs in <5s with mocked SDK calls.
 
-## Limitations
+---
 
-- **MDS not PCA:** The map uses classical MDS over cosine distance. This preserves pairwise distances faithfully (better than PCA with N=10 in high dim, which is statistically trivial). Still, validate the distance ranking against your own human judgment on the first 3 invocations.
-- **MVP scope:** no persistence, no streaming, no auto-tool-use across the 9 advisors. Each invocation is independent.
-- **Only tested on Claude Code.** Other MCP clients should work (standard stdio transport) but are not validated.
+## Core principle
+
+TenthAI does not blindly contradict.
+
+If there is no real consensus, forcing disagreement only adds noise.
+
+The tenth-man activates when the system detects meaningful alignment between the other frames.
+
+---
+
+## Available tool
+
+### `tenthai_analyze`
+
+Runs a structured dissent analysis over a user question.
+
+**Input:**
+
+```json
+{
+  "question": "Should I hire someone or keep working alone in my business?",
+  "context": "Monthly revenue is CLP 2.4M. Hiring would cost around CLP 500K/month. I have family expenses and limited runway."
+}
+```
+
+**Output:**
+
+```json
+{
+  "consensus_strength": "weak",
+  "most_aligned_frame": "first-principles",
+  "most_divergent_frame": "analogical",
+  "tenth_man_activated": false,
+  "verdict": "No strong consensus detected. Do not force dissent.",
+  "recommendation": "Validate whether the operational bottleneck is truly limiting revenue before hiring."
+}
+```
+
+---
+
+## Cognitive frames
+
+TenthAI can reason through frames such as:
+
+- empirical
+- historical
+- first-principles
+- systemic
+- ethical
+- analogical
+- soft-contrarian
+- radical-optimist
+- pre-mortem
+- tenth-man
+
+---
+
+## Compared to simple prompting
+
+| Approach | Problem | TenthAI MCP |
+|----------|---------|-------------|
+| Single prompt | One confident answer | Multiple frames |
+| Multi-agent debate | Often noisy | Measures agreement |
+| Devil's advocate | Always contradicts | Conditional dissent |
+| Tenth-man rule | Fixed opposition | Data-driven dissent |
+
+---
+
+## Use cases
+
+- Founder decisions
+- Product strategy
+- Hiring and investment decisions
+- Risk analysis
+- Agent orchestration
+- Pre-mortems
+- High-uncertainty choices
+
+---
+
+## Not goals
+
+TenthAI MCP is not:
+
+- a chatbot
+- a debate simulator
+- a generic agent framework
+- a replacement for judgment
+
+It is a focused reasoning tool for structured disagreement.
+
+---
+
+## Example
+
+User asks:
+
+> Should I hire someone for my 3D printing business?
+
+TenthAI MCP may produce:
+
+> The nine frames converge around caution:
+> validate demand before creating a fixed cost.
+>
+> The tenth-man challenges that:
+> waiting for perfect validation may be the mechanism that keeps the founder stuck in operational work.
+>
+> Final verdict:
+> externalize first, measure impact, then convert to a fixed role only if time liberated becomes measurable revenue.
+
+---
+
+## Roadmap
+
+- MCP tool schema refinement
+- Consensus strength scoring
+- Dissent impact scoring
+- HTML/PDF report export
+- Embedding-based disagreement map
+- Claude Desktop / Cursor usage examples
+
+---
 
 ## License
 
-MIT.
+MIT
