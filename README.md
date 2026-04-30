@@ -2,17 +2,17 @@
 
 > **AI advisors agree too easily.** TenthAI builds disagreement on purpose.
 
-Ask any decision. 9 AI agents respond from 9 distinct cognitive frames — empirical, historical, ethical, systemic, and others. A 10th agent then reads what the others said and is *required* to dissent, building the most coherent counter-case it can.
+Ask any decision. **9 advisors** respond — each from a distinct cognitive angle: empirical, historical, ethical, systemic, and six more. A **10th advisor** then reads what the others said and is *required* to dissent, building the most coherent counter-case it can.
 
-You don't get an answer. You get a **map** — a 2D projection of the response space where you see at a glance whether consensus is robust or fragile, with the steel-manned dissent in full.
+You don't get an answer. You get a **map** — a 2D projection of the response space where you see at a glance whether the 9 are aligned or divided, with the steel-manned dissent of the 10th in full.
 
-The mechanic comes from the **tenth man rule**: a doctrine adopted by Israeli intelligence after the 1973 Yom Kippur surprise (popularized in *World War Z*). When 9 analysts agree, the 10th is institutionally obligated to disagree — a structural defense against groupthink. TenthAI ports that into LLM advice.
+The mechanic comes from the **tenth man rule**: a doctrine adopted by Israeli intelligence after the 1973 Yom Kippur surprise (popularized in *World War Z*). When 9 analysts agree, the 10th is institutionally obligated to disagree — a structural defense against groupthink. TenthAI ports that discipline into LLM advice.
 
 ## Quick install (5 min)
 
 ```bash
-git clone https://github.com/ChrisPiz/tenthai.git
-cd tenthai
+git clone https://github.com/ChrisPiz/TenthAI-MCP.git
+cd TenthAI-MCP
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
@@ -48,7 +48,7 @@ Create `~/.claude/commands/decide.md` with this content:
 
 ```markdown
 ---
-description: Invokes TenthAI — disagreement map of 9 frames + 1 dissenter.
+description: Invokes TenthAI — disagreement map of 9 advisors + 1 dissenter.
 ---
 Use the `decide` MCP tool from the `tenthai` server to analyze:
 
@@ -71,7 +71,7 @@ Since it's an MCP tool, you can also ask Claude to use it without a slash comman
 - "**With TenthAI**, evaluate whether this PR's architecture is correct."
 - "**Run TenthAI on**: Postgres or DynamoDB for this workload?"
 
-After ~60-150s, the browser opens with the 2D map showing 9 frames + the dissenter.
+After ~60-150s, the browser opens with the 2D map showing the 9 advisors + the dissenter.
 
 ## What it returns
 
@@ -82,9 +82,9 @@ The `decide()` tool returns JSON with:
 - `summary` — tenth_man_distance, max_frame_distance, n_frames_succeeded, embed_provider.
 - `cost_clp` — approximate cost in CLP.
 
-## The 9 frames + 1
+## The 9 advisors + 1 dissenter
 
-Each frame produces a distinct angle on your question:
+Each advisor reasons from a distinct cognitive frame:
 
 1. **Empirical** — data, base rates, evidence.
 2. **Historical** — precedent, analogous cases.
@@ -113,7 +113,7 @@ pytest tests/ -v
 ## Limitations
 
 - **MDS not PCA:** The map uses classical MDS over cosine distance. This preserves pairwise distances faithfully (better than PCA with N=10 in high dim, which is statistically trivial). Still, validate the distance ranking against your own human judgment on the first 3 invocations.
-- **MVP scope:** no persistence, no streaming, no auto-tool-use across the 9 agents. Each invocation is independent.
+- **MVP scope:** no persistence, no streaming, no auto-tool-use across the 9 advisors. Each invocation is independent.
 - **Only tested on Claude Code.** Other MCP clients should work (standard stdio transport) but are not validated.
 
 ## License
