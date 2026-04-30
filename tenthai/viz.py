@@ -98,6 +98,25 @@ def _md_to_html(text: str) -> str:
     return "\n".join(out)
 
 
+def _split_consensus_title(text: str):
+    """Pull a leading ``# Title`` line out of the consensus output.
+
+    Returns (title_or_none, body). If the first non-empty line starts with
+    ``# `` (markdown h1), use it as the title and strip from the body.
+    Otherwise return (None, text) so the caller renders a fallback title.
+    """
+    if not text:
+        return None, ""
+    stripped = text.lstrip()
+    lines = stripped.split("\n", 1)
+    first = lines[0].strip()
+    if first.startswith("# ") and not first.startswith("## "):
+        title = first[2:].strip()
+        body = lines[1].lstrip() if len(lines) > 1 else ""
+        return title, body
+    return None, text
+
+
 def _split_failure_modes(text: str):
     """Pull a [FAILURE_MODES]...[/FAILURE_MODES] block out of the tenth-man response.
 
@@ -398,10 +417,16 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
     else:
         tenth_modes_html = ""
 
-    # Consensus block (optional)
+    # Consensus block (optional). Editorial 2-column essay treatment:
+    # extracted h1 title + verdict-aware metric in the header card.
     consensus_block_html = ""
     if consensus:
-        consensus_html = _md_to_html(consensus)
+        consensus_title, consensus_body_md = _split_consensus_title(consensus)
+        if not consensus_title:
+            consensus_title = "Lo que los nueve coinciden"
+        consensus_html = _md_to_html(consensus_body_md)
+        verdict = consensus_verdict(tenth_distance, max_frame_distance)
+        verdict_label_upper = verdict["label_short"].upper()
         consensus_block_html = f"""
   <div class="sec">
     <span class="glyph">∑</span>
@@ -411,6 +436,13 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
   </div>
 
   <article class="consensus">
+    <header class="consensus-top">
+      <div>
+        <div class="lbl">Σ · 9 consejeros · {html_mod.escape(verdict_label_upper)}</div>
+        <h3>{html_mod.escape(consensus_title)}</h3>
+      </div>
+      <div class="d"><b>{max_frame_distance:.3f}</b>max distancia · vs centroide</div>
+    </header>
     <div class="consensus-body">
       {consensus_html}
     </div>
@@ -719,24 +751,75 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
     border: 1px solid var(--rule);
     border-radius: 2px;
     overflow: hidden;
-    position: relative;
   }}
-  .consensus::before{{
-    content:"";
-    position:absolute; left:0; top:0; bottom:0; width: 3px;
-    background: var(--nine);
+  .consensus-top{{
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 24px;
+    padding: 22px 32px;
+    border-bottom: 1px solid var(--rule);
+    background: linear-gradient(180deg, var(--nine-soft), var(--paper) 100%);
+  }}
+  .consensus-top .lbl{{
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--nine);
+    font-weight: 500;
+  }}
+  .consensus-top h3{{
+    margin: 4px 0 0;
+    font-family: var(--serif);
+    font-weight: 420;
+    font-size: 24px;
+    letter-spacing: -0.018em;
+    color: var(--ink);
+    text-wrap: balance;
+  }}
+  .consensus-top .d{{
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    text-align: right;
+    letter-spacing: .04em;
+  }}
+  .consensus-top .d b{{
+    display: block;
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 26px;
+    color: var(--nine);
+    line-height: 1;
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
   }}
   .consensus-body{{
-    padding: 28px 32px;
+    padding: 28px 32px 36px;
+    column-count: 2;
+    column-gap: 40px;
+    column-rule: 1px solid var(--rule-2);
     font-family: var(--serif);
     font-weight: 380;
-    font-size: 16px;
+    font-size: 15px;
     line-height: 1.62;
     color: var(--ink);
-    font-variation-settings: "opsz" 30;
-    max-width: 78ch;
+    font-variation-settings: "opsz" 24;
   }}
-  .consensus-body p{{ margin: 0 0 14px; }}
+  .consensus-body h3{{
+    margin: 0 0 10px;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    break-after: avoid;
+  }}
+  .consensus-body h3:not(:first-child){{ margin-top: 22px; }}
+  .consensus-body p{{ margin: 0 0 12px; break-inside: avoid-column; }}
   .consensus-body p:last-child{{ margin-bottom: 0; }}
   .consensus-body strong{{ font-weight: 600; color: var(--ink); }}
   .consensus-body em{{ font-style: italic; color: var(--ink); }}
@@ -1147,6 +1230,9 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
     .guide{{ right: 16px; bottom: 16px; }}
     .guide-panel-body{{ padding: 22px 18px 4px 20px; }}
     .guide-panel-foot{{ padding: 12px 20px 16px; }}
+    .consensus-body{{ column-count: 1; }}
+    .consensus-top{{ grid-template-columns: 1fr; }}
+    .consensus-top .d{{ text-align: left; margin-top: 8px; }}
     .tenth-body .modes{{ grid-template-columns: 1fr; }}
     .tenth-body .mode,
     .tenth-body .mode:nth-child(2),

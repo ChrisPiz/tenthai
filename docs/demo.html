@@ -295,24 +295,75 @@
     border: 1px solid var(--rule);
     border-radius: 2px;
     overflow: hidden;
-    position: relative;
   }
-  .consensus::before{
-    content:"";
-    position:absolute; left:0; top:0; bottom:0; width: 3px;
-    background: var(--nine);
+  .consensus-top{
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 24px;
+    padding: 22px 32px;
+    border-bottom: 1px solid var(--rule);
+    background: linear-gradient(180deg, var(--nine-soft), var(--paper) 100%);
+  }
+  .consensus-top .lbl{
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--nine);
+    font-weight: 500;
+  }
+  .consensus-top h3{
+    margin: 4px 0 0;
+    font-family: var(--serif);
+    font-weight: 420;
+    font-size: 24px;
+    letter-spacing: -0.018em;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+  .consensus-top .d{
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    text-align: right;
+    letter-spacing: .04em;
+  }
+  .consensus-top .d b{
+    display: block;
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 26px;
+    color: var(--nine);
+    line-height: 1;
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
   }
   .consensus-body{
-    padding: 28px 32px;
+    padding: 28px 32px 36px;
+    column-count: 2;
+    column-gap: 40px;
+    column-rule: 1px solid var(--rule-2);
     font-family: var(--serif);
     font-weight: 380;
-    font-size: 16px;
+    font-size: 15px;
     line-height: 1.62;
     color: var(--ink);
-    font-variation-settings: "opsz" 30;
-    max-width: 78ch;
+    font-variation-settings: "opsz" 24;
   }
-  .consensus-body p{ margin: 0 0 14px; }
+  .consensus-body h3{
+    margin: 0 0 10px;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    break-after: avoid;
+  }
+  .consensus-body h3:not(:first-child){ margin-top: 22px; }
+  .consensus-body p{ margin: 0 0 12px; break-inside: avoid-column; }
   .consensus-body p:last-child{ margin-bottom: 0; }
   .consensus-body strong{ font-weight: 600; color: var(--ink); }
   .consensus-body em{ font-style: italic; color: var(--ink); }
@@ -723,6 +774,9 @@
     .guide{ right: 16px; bottom: 16px; }
     .guide-panel-body{ padding: 22px 18px 4px 20px; }
     .guide-panel-foot{ padding: 12px 20px 16px; }
+    .consensus-body{ column-count: 1; }
+    .consensus-top{ grid-template-columns: 1fr; }
+    .consensus-top .d{ text-align: left; margin-top: 8px; }
     .tenth-body .modes{ grid-template-columns: 1fr; }
     .tenth-body .mode,
     .tenth-body .mode:nth-child(2),
@@ -746,7 +800,7 @@
       <span class="sep">·</span>
       <span>Disagreement Map</span>
       <span class="sep">·</span>
-      <span>Report&nbsp;<b style="font-weight:500;">#1648</b></span>
+      <span>Report&nbsp;<b style="font-weight:500;">#1657</b></span>
       <span class="sep">·</span>
       <span>2026·04·30</span>
     </div>
@@ -919,11 +973,20 @@
   </div>
 
   <article class="consensus">
+    <header class="consensus-top">
+      <div>
+        <div class="lbl">Σ · 9 ADVISORS · DIVIDED</div>
+        <h3>Quit on the back of a contract — not on the back of confidence</h3>
+      </div>
+      <div class="d"><b>0.686</b>max distance · vs centroid</div>
+    </header>
     <div class="consensus-body">
-      <p>The nine advisors converge on two things and disagree on a third.</p>
-<p><strong>They agree</strong> that the financial setup is workable but unforgiving: 9 months of runway is enough for a wedge but not for a category, and a toddler in the household compresses your willingness to extend that runway under stress. They also agree that your healthtech background materially de-risks the idea — niche workflow tools for clinical research coordinators is exactly the kind of unsexy, sticky software that compounds when sold to people you already understand.</p>
-<p><strong>They disagree</strong> on whether <em>now</em> is the right moment. The systemic and pre-mortem frames want one more thing nailed before you quit (a paying design partner, or a side-project prototype that 3 coordinators are already using). The optimist and first-principles frames argue that the cost of waiting another 6 months is higher than it looks — your context window on the buyer is degrading from the inside the longer you stay at the unicorn.</p>
-<p><strong>Net inclination:</strong> lean <em>out</em> of the job, but not blindly — secure one paying design partner before the quit, then go full-time. Don&#x27;t quit and figure it out; quit and execute on a contract you already signed.</p>
+      <h3>(1) Where the nine converge</h3>
+<p>The financial setup is workable but unforgiving — 9 months of runway is enough for a wedge but not for a category, and a toddler in the household compresses your willingness to extend that runway under stress. The healthtech background materially de-risks the idea: niche workflow tools for clinical research coordinators are exactly the kind of unsexy, sticky software that compounds when sold to people the founder already understands. Domain-insider founders in regulated B2B verticals fail at much lower rates than outsiders, and that asymmetry is the strongest signal in the dataset.</p>
+<h3>(2) Internal tension</h3>
+<p>Tension persists on <strong>whether <em>now</em> is the right moment</strong>. The systemic and pre-mortem frames want one more thing nailed before the quit — a paying design partner, or a side-project prototype that three coordinators are already using. The optimist and first-principles frames argue the cost of waiting another six months is higher than it looks: your context window on the buyer degrades from the inside the longer you stay at the unicorn. Both sides are pricing the same risk; they disagree on which clock runs faster.</p>
+<h3>(3) Net inclination</h3>
+<p><strong>Inclinación neta:</strong> lean <em>out</em> of the job, but not blindly. Secure one paying design partner before the quit, then go full-time on the back of that contract. Don&#x27;t quit and figure it out — quit and execute on a contract you already signed. The sequencing matters more than the timing.</p>
     </div>
   </article>
 
@@ -1149,8 +1212,8 @@
     </div>
     <div class="right">
       <b>Estimated cost</b> ~CLP 550<br/>
-      2026·04·30 · 16:48 CLT<br/>
-      report&nbsp;#1648
+      2026·04·30 · 16:57 CLT<br/>
+      report&nbsp;#1657
     </div>
   </footer>
 

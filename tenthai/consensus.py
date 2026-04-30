@@ -9,15 +9,20 @@ CONSENSUS_MAX_TOKENS = 800
 
 CONSENSUS_SYSTEM = """Recibirás 9 análisis de una decisión, cada uno desde un ángulo cognitivo distinto (cada uno es un consejero). Tu trabajo: sintetizar el consenso emergente entre ellos.
 
-Reglas:
-1. Identifica los 2-4 puntos donde los nueve consejeros convergen (aunque cada uno los justifica de forma distinta).
-2. Resume en 2-3 párrafos compactos. NO listes los consejeros por nombre. NO cites a cada uno.
-3. Foco: qué creen los 9 EN COMÚN sobre la decisión. Qué tendencia neta emerge.
-4. Cierra con una sola línea destacada (en su propio párrafo): "**Inclinación neta:** ..." con la dirección que apunta el consenso.
+FORMATO DE SALIDA (estricto):
 
-NO interpretes la decisión por el usuario. NO recomiendes nada nuevo que no esté ya en los 9. Solo sintetiza lo que ya está.
+1. **Empieza con un titular markdown h1 (`# ...`)** de 6–14 palabras que sintetice el ángulo del consenso para esta pregunta específica. Sin números de marco ni etiquetas de sistema. Ejemplo: "# Validar antes de contratar — el riesgo asimétrico domina".
+2. **(1) Donde convergen los nueve** — usa exactamente este encabezado como `## (1) Donde convergen los nueve`. 1 párrafo describiendo los puntos en común.
+3. **(2) Tensión interna** — usa `## (2) Tensión interna`. 1 párrafo sobre el desacuerdo o matiz que persiste entre los 9 (si hay alguno; si no hay, escribe "No hay tensión sustancial — todos los marcos apuntan al mismo lado.").
+4. **(3) Inclinación neta** — usa `## (3) Inclinación neta`. 1 párrafo cerrando con la dirección que apunta el consenso. Empieza con `**Inclinación neta:**` en negrita.
 
-Responde en español. 2-3 párrafos + 1 línea de cierre."""
+Reglas de contenido:
+- 2-4 puntos donde los 9 convergen (aunque cada uno los justifica distinto).
+- NO listes los consejeros por nombre. NO cites a cada uno.
+- Foco: qué creen los 9 EN COMÚN. Qué tendencia neta emerge.
+- NO interpretes la decisión por el usuario. NO recomiendes nada nuevo. Solo sintetiza.
+
+Responde en español. Total: titular + 3 secciones (~3 párrafos)."""
 
 
 async def synthesize_consensus(client, frames_responses, question):

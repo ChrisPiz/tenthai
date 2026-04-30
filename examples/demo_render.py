@@ -30,13 +30,19 @@ QUESTION = (
     "Should I leave my Senior PM job at a Series C unicorn to start a B2B SaaS in clinical research?"
 )
 
-CONSENSUS = """The nine advisors converge on two things and disagree on a third.
+CONSENSUS = """# Quit on the back of a contract — not on the back of confidence
 
-**They agree** that the financial setup is workable but unforgiving: 9 months of runway is enough for a wedge but not for a category, and a toddler in the household compresses your willingness to extend that runway under stress. They also agree that your healthtech background materially de-risks the idea — niche workflow tools for clinical research coordinators is exactly the kind of unsexy, sticky software that compounds when sold to people you already understand.
+## (1) Donde convergen los nueve
 
-**They disagree** on whether *now* is the right moment. The systemic and pre-mortem frames want one more thing nailed before you quit (a paying design partner, or a side-project prototype that 3 coordinators are already using). The optimist and first-principles frames argue that the cost of waiting another 6 months is higher than it looks — your context window on the buyer is degrading from the inside the longer you stay at the unicorn.
+The financial setup is workable but unforgiving — 9 months of runway is enough for a wedge but not for a category, and a toddler in the household compresses your willingness to extend that runway under stress. The healthtech background materially de-risks the idea: niche workflow tools for clinical research coordinators are exactly the kind of unsexy, sticky software that compounds when sold to people the founder already understands. Domain-insider founders in regulated B2B verticals fail at much lower rates than outsiders, and that asymmetry is the strongest signal in the dataset.
 
-**Net inclination:** lean *out* of the job, but not blindly — secure one paying design partner before the quit, then go full-time. Don't quit and figure it out; quit and execute on a contract you already signed."""
+## (2) Tensión interna
+
+Tension persists on **whether *now* is the right moment**. The systemic and pre-mortem frames want one more thing nailed before the quit — a paying design partner, or a side-project prototype that three coordinators are already using. The optimist and first-principles frames argue the cost of waiting another six months is higher than it looks: your context window on the buyer degrades from the inside the longer you stay at the unicorn. Both sides are pricing the same risk; they disagree on which clock runs faster.
+
+## (3) Inclinación neta
+
+**Inclinación neta:** lean *out* of the job, but not blindly. Secure one paying design partner before the quit, then go full-time on the back of that contract. Don't quit and figure it out — quit and execute on a contract you already signed. The sequencing matters more than the timing."""
 
 
 FRAMES = {
@@ -204,6 +210,15 @@ CHROME = [
     ("disenso steel-man", "steel-man dissent"),
     # Section asides + frame list
     ("qué creen <b>en común</b> los nueve", "what the nine <b>agree on</b>"),
+    # Consensus essay header
+    ("Σ · 9 consejeros · ALIGNED", "Σ · 9 ADVISORS · ALIGNED"),
+    ("Σ · 9 consejeros · FRAGILE CONSENSUS", "Σ · 9 ADVISORS · FRAGILE CONSENSUS"),
+    ("Σ · 9 consejeros · DIVIDED", "Σ · 9 ADVISORS · DIVIDED"),
+    ("max distancia · vs centroide", "max distance · vs centroid"),
+    # Consensus body section labels
+    ("(1) Donde convergen los nueve", "(1) Where the nine converge"),
+    ("(2) Tensión interna", "(2) Internal tension"),
+    ("(3) Inclinación neta", "(3) Net inclination"),
     ("orden por <b>distancia al centroide</b> · click para expandir",
      "ordered by <b>distance to centroid</b> · click to expand"),
     ("d&nbsp;<b>{tenth_distance:.3f}</b> · obligación de discrepar", ""),  # not used as literal
