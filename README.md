@@ -1,12 +1,12 @@
 # TenthAI
 
-> Map the disagreement between 9 AI agents + 1 obligatory dissenter.
+> **AI advisors agree too easily.** TenthAI builds disagreement on purpose.
 
-Multi-agent MCP server. Your question → 9 cognitive frames + 1 steel-man dissenter → 2D map of the response space.
+Ask any decision. 9 AI agents respond from 9 distinct cognitive frames — empirical, historical, ethical, systemic, and others. A 10th agent then reads what the others said and is *required* to dissent, building the most coherent counter-case it can.
 
-Inspired by the **tenth man rule** (Israeli intelligence post-Yom Kippur, popularized in *World War Z*): if 9 advisors agree, the 10th is OBLIGATED to dissent and build the coherent counter-case.
+You don't get an answer. You get a **map** — a 2D projection of the response space where you see at a glance whether consensus is robust or fragile, with the steel-manned dissent in full.
 
-The output is not an answer. It's a visual map: you see where consensus is robust and where it's fragile.
+The mechanic comes from the **tenth man rule**: a doctrine adopted by Israeli intelligence after the 1973 Yom Kippur surprise (popularized in *World War Z*). When 9 analysts agree, the 10th is institutionally obligated to disagree — a structural defense against groupthink. TenthAI ports that into LLM advice.
 
 ## Quick install (5 min)
 
