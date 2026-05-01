@@ -39,6 +39,8 @@ Restart Claude Code fully when it's done, then try:
 /decide should I take the new job?
 ```
 
+> **Note:** the `/decide` slash command is **Claude Code only**. In Claude Desktop and Cursor, MCP tools don't appear as slash commands — you invoke Henge by writing your question normally ("Should I quit my job to start a company?") and Claude picks up the `decide` tool from its description, or you can mention it explicitly ("use the decide tool to analyze ...").
+
 For Claude Desktop, Cursor or any other MCP host, see [Manual install](#manual-install) at the bottom.
 
 ---
@@ -260,7 +262,9 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) a
 }
 ```
 
-Use the absolute path to the venv's Python — `~` is not expanded by every host. Quit Claude Desktop fully (not just close the window) and reopen for the change to load.
+Use the absolute path to the venv's Python — `~` is not expanded by every host. Quit Claude Desktop fully with **Cmd+Q** (closing the window only hides it; the process keeps running and won't reread the config) and reopen.
+
+After restart, **Claude Desktop requires you to approve the new connector** before it actually starts the server. Open **Settings → Connectors** (or Extensions, depending on the version), find `henge` in the list, and enable/approve it. Editing the config file is not enough on its own. Once approved, the tool is available in any chat — but it does **not** show up as a `/decide` slash command. Ask your decision question in natural language ("Should I hire someone now?") and Claude will pick up the `decide` tool, or invoke it explicitly ("use the decide tool to analyze ...").
 
 ### Cursor
 
