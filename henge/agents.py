@@ -68,7 +68,7 @@ async def _call_anthropic(client, model, system, user, max_tokens):
 async def run_agent(client, frame, question, context=None):
     """Run one cognitive frame. Returns response text."""
     system = PROMPTS[frame]
-    user = question if not context else f"{question}\n\nContexto adicional:\n{context}"
+    user = question if not context else f"{question}\n\nAdditional context:\n{context}"
     return await _call_anthropic(client, SONNET, system, user, FRAME_MAX_TOKENS)
 
 
@@ -78,14 +78,14 @@ async def run_tenth_man(client, successful_frames, question):
     successful_frames: list of (frame_name, response_text) tuples.
     """
     consensus_block = "\n\n".join(
-        f"### Consejero {i+1} — {frame}\n{resp}"
+        f"### Advisor {i+1} — {frame}\n{resp}"
         for i, (frame, resp) in enumerate(successful_frames)
     )
     user = (
-        f"Pregunta original:\n{question}\n\n"
-        f"Los siguientes análisis convergen en un consenso. "
-        f"Tu trabajo: asume que están TODOS equivocados y construye el contraargumento más fuerte y coherente posible. "
-        f"Steel-man del disenso, no straw-man.\n\n"
+        f"Original question:\n{question}\n\n"
+        f"The following analyses converge on a consensus. "
+        f"Your job: assume they are ALL wrong and build the strongest, most coherent counter-argument possible. "
+        f"Steel-man the dissent, never straw-man.\n\n"
         f"{consensus_block}"
     )
     return await _call_anthropic(client, OPUS, PROMPTS[TENTH_MAN], user, TENTH_MAX_TOKENS)
@@ -114,8 +114,8 @@ async def run_agents(client, question, context=None):
     if n_ok < 8:
         failed_frames = [f for f, _, s in nine if s == "failed"]
         raise RuntimeError(
-            f"Solo {n_ok}/9 consejeros exitosos. Abortando (mínimo requerido: 8). "
-            f"Consejeros fallidos: {failed_frames}"
+            f"Only {n_ok}/9 advisors succeeded. Aborting (minimum required: 8). "
+            f"Failed advisors: {failed_frames}"
         )
 
     successful = [(f, r) for f, r, s in nine if s == "ok"]

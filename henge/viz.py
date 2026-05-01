@@ -10,8 +10,8 @@ Design language (v3):
 - Type pairing: Fraunces (serif display + numerics) + DM Sans (UI) +
   JetBrains Mono (data, labels, meta)
 
-Layout: masthead → hero (painting + 4 stats) → 01 Reporte (question + map +
-optional consensus + tenth-card) → 02 Marcos (frames table) → colophon.
+Layout: masthead → hero (painting + 4 stats) → 01 Report (question + map +
+optional consensus + tenth-card) → 02 Frames (frames table) → colophon.
 The 9 frames are sorted by distance to centroide ascending; the closest one is
 expanded by default. The tenth-man sits in its own chartreuse-accented card
 with a 3-up failure-modes grid when the [FAILURE_MODES] block is present.
@@ -45,18 +45,18 @@ def consensus_verdict(tenth_distance: float, max_frame_distance: float) -> dict:
         return {
             "state": "divided",
             "label_short": "divided",
-            "verdict": "Consejeros divididos — no había consenso fuerte para empezar.",
+            "verdict": "Advisors divided — there was no strong consensus to begin with.",
         }
     if tenth_distance > DISSENT_RATIO * max_frame_distance:
         return {
             "state": "aligned-fragile",
             "label_short": "fragile consensus",
-            "verdict": "Consenso fuerte pero frágil — el disidente lo rompe coherentemente.",
+            "verdict": "Strong but fragile consensus — the dissenter breaks it coherently.",
         }
     return {
         "state": "aligned-stable",
         "label_short": "aligned",
-        "verdict": "Consejeros alineados — el disenso suena pero el consenso aguanta.",
+        "verdict": "Advisors aligned — dissent sounds reasonable but consensus holds.",
     }
 
 
@@ -305,9 +305,9 @@ def _build_map_svg(coords_2d, frames, distances, max_frame_dist, min_frame_dist)
         marker_r = 7 if is_closest else 6
         suffix = ""
         if is_closest:
-            suffix = " · más cercano"
+            suffix = " · closest"
         elif is_farthest:
-            suffix = " · más lejano"
+            suffix = " · farthest"
         parts.append('<g>')
         parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{marker_r}" fill="#1b2540"/>')
         if is_closest:
@@ -422,8 +422,8 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
     storage.write_record + webbrowser.open). Keeping render() pure makes it easy
     to test, embed, and post-process.
 
-    Layout order: masthead → hero (painting + 4 stats) → 01 Reporte (question +
-    map card + optional consensus card + tenth-man card) → 02 Marcos (frames
+    Layout order: masthead → hero (painting + 4 stats) → 01 Report (question +
+    map card + optional consensus card + tenth-man card) → 02 Frames (frames
     table) → colophon.
     """
     frames = [r[0] for r in results]
@@ -446,14 +446,14 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
     verdict_state = verdict["state"]
     # Hero verdict cell — short editorial label
     hero_verdict_label = {
-        "aligned-stable": "Alineado",
-        "aligned-fragile": "Frágil",
-        "divided": "Disperso",
+        "aligned-stable": "Aligned",
+        "aligned-fragile": "Fragile",
+        "divided": "Divided",
     }.get(verdict_state, "—")
     hero_verdict_sub = {
-        "aligned-stable": "consenso aguanta",
-        "aligned-fragile": "consenso frágil",
-        "divided": "sin consenso fuerte",
+        "aligned-stable": "consensus holds",
+        "aligned-fragile": "fragile consensus",
+        "divided": "no strong consensus",
     }.get(verdict_state, "")
 
     # Map SVG (real MDS coords scaled into the v3 viewBox)
@@ -476,8 +476,8 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
             max_dist=max_frame_distance,
             idx_str=FRAME_INDEX.get(frames[i], f"{i + 1:02d}"),
             is_open=(i == closest_frame_idx),
-            flag=("más cercano" if i == closest_frame_idx
-                  else "más lejano" if i == most_divergent_idx
+            flag=("closest" if i == closest_frame_idx
+                  else "farthest" if i == most_divergent_idx
                   else None),
         )
         for i in frame_order
@@ -491,13 +491,13 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
         for i, (title, body) in enumerate(tenth_modes, start=1):
             mode_cards.append(
                 f'<div class="mode">'
-                f'<div class="ord">Modo · {i:02d}</div>'
+                f'<div class="ord">Mode · {i:02d}</div>'
                 f'<h5>{html_mod.escape(title)}</h5>'
                 f'<p>{html_mod.escape(body)}</p>'
                 f'</div>'
             )
         tenth_modes_html = (
-            '<h4><span class="ord">§ 4</span>Modos de fallo del consenso</h4>'
+            '<h4><span class="ord">§ 4</span>Consensus failure modes</h4>'
             '<div class="modes">' + "".join(mode_cards) + '</div>'
         )
     else:
@@ -508,18 +508,18 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
     if consensus:
         consensus_title, consensus_body_md = _split_consensus_title(consensus)
         if not consensus_title:
-            consensus_title = "Lo que los nueve coinciden"
+            consensus_title = "What the nine agree on"
         consensus_html = _md_to_html(consensus_body_md)
         consensus_block_html = f"""
     <article class="consensus-card">
       <header class="consensus-top">
         <div>
-          <div class="consensus-tag"><span class="d"></span>Σ · 9 consejeros · {html_mod.escape(verdict_short.upper())}</div>
+          <div class="consensus-tag"><span class="d"></span>Σ · 9 advisors · {html_mod.escape(verdict_short.upper())}</div>
           <h3>{html_mod.escape(consensus_title)}</h3>
         </div>
         <div class="consensus-d">
           <b>{max_frame_distance:.3f}</b>
-          max · vs centroide
+          max · vs centroid
         </div>
       </header>
       <div class="consensus-body">
@@ -1189,7 +1189,7 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
   <header class="masthead">
     <div class="logo"><span class="mk">10</span> TenthAI</div>
     <div class="mast-meta">
-      <b>Reporte #{report_id}</b><span class="sep">·</span>{timestamp}<span class="sep">·</span>v0.4
+      <b>Report #{report_id}</b><span class="sep">·</span>{timestamp}<span class="sep">·</span>v0.4
     </div>
   </header>
 
@@ -1202,28 +1202,28 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
           <span>Steel-man dissent · Frame 10 online</span>
           <span class="arrow">→</span>
         </div>
-        <h1 class="hero-h">Nueve consejeros alineados.<br><em>El décimo debe disentir.</em></h1>
-        <p class="hero-dek">Tu pregunta corre por nueve marcos cognitivos. Medimos el consenso y obligamos a un décimo a discrepar con rigor.</p>
+        <h1 class="hero-h">Nine advisors aligned.<br><em>The tenth must dissent.</em></h1>
+        <p class="hero-dek">Your question runs through nine cognitive frames. We measure the consensus and force a tenth to disagree with rigor.</p>
       </div>
 
       <div class="hero-stats">
         <div class="hero-stat">
           <div class="lbl">Tenth · d</div>
           <div class="val acc">{tenth_distance:.3f}</div>
-          <div class="sub">vs centroide</div>
+          <div class="sub">vs centroid</div>
         </div>
         <div class="hero-stat">
-          <div class="lbl">Más cercano</div>
+          <div class="lbl">Closest</div>
           <div class="val">{min_frame_distance:.3f}</div>
           <div class="sub">{html_mod.escape(closest_name)}</div>
         </div>
         <div class="hero-stat">
-          <div class="lbl">Más divergente</div>
+          <div class="lbl">Most divergent</div>
           <div class="val">{max_frame_distance:.3f}</div>
           <div class="sub">{html_mod.escape(most_divergent_name)}</div>
         </div>
         <div class="hero-stat">
-          <div class="lbl">Veredicto</div>
+          <div class="lbl">Verdict</div>
           <div class="val">{html_mod.escape(hero_verdict_label)}</div>
           <div class="sub">{html_mod.escape(hero_verdict_sub)}</div>
         </div>
@@ -1236,8 +1236,8 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
   <section class="section">
     <div class="sec-head">
       <div class="l">
-        <div class="sec-eyebrow"><span class="n">01</span>Reporte · #{report_id}</div>
-        <h2>La pregunta que <em>los nueve respondieron</em></h2>
+        <div class="sec-eyebrow"><span class="n">01</span>Report · #{report_id}</div>
+        <h2>The question <em>the nine answered</em></h2>
         <p class="sub">{question_safe}</p>
       </div>
     </div>
@@ -1246,11 +1246,11 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
       <div class="map-top">
         <div class="l">
           <span class="pill"><span class="d"></span>fig.01 · disagreement map</span>
-          <span class="meta">10 voces · MDS · cosine</span>
+          <span class="meta">10 voices · MDS · cosine</span>
         </div>
         <div class="legend-row">
-          <span><i class="ld t"></i>Décimo hombre</span>
-          <span><i class="ld n"></i>Marcos consensus</span>
+          <span><i class="ld t"></i>Tenth man</span>
+          <span><i class="ld n"></i>Consensus frames</span>
         </div>
       </div>
 
@@ -1260,24 +1260,24 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
 
       <div class="map-foot">
         <div class="cell">
-          <div class="lbl">Décimo · d</div>
+          <div class="lbl">Tenth · d</div>
           <div class="val">{tenth_distance:.3f}<span class="badge">tenth</span></div>
-          <div class="sub">obligado a discrepar</div>
+          <div class="sub">forced to dissent</div>
         </div>
         <div class="cell">
-          <div class="lbl">Más cercano</div>
+          <div class="lbl">Closest</div>
           <div class="val">{min_frame_distance:.3f}</div>
           <div class="sub">{html_mod.escape(closest_name)}</div>
         </div>
         <div class="cell">
-          <div class="lbl">Más divergente (de los 9)</div>
+          <div class="lbl">Most divergent (of the 9)</div>
           <div class="val">{max_frame_distance:.3f}</div>
           <div class="sub">{html_mod.escape(most_divergent_name)}</div>
         </div>
         <div class="cell">
-          <div class="lbl">Spread interno</div>
+          <div class="lbl">Internal spread</div>
           <div class="val">{spread_sigma:.3f}</div>
-          <div class="sub">σ entre los 9 marcos</div>
+          <div class="sub">σ across the 9 frames</div>
         </div>
       </div>
     </section>
@@ -1288,11 +1288,11 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
       <header class="tenth-top">
         <div>
           <div class="tenth-tag"><span class="d"></span>Frame 10 · Tenth-man</div>
-          <h3>Por qué los nueve <em>podrían estar equivocados</em></h3>
+          <h3>Why the nine <em>might be wrong</em></h3>
         </div>
         <div class="tenth-d-stat">
           <b>{tenth_distance:.3f}</b>
-          distance · centroide
+          distance · centroid
         </div>
       </header>
 
@@ -1302,7 +1302,7 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
       </div>
 
       <footer class="tenth-foot">
-        <span>Generado bajo restricción · <b>steel-man obligatorio</b></span>
+        <span>Generated under constraint · <b>steel-man mandatory</b></span>
         <span>embed <b>{html_mod.escape(provider)}/{html_mod.escape(model)}</b> · ~CLP {cost_estimate_clp:.0f}</span>
       </footer>
     </article>
@@ -1311,9 +1311,9 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
   <section class="section">
     <div class="sec-head">
       <div class="l">
-        <div class="sec-eyebrow"><span class="n">02</span>Marcos cognitivos · 9 voces</div>
-        <h2>Los nueve, ordenados por <em>distancia al centroide</em></h2>
-        <p class="sub">Cada marco aporta una lente: empírica, sistémica, histórica, analógica. Cuanto más cerca del centroide, más representa el consenso. Cuanto más lejos, más solo razona.</p>
+        <div class="sec-eyebrow"><span class="n">02</span>Cognitive frames · 9 voices</div>
+        <h2>The nine, ranked by <em>distance to centroid</em></h2>
+        <p class="sub">Each frame brings a different lens: empirical, systemic, historical, analogical. The closer to the centroid, the more it represents the consensus. The farther, the more it reasons alone.</p>
       </div>
     </div>
 
@@ -1322,7 +1322,7 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
         <span>Idx</span>
         <span>Frame</span>
         <span>Status</span>
-        <span>Distancia</span>
+        <span>Distance</span>
         <span style="text-align:right;">d</span>
         <span></span>
       </div>

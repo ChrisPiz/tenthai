@@ -7,22 +7,22 @@ has no anchor to attack, narratively. Cost: ~CLP 30, +3-5s latency.
 HAIKU = "claude-haiku-4-5-20251001"
 CONSENSUS_MAX_TOKENS = 800
 
-CONSENSUS_SYSTEM = """Recibirás 9 análisis de una decisión, cada uno desde un ángulo cognitivo distinto (cada uno es un consejero). Tu trabajo: sintetizar el consenso emergente entre ellos.
+CONSENSUS_SYSTEM = """You will receive 9 analyses of a decision, each from a different cognitive angle (each is an advisor). Your job: synthesize the emerging consensus between them.
 
-FORMATO DE SALIDA (estricto):
+OUTPUT FORMAT (strict):
 
-1. **Empieza con un titular markdown h1 (`# ...`)** de 6–14 palabras que sintetice el ángulo del consenso para esta pregunta específica. Sin números de marco ni etiquetas de sistema. Ejemplo: "# Validar antes de contratar — el riesgo asimétrico domina".
-2. **(1) Donde convergen los nueve** — usa exactamente este encabezado como `## (1) Donde convergen los nueve`. 1 párrafo describiendo los puntos en común.
-3. **(2) Tensión interna** — usa `## (2) Tensión interna`. 1 párrafo sobre el desacuerdo o matiz que persiste entre los 9 (si hay alguno; si no hay, escribe "No hay tensión sustancial — todos los marcos apuntan al mismo lado.").
-4. **(3) Inclinación neta** — usa `## (3) Inclinación neta`. 1 párrafo cerrando con la dirección que apunta el consenso. Empieza con `**Inclinación neta:**` en negrita.
+1. **Start with a markdown h1 headline (`# ...`)** of 6–14 words that synthesizes the angle of the consensus for this specific question. No frame numbers or system labels. Example: "# Validate before hiring — asymmetric risk dominates".
+2. **(1) Where the nine converge** — use exactly this heading as `## (1) Where the nine converge`. 1 paragraph describing the points in common.
+3. **(2) Internal tension** — use `## (2) Internal tension`. 1 paragraph about the disagreement or nuance that persists between the 9 (if any; if there is none, write "No substantial tension — all frames point the same way.").
+4. **(3) Net lean** — use `## (3) Net lean`. 1 paragraph closing with the direction the consensus points to. Start with `**Net lean:**` in bold.
 
-Reglas de contenido:
-- 2-4 puntos donde los 9 convergen (aunque cada uno los justifica distinto).
-- NO listes los consejeros por nombre. NO cites a cada uno.
-- Foco: qué creen los 9 EN COMÚN. Qué tendencia neta emerge.
-- NO interpretes la decisión por el usuario. NO recomiendes nada nuevo. Solo sintetiza.
+Content rules:
+- 2-4 points where the 9 converge (even if each justifies them differently).
+- DO NOT list advisors by name. DO NOT cite each one.
+- Focus: what the 9 believe IN COMMON. What net tendency emerges.
+- DO NOT interpret the decision for the user. DO NOT recommend anything new. Only synthesize.
 
-Responde en español. Total: titular + 3 secciones (~3 párrafos)."""
+Match the language of the question. Total: headline + 3 sections (~3 paragraphs)."""
 
 
 async def synthesize_consensus(client, frames_responses, question):
@@ -39,7 +39,7 @@ async def synthesize_consensus(client, frames_responses, question):
     block = "\n\n".join(
         f"### {name}\n{resp}" for name, resp in frames_responses
     )
-    user = f"Pregunta original:\n{question}\n\n9 análisis:\n\n{block}"
+    user = f"Original question:\n{question}\n\n9 analyses:\n\n{block}"
 
     try:
         msg = await client.messages.create(

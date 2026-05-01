@@ -94,17 +94,17 @@ def test_consensus_verdict_three_states():
     # 9 tight (max 0.08), tenth moderate (0.10) → aligned-stable
     v = consensus_verdict(tenth_distance=0.10, max_frame_distance=0.08)
     assert v["state"] == "aligned-stable"
-    assert "alineados" in v["verdict"].lower()
+    assert "aligned" in v["verdict"].lower()
 
     # 9 tight (max 0.119), tenth pushed (0.213) → aligned-fragile
     v = consensus_verdict(tenth_distance=0.213, max_frame_distance=0.119)
     assert v["state"] == "aligned-fragile"
-    assert "frágil" in v["verdict"].lower()
+    assert "fragile" in v["verdict"].lower()
 
     # 9 spread (max 0.22) → divided regardless of tenth
     v = consensus_verdict(tenth_distance=0.40, max_frame_distance=0.22)
     assert v["state"] == "divided"
-    assert "divididos" in v["verdict"].lower()
+    assert "divided" in v["verdict"].lower()
 
 
 def test_voyage_failure_returns_structured_error(monkeypatch):

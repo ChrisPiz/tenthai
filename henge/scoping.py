@@ -10,27 +10,27 @@ import json
 HAIKU = "claude-haiku-4-5-20251001"
 SCOPING_MAX_TOKENS = 800
 
-SCOPING_SYSTEM = """Recibirás una pregunta de decisión. Tu trabajo: generar 4-7 preguntas concretas que un asesor experto haría al usuario antes de poder dar consejo fundado.
+SCOPING_SYSTEM = """You will receive a decision question. Your job: generate 4-7 concrete questions an expert advisor would ask the user before being able to give grounded advice.
 
-Las respuestas alimentarán a 9 consejeros con ángulos cognitivos distintos: empírico (datos, números), histórico (precedentes, casos), primer-principios (restricciones), analógico, sistémico (segundo orden), ético (stakeholders), contrarian (supuestos), pre-mortem (modos de falla), optimista (upside).
+The answers will feed 9 advisors with distinct cognitive angles: empirical (data, numbers), historical (precedents, cases), first-principles (constraints), analogical, systemic (second-order), ethical (stakeholders), contrarian (assumptions), pre-mortem (failure modes), optimist (upside).
 
-Busca preguntas que cubran (cuando apliquen al dominio):
-- Datos cuantitativos personales (ingresos, ahorros, plazos, deudas, edad, dependientes)
-- Restricciones y deal-breakers
-- Geografía, comunidad, ubicación
-- Relaciones y stakeholders afectados
-- Preferencias subjetivas, filosofía de vida, prioridades
-- Información que NO esté ya en la pregunta original
+Look for questions that cover (when relevant to the domain):
+- Personal quantitative data (income, savings, deadlines, debts, age, dependents)
+- Constraints and deal-breakers
+- Geography, community, location
+- Relationships and affected stakeholders
+- Subjective preferences, life philosophy, priorities
+- Information NOT already in the original question
 
-Reglas:
-- 4-7 preguntas, no más, no menos.
-- Cada una concreta, específica al dominio. NO genérica.
-- Una pregunta por entry — sin "y" compuestas.
-- NO repitas información ya en la pregunta.
-- En español.
+Rules:
+- 4-7 questions, no more, no less.
+- Each concrete, specific to the domain. NOT generic.
+- One question per entry — no "and"-compound questions.
+- DO NOT repeat information already in the question.
+- Match the language of the original question.
 
-Output: JSON array de strings. SOLO el JSON, sin prosa, sin markdown fence.
-Ejemplo formato: ["¿Cuál es tu ingreso mensual neto aproximado?", "¿En qué comunas estarías dispuesto a vivir?"]"""
+Output: JSON array of strings. ONLY the JSON, no prose, no markdown fence.
+Format example: ["What is your approximate net monthly income?", "Which neighborhoods would you be willing to live in?"]"""
 
 
 async def generate_questions(client, question):

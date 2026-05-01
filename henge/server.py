@@ -102,32 +102,33 @@ def _validate_keys_at_startup():
 
 @mcp.tool()
 async def decide(question: str, context: str | None = None, skip_scoping: bool = False) -> dict:
-    """Mapa de desacuerdo: 9 consejeros + 1 disidente obligatorio (décimo hombre).
+    """Disagreement map: 9 advisors + 1 mandatory dissenter (tenth man).
 
-    DOS FASES:
+    TWO PHASES:
 
-    Fase 1 — Scoping (default si no se pasa context):
-    Devuelve {status: "needs_context", questions: [...]} con 4-7 preguntas concretas
-    tailored al dominio. El caller (Claude Code) debe presentárselas al usuario antes
-    de proceder. Sin contexto rico, los consejeros especulan o se quedan genéricos.
+    Phase 1 — Scoping (default when no context is passed):
+    Returns {status: "needs_context", questions: [...]} with 4-7 concrete,
+    domain-tailored questions. The caller (Claude Code) must present them to
+    the user before proceeding. Without rich context, advisors speculate or
+    stay generic.
 
-    Fase 2 — Run (cuando context está presente o skip_scoping=True):
-    Corre 9 consejeros en paralelo + el décimo hombre, devuelve mapa 2D con distancias,
-    cita literal del disidente, y abre HTML en navegador.
+    Phase 2 — Run (when context is present or skip_scoping=True):
+    Runs the 9 advisors in parallel + the tenth man, returns a 2D map with
+    distances, the dissenter's literal quote, and opens the HTML in a browser.
 
     Args:
-        question: La pregunta de decisión o juicio.
-        context: Respuestas del usuario a las preguntas de scoping, o contexto
-                 inicial rico. Si está vacío, se entra a fase 1.
-        skip_scoping: Si True, salta scoping y corre directo. Útil cuando el caller
-                      decide que la pregunta ya tiene contexto suficiente.
+        question: The decision or judgment question.
+        context: User answers to the scoping questions, or rich initial
+                 context. If empty, phase 1 is entered.
+        skip_scoping: If True, skip scoping and run directly. Useful when the
+                      caller decides the question already has enough context.
 
     Returns:
-        Fase 1: {status: "needs_context", questions: [...], note, next_call_hint}
-        Fase 2: {viz_path, frames, tenth_man, summary, cost_clp}
+        Phase 1: {status: "needs_context", questions: [...], note, next_call_hint}
+        Phase 2: {viz_path, frames, tenth_man, summary, cost_clp}
     """
     if not question or not question.strip():
-        return {"error": "empty_question", "reason": "Provide una pregunta no vacía."}
+        return {"error": "empty_question", "reason": "Provide a non-empty question."}
 
     client = AsyncAnthropic()
 
@@ -136,13 +137,13 @@ async def decide(question: str, context: str | None = None, skip_scoping: bool =
         if questions is None:
             return {
                 "status": "scoping_failed",
-                "reason": "No pude generar preguntas de scoping. Pasa skip_scoping=True o provee context para proceder.",
+                "reason": "Could not generate scoping questions. Pass skip_scoping=True or provide context to proceed.",
             }
         return {
             "status": "needs_context",
             "questions": questions,
-            "note": "Presenta estas preguntas al usuario en un mensaje numerado, espera su respuesta, luego llama decide() de nuevo con question + sus respuestas como context.",
-            "next_call_hint": f"decide(question={question!r}, context='<respuestas del usuario formateadas>')",
+            "note": "Present these questions to the user in a numbered message, wait for their reply, then call decide() again with question + their answers as context.",
+            "next_call_hint": f"decide(question={question!r}, context='<user answers formatted>')",
         }
 
     try:
