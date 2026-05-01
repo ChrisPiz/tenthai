@@ -177,6 +177,31 @@ python -m henge.server   # runs as an MCP stdio server
 
 ---
 
+## Before you install
+
+Quick checklist so the install doesn't surprise you:
+
+- **Python ≥3.11.** macOS still ships Python 3.9. The Claude Code paste prompt detects this and installs Python 3.11.9 via pyenv automatically (no admin/sudo, but the build takes ~10 min the first time).
+- **Two API keys.** `ANTHROPIC_API_KEY` (mandatory — runs the 10 advisors) and `OPENAI_API_KEY` (default embedding provider). Voyage is an alternative — see [Embeddings · why a second provider?](#embeddings--why-a-second-provider).
+- **`pip install -e .` is mandatory.** Not `pip install -r requirements.txt`. The editable install registers the `henge` package inside the venv. Without it, the MCP server crashes with `ModuleNotFoundError: No module named 'henge'` whenever it's spawned from a cwd other than `~/Henge` — which is exactly what an MCP host does.
+- **Restart Claude Code fully after install.** Close ALL terminals running `claude`, then reopen. The MCP catalog is loaded once at startup; a running session will never pick up a freshly-registered server.
+
+---
+
+## Troubleshooting
+
+| Symptom | Cause / fix |
+| --- | --- |
+| `/decide` says "Henge MCP server doesn't appear to be connected" | Quit every `claude` session and reopen. If still failing → next row. |
+| `claude mcp list` shows `henge ✗ Failed` | Run `~/Henge/.venv/bin/python -m henge.server </dev/null` interactively to see the real error. Most common cause: the editable install was skipped — `cd ~/Henge && .venv/bin/pip install -e .` and re-register. |
+| `ModuleNotFoundError: No module named 'henge'` | Editable install missing. `cd ~/Henge && .venv/bin/pip install -e .` |
+| `git clone` fails with "destination already exists" | The repo is already there. `cd ~/Henge && git pull --ff-only`. |
+| `pyenv install` shows an `lzma` warning | Non-fatal, ignore. (Optional cleanup: `brew install xz` and re-run.) |
+| Server validates keys then exits immediately | Expected. It's a stdio MCP server; without a client on stdin, it shuts down once `✓ keys validated` is printed. |
+| `claude mcp add` rejects the path with $HOME | Pass an absolute path: `~/Henge/.venv/bin/python` (Claude Code expands `~`, but other shells re-expand `$HOME` after registration). |
+
+---
+
 ## MCP integration
 
 Henge speaks Model Context Protocol. Any MCP-compatible client can drive it as a reasoning tool.
