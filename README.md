@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/header.jpg" alt="Henge — Dissent for AI Agents" width="100%">
+  <img src="docs/header-v2.jpg" alt="Henge — Dissent for AI Agents" width="100%">
 </p>
 
 # Henge · Structured Dissent for AI Agents
