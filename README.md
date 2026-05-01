@@ -58,6 +58,8 @@ Consensus is cheap. Correct decisions are not.
 
 ## What Henge does
 
+![Disagreement map — tenth-man pulled to d=1.074, nine cluster around the centroid](docs/disagreement-map.png)
+
 Henge runs your question through ten cognitive perspectives and:
 
 1. Asks 4–7 scoping questions before reasoning, so the advisors apply to facts instead of speculation
@@ -148,6 +150,8 @@ Nine consensus frames + one mandatory dissenter:
 | 10| **tenth-man**      | steel-man dissent, mandatory, after the nine align        |
 
 All frames respond in the **same language as the question** (Spanish question → Spanish answer; English → English). The report chrome (headings, labels, reading guide) follows the same rule by auto-detecting the question's language; force a single locale with `HENGE_LOCALE=en` or `HENGE_LOCALE=es` in your `.env`.
+
+![Frames ranked by distance to centroid — closest is the most representative voice, farthest reasons most alone](docs/frames-table.png)
 
 ---
 
