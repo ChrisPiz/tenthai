@@ -74,7 +74,11 @@ Steps:
    ---
    description: Invokes Henge — disagreement map of 9 advisors + 1 dissenter.
    ---
-   Use the `decide` MCP tool from the `henge` server to analyze: $ARGUMENTS. When the JSON returns: cite viz_path, summarize the consensus first, list the 9 advisors' conclusions, then quote the tenth-man verbatim.
+   Use the `decide` MCP tool from the `henge` server to analyze: $ARGUMENTS.
+
+   If the response is `status: "needs_context"`: present the `questions` to the user as a numbered list, then add a final line saying they can skip these and run immediately by replying "skip" (or "omitir" / "corre ya"). On that reply, call `decide` again with `skip_scoping=True`. Otherwise, call `decide` again with `context` set to their answers.
+
+   When the full JSON returns (status absent): cite `viz_path`, summarize the `consensus` first, list the 9 advisors' conclusions, then quote `tenth_man.response` verbatim.
 
 After step 6, tell me to restart Claude Code and try `/decide should I take the new job?`
 ````

@@ -142,8 +142,21 @@ async def decide(question: str, context: str | None = None, skip_scoping: bool =
         return {
             "status": "needs_context",
             "questions": questions,
-            "note": "Present these questions to the user in a numbered message, wait for their reply, then call decide() again with question + their answers as context.",
+            "note": (
+                "Present these questions to the user in a numbered message, wait for "
+                "their reply, then call decide() again with question + their answers "
+                "as context. ALSO tell the user — at the bottom of the questions "
+                "message — that they can skip the questions and run immediately by "
+                "saying 'skip' / 'omitir' / 'corre ya', in which case call decide "
+                "again with skip_scoping=True."
+            ),
+            "skip_hint": (
+                "Optional escape hatch: if you'd rather not answer, just say 'skip' "
+                "(or 'omitir' / 'corre ya') and Henge will run the 9 advisors + the "
+                "tenth-man on the question as-is."
+            ),
             "next_call_hint": f"decide(question={question!r}, context='<user answers formatted>')",
+            "skip_call_hint": f"decide(question={question!r}, skip_scoping=True)",
         }
 
     try:
