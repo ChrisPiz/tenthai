@@ -210,6 +210,16 @@ def main() -> None:
     out_file = out_dir / "demo.html"
     out_file.write_text(html, encoding="utf-8")
 
+    # Mirror the bundled hero painting next to demo.html so the relative
+    # `assets/header-painting.jpg` reference resolves on GitHub Pages.
+    import shutil
+    pkg_assets = Path(__file__).resolve().parent.parent / "henge" / "assets"
+    demo_assets = out_dir / "assets"
+    demo_assets.mkdir(exist_ok=True)
+    painting = pkg_assets / "header-painting.jpg"
+    if painting.exists():
+        shutil.copyfile(painting, demo_assets / "header-painting.jpg")
+
     print(f"Demo report written to: {out_file}")
     if not args.no_open:
         webbrowser.open(f"file://{out_file.absolute()}")
