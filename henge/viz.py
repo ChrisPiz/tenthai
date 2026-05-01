@@ -617,7 +617,7 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
   }}
   .hero-bg{{
     position: absolute; inset: 0;
-    background-image: url('assets/header-painting.png');
+    background-image: url('assets/header-painting.jpg');
     background-size: cover;
     background-position: center 40%;
     z-index: -2;

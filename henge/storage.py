@@ -62,9 +62,9 @@ def write_record(report_dir: Path, html: str, payload: dict) -> tuple[Path, Path
 
     assets_dir = report_dir / "assets"
     assets_dir.mkdir(exist_ok=True)
-    painting_src = PACKAGE_ASSETS_DIR / "header-painting.png"
+    painting_src = PACKAGE_ASSETS_DIR / "header-painting.jpg"
     if painting_src.exists():
-        shutil.copyfile(painting_src, assets_dir / "header-painting.png")
+        shutil.copyfile(painting_src, assets_dir / "header-painting.jpg")
 
     return html_path, json_path
 
