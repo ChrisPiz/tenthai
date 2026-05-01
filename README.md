@@ -61,10 +61,10 @@ Henge does not simulate debate. It analyzes the structure of thought, then quant
 Paste this prompt into Claude Code and it self-installs by running a deterministic shell script — no LLM step-following, no drift:
 
 ````
-Install Henge from https://github.com/ChrisPiz/Henge-MCP. Idempotent flow:
+Install Henge from https://github.com/ChrisPiz/Henge. Idempotent flow:
 
 1. Clone shallow (or pull if already there):
-   git clone --single-branch --depth 1 https://github.com/ChrisPiz/Henge-MCP.git ~/Henge \
+   git clone --single-branch --depth 1 https://github.com/ChrisPiz/Henge.git ~/Henge \
      || (cd ~/Henge && git pull --ff-only)
 
 2. cd ~/Henge && cp -n .env.example .env
@@ -119,7 +119,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
     "henge": {
       "command": "python",
       "args": ["-m", "henge.server"],
-      "cwd": "/absolute/path/to/Henge-MCP",
+      "cwd": "/absolute/path/to/Henge",
       "env": {
         "ANTHROPIC_API_KEY": "...",
         "OPENAI_API_KEY": "..."
@@ -136,7 +136,7 @@ Add the same `mcpServers.henge` block to Cursor's MCP config (`Settings → MCP 
 ### Manual install (any environment)
 
 ```bash
-git clone --single-branch --depth 1 https://github.com/ChrisPiz/Henge-MCP.git ~/Henge
+git clone --single-branch --depth 1 https://github.com/ChrisPiz/Henge.git ~/Henge
 cd ~/Henge
 cp .env.example .env
 # Open .env and fill in:

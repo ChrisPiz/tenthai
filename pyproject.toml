@@ -35,9 +35,9 @@ dependencies = [
 henge = "henge.server:main"
 
 [project.urls]
-Homepage = "https://github.com/ChrisPiz/Henge-MCP"
-Repository = "https://github.com/ChrisPiz/Henge-MCP"
-Demo = "https://chrispiz.github.io/Henge-MCP/demo.html"
+Homepage = "https://github.com/ChrisPiz/Henge"
+Repository = "https://github.com/ChrisPiz/Henge"
+Demo = "https://chrispiz.github.io/Henge/demo.html"
 
 [tool.setuptools.packages.find]
 include = ["henge*"]
