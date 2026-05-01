@@ -19,6 +19,7 @@ from .consensus import synthesize_consensus
 from .embed import embed_responses, project_mds
 from .scoping import generate_questions
 from .storage import make_report_dir, make_report_id, write_index, write_record
+from .updater import get_update_status, update_message
 from .viz import consensus_verdict, render
 
 # Load .env from project root regardless of cwd (Claude Code may spawn subprocess elsewhere).
@@ -241,12 +242,23 @@ async def decide(question: str, context: str | None = None, skip_scoping: bool =
             return text
         return text[:limit].rsplit(" ", 1)[0] + "..."
 
+    update_status = get_update_status()
+    update_available = None
+    if update_status and update_status.get("behind", 0) > 0:
+        update_available = {
+            "behind": update_status["behind"],
+            "latest_sha": update_status.get("latest_sha"),
+            "current_sha": update_status.get("current_sha"),
+            "message": update_message(update_status),
+        }
+
     return {
         "viz_path": viz_path,
         "report_id": report_id,
         "report_dir": str(report_dir),
         "json_path": str(json_path),
         "index_path": str(index_path),
+        "update_available": update_available,
         "viz_note": "Persisted at viz_path (HTML) + json_path (raw data). index_path is the browseable ledger. JSON below contains summaries only (consensus + tenth-man are full).",
         "consensus": consensus_text or "(consensus synthesis failed)",
         "frames": [
@@ -277,6 +289,13 @@ async def decide(question: str, context: str | None = None, skip_scoping: bool =
 
 def main():
     _validate_keys_at_startup()
+    # Best-effort version check. Cached for 24h, silent on any failure.
+    try:
+        msg = update_message(get_update_status())
+        if msg:
+            print(f"⟳ {msg}", file=sys.stderr)
+    except Exception:
+        pass
     mcp.run()
 
 
