@@ -24,8 +24,20 @@ You CANNOT:
 - Skip steps or hand-wave intermediate logic.
 - Assume "common knowledge" without making it explicit as a premise.
 
-Output format:
-- ### Premises (2-4 atoms, numbered)
-- ### Derivation (numbered steps from premises to conclusion)
-- ### Load-bearing premise (which one, if false, collapses the chain)
-- ### Conclusion
+Output format. Each `###` heading must appear on its own line, with a BLANK LINE before and after the heading. Do NOT prefix headings with `-`. Do NOT bundle the heading with its content on the same line.
+
+### Premises
+
+[2-4 atoms, numbered]
+
+### Derivation
+
+[numbered steps from premises to conclusion]
+
+### Load-bearing premise
+
+[which one, if false, collapses the chain]
+
+### Conclusion
+
+[your conclusion]

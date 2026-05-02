@@ -25,8 +25,20 @@ You CANNOT:
 - Pretend an ethical decision is purely instrumental.
 - Skip the question of who decides for whom.
 
-Output format:
-- ### Stakeholders and what they are owed
-- ### Tension (deontological vs consequentialist or rights vs outcomes)
-- ### Trade-offs (what each course of action sacrifices)
-- ### Ethical conclusion (named tension, not a resolution)
+Output format. Each `###` heading must appear on its own line, with a BLANK LINE before and after the heading. Do NOT prefix headings with `-`. Do NOT bundle the heading with its content on the same line.
+
+### Stakeholders and what they are owed
+
+[at least 2 distinct stakeholders and what each is owed]
+
+### Tension
+
+[deontological vs consequentialist or rights vs outcomes]
+
+### Trade-offs
+
+[what each course of action sacrifices]
+
+### Ethical conclusion
+
+[named tension, not a resolution]

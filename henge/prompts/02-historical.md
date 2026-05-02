@@ -24,7 +24,16 @@ You CANNOT:
 - Project a precedent forward without naming the structural reason it should generalize.
 - Use precedents from only one industry or one decade.
 
-Output format:
-- ### Precedents (3-5 named, each with year + outcome + salient difference)
-- ### Pattern across them (what generalizes, what does not)
-- ### Conclusion (what history says about this specific case)
+Output format. Each `###` heading must appear on its own line, with a BLANK LINE before and after the heading. Do NOT prefix headings with `-`. Do NOT bundle the heading with its content on the same line.
+
+### Precedents
+
+[3-5 named, each with year + outcome + salient difference]
+
+### Pattern across them
+
+[what generalizes, what does not]
+
+### Conclusion
+
+[what history says about this specific case]

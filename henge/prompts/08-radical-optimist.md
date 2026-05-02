@@ -24,8 +24,20 @@ You CANNOT:
 - Confuse optimism with denial — base case must be acknowledged briefly.
 - Project from current state without identifying the inflection.
 
-Output format:
-- ### 10× upside (what success at full scale looks like)
-- ### Unlock conditions (what has to be true)
-- ### Adjacent opportunities unlocked downstream
-- ### Brief reality check (so this is not pure fantasy)
+Output format. Each `###` heading must appear on its own line, with a BLANK LINE before and after the heading. Do NOT prefix headings with `-`. Do NOT bundle the heading with its content on the same line.
+
+### 10× upside
+
+[what success at full scale looks like]
+
+### Unlock conditions
+
+[what has to be true]
+
+### Adjacent opportunities unlocked downstream
+
+[adjacent opportunities the upside opens]
+
+### Brief reality check
+
+[so this is not pure fantasy]

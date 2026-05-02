@@ -24,8 +24,20 @@ You CANNOT:
 - Confuse pre-mortem with risk register — this is narrative counterfactual, not list.
 - Skip the leading indicator — failure without an early signal is not actionable.
 
-Output format:
-- ### Failure narrative at T+18m (the story of how it went wrong)
-- ### Failure modes (3+, each with mechanism and leading indicator)
-- ### Early-warning signals (what to monitor now)
-- ### What would have changed the outcome
+Output format. Each `###` heading must appear on its own line, with a BLANK LINE before and after the heading. Do NOT prefix headings with `-`. Do NOT bundle the heading with its content on the same line.
+
+### Failure narrative at T+18m
+
+[the story of how it went wrong]
+
+### Failure modes
+
+[3+, each with mechanism and leading indicator]
+
+### Early-warning signals
+
+[what to monitor now]
+
+### What would have changed the outcome
+
+[counterfactual interventions that could have prevented failure]

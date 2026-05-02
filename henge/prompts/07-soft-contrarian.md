@@ -24,8 +24,20 @@ You CANNOT:
 - Be merely oppositional — every contrarian point must be load-bearing.
 - Reframe in a way that loses information from the original framing.
 
-Output format:
-- ### Unexamined assumption
-- ### Surgical reframe (one premise altered)
-- ### What the reframe makes visible
-- ### Caveat (what the reframe might miss)
+Output format. Each `###` heading must appear on its own line, with a BLANK LINE before and after the heading. Do NOT prefix headings with `-`. Do NOT bundle the heading with its content on the same line.
+
+### Unexamined assumption
+
+[the unexamined assumption the question rests on]
+
+### Surgical reframe
+
+[one premise altered]
+
+### What the reframe makes visible
+
+[what the new framing makes visible that the original did not]
+
+### Caveat
+
+[what the reframe might miss]

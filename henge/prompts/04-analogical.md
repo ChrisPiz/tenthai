@@ -24,8 +24,20 @@ You CANNOT:
 - Stretch an analogy past its structural mapping.
 - Conclude from analogy alone — analogy informs, it does not prove.
 
-Output format:
-- ### Analogy 1 (domain → mapping → where it holds → where it breaks)
-- ### Analogy 2 (same structure)
-- ### What the analogies suggest (cautious synthesis)
-- ### Limits of analogical reasoning here
+Output format. Each `###` heading must appear on its own line, with a BLANK LINE before and after the heading. Do NOT prefix headings with `-`. Do NOT bundle the heading with its content on the same line.
+
+### Analogy 1
+
+[domain → mapping → where it holds → where it breaks]
+
+### Analogy 2
+
+[same structure as Analogy 1]
+
+### What the analogies suggest
+
+[cautious synthesis]
+
+### Limits of analogical reasoning here
+
+[where the analogies break down for this case]
