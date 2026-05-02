@@ -8,6 +8,24 @@ documented under **Removed** with migration notes.
 
 ---
 
+## [0.6.0-dev]
+
+### Added
+- Provider abstraction layer (`henge/providers/`):
+  - `ProviderBase` ABC + `CompletionRequest`/`CompletionResponse` dataclasses
+  - `AnthropicProvider` and `OpenAIProvider` with canonical-id mapping (`anthropic/haiku-4-5`, `anthropic/sonnet-4-6`, `anthropic/opus-4-7`, `openai/gpt-5`)
+  - Versioned pricing table (`PRICING_VERSION = "2026-05"`) for cost accounting
+  - Lazy-init singleton registry with prefix dispatch
+  - Live smoke tests skipped when API keys are absent
+
+### Changed
+- `OpenAIProvider` omits the `temperature` kwarg when `req.temperature == 0.0`. Reasoning models (gpt-5) reject an explicit 0.0; this lets every OpenAI model fall through to its API default (1). Mirrors Anthropic's `_NO_TEMPERATURE` pattern for Opus 4.7.
+
+### Notes
+- The legacy `henge/pricing.py` module is intentionally untouched; it is replaced by `henge/providers/pricing.py` for v0.6+ flows. Removal is scheduled for Phase 8 when the report schema bumps to 0.6.
+
+---
+
 ## [0.5.0] — 2026-05-01
 
 The "Validity + paper" release. Adopts a DORA-style hybrid model: rigor

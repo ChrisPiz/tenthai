@@ -1,6 +1,8 @@
 """Real-call smoke test for both providers. Skipped automatically without API keys.
 
-Each call is minimal (max_tokens=10) — under USD 0.01 per run. Verifies that
+Anthropic call uses max_tokens=10 (~USD 0.001). OpenAI gpt-5 uses
+max_tokens=500 because it is a reasoning model that burns ~100+ internal
+tokens before output (~USD 0.01–0.05 per run). Verifies that
 the canonical interface works end-to-end against live SDKs.
 """
 import os
@@ -42,5 +44,7 @@ async def test_smoke_openai_gpt5():
     assert resp.text.strip() != ""
     assert resp.input_tokens > 0
     assert resp.output_tokens > 0
-    # OpenAI returns dated releases (e.g. "gpt-5-2025-08-07"); check prefix only.
+    # Provider stores the bare alias from _RAW_MODEL ("gpt-5"); the SDK's
+    # completion.model is dated but is not what we surface. startswith is
+    # defensive against any future change to the canonical→raw mapping.
     assert resp.raw_model.startswith("gpt-5")

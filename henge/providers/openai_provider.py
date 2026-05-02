@@ -11,8 +11,10 @@ OpenAI normalisation notes:
 - Token usage exposed as ``prompt_tokens``/``completion_tokens``.
 - ``finish_reason`` lives on each choice.
 - ``temperature`` is omitted when ``req.temperature == 0.0`` (the
-  ``CompletionRequest`` default) because newer models such as ``gpt-5`` only
-  support the API default (1) and reject an explicit 0.0.
+  ``CompletionRequest`` default). Reasoning models (gpt-5) reject an explicit
+  0.0; chat models silently fall through to their API default (1). Callers
+  needing strict 0.0 with chat models would require an API-rejected fallback
+  similar to ``anthropic_provider.py``'s try/except — out of scope for v0.6.
 """
 from __future__ import annotations
 
