@@ -423,6 +423,46 @@ def _md_to_html(text: str) -> str:
     return "\n".join(out)
 
 
+def _meta_card_html(meta_dict, locale: str = "es") -> str:
+    """Render the meta-frame audit card. ``meta_dict`` may be None (legacy reports)."""
+    if not meta_dict:
+        return ""
+    decision = meta_dict.get("decision_class", "unknown")
+    urgency = meta_dict.get("urgency", "unknown")
+    quality = meta_dict.get("question_quality", "unknown")
+    rec = meta_dict.get("meta_recommendation", "proceed")
+    reasoning = (meta_dict.get("reasoning") or "").strip()
+
+    rec_label = {
+        "proceed":               "Procede" if locale == "es" else "Proceed",
+        "reformulate":           "Reformular" if locale == "es" else "Reformulate",
+        "postpone":              "Postergar" if locale == "es" else "Postpone",
+        "this-is-not-a-decision": "No es decisión" if locale == "es" else "Not a decision",
+    }.get(rec, rec)
+
+    title = "Auditoría de la pregunta" if locale == "es" else "Question audit"
+
+    safe_decision = html_mod.escape(str(decision))
+    safe_urgency = html_mod.escape(str(urgency))
+    safe_quality = html_mod.escape(str(quality))
+    safe_rec_label = html_mod.escape(rec_label)
+    safe_rec = html_mod.escape(str(rec))
+    safe_title = html_mod.escape(title)
+
+    return (
+        f'<section class="meta-card">'
+        f'  <h3>{safe_title}</h3>'
+        f'  <div class="meta-tags">'
+        f'    <span class="tag tag-decision tag-{safe_decision}">{safe_decision}</span>'
+        f'    <span class="tag tag-urgency tag-{safe_urgency}">{safe_urgency}</span>'
+        f'    <span class="tag tag-quality tag-{safe_quality}">{safe_quality}</span>'
+        f'    <span class="tag tag-rec tag-{safe_rec}">{safe_rec_label}</span>'
+        f'  </div>'
+        f'  <div class="meta-reasoning">{_md_to_html(reasoning)}</div>'
+        f'</section>'
+    )
+
+
 def _split_consensus_title(text: str):
     """Pull a leading ``# Title`` line out of the consensus output.
 
@@ -809,7 +849,7 @@ def _build_frame_card_with_flag(frame, response, status, distance, max_dist, idx
     """
 
 
-def render(question, results, coords_2d, distances, provider, model, cost_estimate_usd, consensus=None, cfi_data=None):
+def render(question, results, coords_2d, distances, provider, model, cost_estimate_usd, consensus=None, cfi_data=None, meta_frame=None):
     """Render the TenthAI/Antimetal-style disagreement report. Returns full HTML.
 
     Persistence and browser-open are handled by the caller (server.py orchestrates
@@ -821,6 +861,7 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
     table) → colophon.
     """
     locale = detect_locale(question)
+    meta_html = _meta_card_html(meta_frame, locale=locale)
 
     frames = [r[0] for r in results]
     responses = [r[1] for r in results]
@@ -1447,6 +1488,27 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
     break-inside: avoid-column;
   }}
 
+  /* Meta-frame audit card */
+  .meta-card{{
+    margin: 16px auto 24px;
+    max-width: 880px;
+    padding: 18px 22px;
+    border: 1px solid var(--border-rule);
+    border-radius: 12px;
+    background: var(--surface-glass-soft);
+    box-shadow: var(--ring-rule);
+  }}
+  .meta-card h3{{ margin: 0 0 10px; font-family: var(--sans); font-size: 12px; font-weight: 600; color: var(--storm); text-transform: uppercase; letter-spacing: 0.06em; }}
+  .meta-tags{{ display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }}
+  .meta-card .tag{{ display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 500; background: var(--chartreuse-10); color: var(--midnight-navy); border: 1px solid var(--chartreuse-25); font-family: var(--sans); }}
+  .meta-card .tag-rec{{ background: var(--chartreuse-25); border-color: var(--chartreuse-55); }}
+  .meta-reasoning{{ font-size: 14px; line-height: 1.55; color: var(--storm); font-family: var(--sans); }}
+  .meta-reasoning p{{ margin: 0 0 10px; }}
+  [data-theme="dark"] .meta-card{{ background: var(--surface-glass-08); border-color: var(--on-dark-border-strong); }}
+  [data-theme="dark"] .meta-card h3{{ color: var(--on-dark-78); }}
+  [data-theme="dark"] .meta-card .tag{{ background: var(--chartreuse-14); color: var(--on-dark); border-color: var(--chartreuse-32); }}
+  [data-theme="dark"] .meta-reasoning{{ color: var(--on-dark-92); }}
+
   /* Tenth-man feature card */
   .tenth-card{{
     background: var(--pure);
@@ -2069,6 +2131,8 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
       </button>
     </div>
   </header>
+
+  {meta_html}
 
   <section class="hero">
     <div class="hero-bg" aria-hidden="true"></div>

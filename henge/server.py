@@ -422,6 +422,15 @@ async def decide(
         model=embed_result["model"],
         cost_estimate_usd=cost_usd,
         cfi_data=cfi_block,
+        meta_frame=(
+            {
+                "decision_class": meta.decision_class,
+                "urgency": meta.urgency,
+                "question_quality": meta.question_quality,
+                "meta_recommendation": meta.meta_recommendation,
+                "reasoning": meta.reasoning,
+            } if meta is not None else None
+        ),
     )
 
     n_frames_succeeded = sum(1 for _, _, s, _ in results[:9] if s == "ok")
