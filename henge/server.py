@@ -34,6 +34,11 @@ from .scoping import (
     generate_questions,
     run_scoping,
 )
+from .meta_frame import (
+    ENABLE_META_FRAME,
+    MetaFrameResult,
+    evaluate_question_quality,
+)
 from .storage import make_report_dir, make_report_id, write_index, write_record
 from .updater import get_update_status, update_message
 from .viz import compute_cfi, consensus_verdict, render
@@ -302,6 +307,31 @@ async def decide(
         canonical_usage = canonical.opus_usage
     else:
         effective_context = context
+
+    # Phase 4: meta-frame audit. gpt-5 cross-lab audits the question itself
+    # before the 9 advisors spend tokens. If the question is malformed
+    # (exploration disguised as decision, or a proxy for the real question),
+    # short-circuit with a recommendation. Behind HENGE_ENABLE_META_FRAME.
+    meta: MetaFrameResult | None = None
+    meta_usage: dict | None = None
+    if ENABLE_META_FRAME and effective_context:
+        meta = await evaluate_question_quality(question, effective_context)
+        meta_usage = meta.gpt5_usage
+        if meta.meta_recommendation in ("reformulate", "this-is-not-a-decision"):
+            return {
+                "status": "meta_early_exit",
+                "meta_recommendation": meta.meta_recommendation,
+                "decision_class": meta.decision_class,
+                "urgency": meta.urgency,
+                "question_quality": meta.question_quality,
+                "suggested_reformulation": meta.suggested_reformulation,
+                "reasoning": meta.reasoning,
+                "next_call_hint": (
+                    f"decide(question='<reformulated>', context={context!r})"
+                    if meta.meta_recommendation == "reformulate"
+                    else "This is not a decision question — try /explica or rephrase."
+                ),
+            }
 
     try:
         results = await run_agents(client, question, effective_context, temperature=primary_temperature)
@@ -599,6 +629,17 @@ async def decide(
             "prompts_hash": PROMPTS_HASH,
             "k_runs_distribution": k_runs_distribution,
         },
+        "meta_frame": (
+            {
+                "decision_class": meta.decision_class,
+                "urgency": meta.urgency,
+                "question_quality": meta.question_quality,
+                "meta_recommendation": meta.meta_recommendation,
+                "reasoning": meta.reasoning,
+            }
+            if meta is not None
+            else None
+        ),
         "cost_breakdown": cost_breakdown,
         "cost_usd": cost_usd,  # deprecated alias, kept until v1.0
     }
