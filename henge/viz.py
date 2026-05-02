@@ -97,6 +97,13 @@ def detect_locale(question: str) -> str:
 TIGHT_SIGMA = 0.03   # σ across the 9 frame distances below this → clustered
 DISSENT_SIGMA = 3.0  # tenth ≥ this many σ above cluster mean → meaningful dissent
 
+# CFI (Consensus Fragility Index) — pre-registered in docs/cfi-spec.md.
+# Normalization constant: at k·σ above the cluster mean, the dissenter has
+# pushed far enough that the consensus is treated as broken.
+CFI_K = 6.0
+CFI_FRAGILE_THRESHOLD = 0.33  # CFI < this → aligned-stable
+CFI_BROKEN_THRESHOLD = 0.66   # informational only; v0.5 collapses ≥0.33 → aligned-fragile
+
 
 TRANSLATIONS = {
     "en": {
@@ -273,6 +280,50 @@ def t(locale: str, key: str) -> str:
     return TRANSLATIONS.get(locale, TRANSLATIONS["en"]).get(
         key, TRANSLATIONS["en"].get(key, key)
     )
+
+
+def compute_cfi(tenth_distance: float, frame_distances: list[float]) -> dict:
+    """Consensus Fragility Index.
+
+    CFI = clamp(0, 1, (d_tenth - μ) / (k · σ)) with k = ``CFI_K`` (= 6).
+
+    σ is floored at 1e-6 to avoid division by zero on degenerate clusters.
+    Bin assignment:
+
+    - ``σ ≥ TIGHT_SIGMA``         → ``divided`` (overrides CFI; the 9 never
+      reached real consensus)
+    - ``CFI < CFI_FRAGILE_THRESHOLD`` (0.33)   → ``aligned-stable``
+    - otherwise                                → ``aligned-fragile``
+
+    The thresholds and constants are pre-registered in ``docs/cfi-spec.md``
+    and ``WHITEPAPER.md``. Changing them requires a new pricing/spec version
+    and a CHANGELOG entry — historical reports remain comparable only within
+    the same spec version.
+    """
+    n = len(frame_distances)
+    if n == 0:
+        return {"cfi": None, "cfi_bin": "divided", "mu_9": None, "sigma_9": None}
+
+    mu = sum(frame_distances) / n
+    sigma = (sum((d - mu) ** 2 for d in frame_distances) / n) ** 0.5
+
+    sigma_floor = max(sigma, 1e-6)
+    cfi_raw = (tenth_distance - mu) / (CFI_K * sigma_floor)
+    cfi = max(0.0, min(1.0, cfi_raw))
+
+    if sigma >= TIGHT_SIGMA:
+        cfi_bin = "divided"
+    elif cfi < CFI_FRAGILE_THRESHOLD:
+        cfi_bin = "aligned-stable"
+    else:
+        cfi_bin = "aligned-fragile"
+
+    return {
+        "cfi": round(cfi, 4),
+        "cfi_bin": cfi_bin,
+        "mu_9": round(mu, 4),
+        "sigma_9": round(sigma, 4),
+    }
 
 
 def consensus_verdict(tenth_distance: float, frame_distances: list[float], locale: str = "en") -> dict:
@@ -668,7 +719,7 @@ def _build_frame_card_with_flag(frame, response, status, distance, max_dist, idx
     """
 
 
-def render(question, results, coords_2d, distances, provider, model, cost_estimate_usd, consensus=None):
+def render(question, results, coords_2d, distances, provider, model, cost_estimate_usd, consensus=None, cfi_data=None):
     """Render the TenthAI/Antimetal-style disagreement report. Returns full HTML.
 
     Persistence and browser-open are handled by the caller (server.py orchestrates
@@ -699,6 +750,17 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
     fragility_text = verdict["verdict"]
     verdict_short = verdict["label_short"]
     verdict_state = verdict["state"]
+    # CFI surfaced on the hero card. Caller (server) may pre-compute it from
+    # the un-substituted distance list for accuracy when some frames failed;
+    # fall back to local computation otherwise.
+    if cfi_data is None:
+        cfi_data = compute_cfi(tenth_distance, frame_distances)
+    cfi_value = cfi_data.get("cfi")
+    cfi_sigma = cfi_data.get("sigma_9")
+    if cfi_value is not None and cfi_sigma is not None:
+        hero_cfi_line = f"CFI {cfi_value:.2f} · σ₉ {cfi_sigma:.3f}"
+    else:
+        hero_cfi_line = ""
     # Hero verdict cell — short editorial label, localized
     hero_verdict_label = {
         "aligned-stable": t(locale, "verdict_label_aligned"),
@@ -1685,10 +1747,11 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
           <div class="val">{max_frame_distance:.3f}</div>
           <div class="sub">{html_mod.escape(most_divergent_name)}</div>
         </div>
-        <div class="hero-stat">
+        <div class="hero-stat" title="Consensus Fragility Index — see docs/cfi-spec.md">
           <div class="lbl">{t(locale, "stat_verdict")}</div>
           <div class="val">{html_mod.escape(hero_verdict_label)}</div>
           <div class="sub">{html_mod.escape(hero_verdict_sub)}</div>
+          <div class="sub" style="opacity:.7;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.04em;margin-top:2px">{html_mod.escape(hero_cfi_line)}</div>
         </div>
       </div>
     </div>

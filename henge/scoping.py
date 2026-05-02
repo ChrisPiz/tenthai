@@ -34,7 +34,7 @@ Format example: ["What is your approximate net monthly income?", "Which neighbor
 
 
 async def generate_questions(client, question):
-    """Returns list of 4-7 clarifying questions, or None on failure.
+    """Returns ``(questions, usage)``. On any failure: ``(None, None)``.
 
     Tolerates 3-8 questions to handle edge cases. Strips markdown code fences
     that Haiku sometimes wraps around JSON.
@@ -43,12 +43,20 @@ async def generate_questions(client, question):
         msg = await client.messages.create(
             model=HAIKU,
             max_tokens=SCOPING_MAX_TOKENS,
+            temperature=0,
             system=SCOPING_SYSTEM,
             messages=[{"role": "user", "content": question}],
         )
         text = msg.content[0].text.strip()
     except Exception:
-        return None
+        return None, None
+
+    usage_obj = getattr(msg, "usage", None)
+    usage = {
+        "model": HAIKU,
+        "input_tokens": int(getattr(usage_obj, "input_tokens", 0) or 0),
+        "output_tokens": int(getattr(usage_obj, "output_tokens", 0) or 0),
+    }
 
     if text.startswith("```"):
         text = text.split("\n", 1)[1] if "\n" in text else text
@@ -59,10 +67,10 @@ async def generate_questions(client, question):
     try:
         questions = json.loads(text)
     except json.JSONDecodeError:
-        return None
+        return None, usage
 
     if not isinstance(questions, list):
-        return None
+        return None, usage
     if not (3 <= len(questions) <= 8):
-        return None
-    return [str(q).strip() for q in questions if str(q).strip()]
+        return None, usage
+    return [str(q).strip() for q in questions if str(q).strip()], usage

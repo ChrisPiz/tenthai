@@ -1,107 +1,28 @@
-# Henge · 9 advisors. 1 mandatory dissenter.
+# Henge
+
+**Structured Dissent Protocol** — 9 cognitive frames + 1 mandatory steel-man
+dissenter, exposed as an MCP server.
 
 ![Henge](docs/header-v2.jpg)
 
-Ten pillars.
-Nine align.
-One must disagree.
+Henge runs your decision through nine cognitive lenses in parallel, then
+forces a tenth advisor — the **Tenth Man** — to build the strongest possible
+steel-man case against whatever consensus the nine reach. It persists a JSON
+record + an editorial HTML report on disk and surfaces a single tri-state
+verdict driven by the **Consensus Fragility Index (CFI)**.
 
-Henge is an MCP server that measures AI consensus and uses a structured dissent role — the **Tenth Man** — implemented through **steel-manning** to challenge the consensus before you act. Built for humans making serious decisions with AI in the loop — also drivable by autonomous agents.
+**Claim (v0.5.0).** Given a pre-registered protocol with `temperature=0`,
+the same question produces the same CFI bin across runs, modulo numerical
+noise from MDS init. Validation against decision quality (Henge-50 benchmark)
+is planned for v0.6.
 
-**[→ See a live demo report](https://chrispiz.github.io/Henge/demo.html)**  ·  **[→ Install with Claude Code](#quickstart--claude-code-30s)**
-
----
-
-## The problem
-
-AI systems don't fail because they lack intelligence.
-
-They fail because:
-- they converge too fast
-- they reinforce assumptions
-- they mistake agreement for truth
-
-Consensus is cheap. Correct decisions are not.
+[Demo](https://chrispiz.github.io/Henge/demo.html) · [Paper](WHITEPAPER.md) ·
+[Limits](LIMITS.md) · [Methodology](METHODOLOGY.md) · [CFI spec](docs/cfi-spec.md) ·
+[Manifesto](MANIFESTO.md) · [Developer](DEVELOPER.md)
 
 ---
 
-## What Henge does
-
-![Disagreement map — tenth-man pulled to d=1.074, nine cluster around the centroid](docs/disagreement-map.png)
-
-Henge runs your question through ten cognitive perspectives and:
-
-1. Asks 4–7 scoping questions before reasoning, so the advisors apply to facts instead of speculation
-2. Runs nine cognitive frames in parallel — each with its own lens
-3. Embeds the answers, projects them with classical MDS, and measures cosine distance to the centroid of the nine
-4. Assigns a **Tenth Man** (mandatory dissent role) and runs **steel-manning** to build the strongest possible case against whatever consensus emerged
-5. Persists a full HTML report + JSON record on disk and opens it in your browser
-
----
-
-## Why this is different
-
-| Approach              | Problem                       | Henge                              |
-| --------------------- | ----------------------------- | ---------------------------------- |
-| Single LLM            | Overconfident answers         | Multi-frame reasoning              |
-| Multi-agent debate    | Noisy, redundant              | Measures structure, doesn't echo   |
-| Devil's advocate      | Weakly argues against         | Tenth Man steel-mans the strongest opposing case |
-| Fixed "tenth man" rule| Hard-coded contrarian         | Tenth Man triggers + measurable distance         |
-
----
-
-## How dissent works
-
-Henge separates **role** from **method**.
-
-- **Tenth Man** is the *role* — a structural, mandatory dissenter, assigned regardless of how much the 9 agree. The role exists to test the consensus, not to disagree with it for the sake of disagreement.
-- **Steel-manning** is the *method* — the dissenter does not argue weakly or randomly. It builds the strongest possible version of the opposing case, grounded in the best precedents and cleanest reasoning available.
-
-```
-Role:    Tenth Man
-Method:  Steel-man
-Purpose: Challenge the consensus by constructing the strongest opposing case
-```
-
-The dissenter runs four steps, in order:
-
-1. Assume the consensus may be wrong
-2. Identify the strongest alternative perspective
-3. Steel-man that alternative — make it as strong as possible
-4. Show under what conditions it defeats the consensus
-
-### Not a devil's advocate
-
-This is not a devil's advocate.
-
-A devil's advocate weakly argues against something — often for sport, often without conviction.
-
-Henge's Tenth Man builds the **strongest** version of the opposing view. If you walk away from the report disagreeing with the dissent, it should be because you genuinely defeated the strongest case against you — not because the case was easy to dismiss.
-
----
-
-## Core principle
-
-![Nine advisors aligned · the tenth must dissent — verdict, distances, and the dissent that landed](docs/report-banner.png)
-
-Forcing disagreement without consensus is noise.
-
-Henge does not simulate debate. It analyzes the structure of thought, then quantifies the distance between voices so the dissent has somewhere to land.
-
----
-
-## What this is NOT
-
-- not a chatbot
-- not a debate simulator
-- not a multi-agent chat
-- not a vibe-checker
-
-It is a **decision-quality** tool. The output is a measurable structure of agreement and disagreement, not a longer answer.
-
----
-
-## How it works
+## What it does
 
 ```
 question
@@ -126,77 +47,73 @@ question
 └───────────────────────────────┘
 ```
 
-The verdict is one of three states:
+Reads as one of three pre-registered states (full bin definition in
+[`docs/cfi-spec.md`](docs/cfi-spec.md)):
 
-- **aligned-stable** — the nine cluster tightly and the tenth's dissent is moderate
-- **aligned-fragile** — the nine are tight but the tenth pushes far enough to break it coherently
-- **divided** — the nine themselves are spread; there was no real consensus to attack
+- **aligned-stable** — the nine cluster tightly and CFI < 0.33
+- **aligned-fragile** — the nine cluster tightly but CFI ≥ 0.33
+- **divided** — `σ` across the nine ≥ 0.03, no real consensus to attack
 
 ---
 
 ## Cognitive frames
 
-Nine consensus frames + one mandatory dissenter:
+Nine consensus frames + one mandatory dissenter. Same prompt set across every
+run; SHA-256 prefix exposed as `henge.agents.PROMPTS_HASH` and persisted in
+every report.
 
-| # | Frame              | Lens                                                      |
-|---|--------------------|-----------------------------------------------------------|
-| 1 | empirical          | quantification, base rates, [assumption] markers          |
-| 2 | historical         | precedents — what happened the last 3–5 times             |
-| 3 | first-principles   | reduce to physical / economic / logical atoms             |
-| 4 | analogical         | cross-domain mappings (biology, military, finance)        |
-| 5 | systemic           | feedback loops, second- and third-order effects           |
-| 6 | ethical            | deontological + consequentialist tension                  |
-| 7 | soft-contrarian    | surgical reframe of the loaded silent assumption          |
-| 8 | radical-optimist   | what unlocks if it goes 10× better                        |
-| 9 | pre-mortem         | assume it failed in 12 months — describe how              |
-| 10| **Tenth Man**      | mandatory dissent role · method: steel-man, after the nine align |
+| #  | Frame              | Lens                                                      |
+|----|--------------------|-----------------------------------------------------------|
+| 1  | empirical          | quantification, base rates, [assumption] markers          |
+| 2  | historical         | precedents — what happened the last 3–5 times             |
+| 3  | first-principles   | reduce to physical / economic / logical atoms             |
+| 4  | analogical         | cross-domain mappings (biology, military, finance)        |
+| 5  | systemic           | feedback loops, second- and third-order effects           |
+| 6  | ethical            | deontological + consequentialist tension                  |
+| 7  | soft-contrarian    | surgical reframe of the loaded silent assumption          |
+| 8  | radical-optimist   | what unlocks if it goes 10× better                        |
+| 9  | pre-mortem         | assume it failed in 12 months — describe how              |
+| 10 | **Tenth Man**      | mandatory dissent role · method: steel-man, after the nine align |
 
-All frames respond in the **same language as the question** (Spanish question → Spanish answer; English → English). The report chrome (headings, labels, reading guide) follows the same rule by auto-detecting the question's language; force a single locale with `HENGE_LOCALE=en` or `HENGE_LOCALE=es` in your `.env`.
-
-![Frames ranked by distance to centroid — closest is the most representative voice, farthest reasons most alone](docs/frames-table.png)
-
-![Tenth Man dissent built via steel-manning — premises accepted, where the consensus fails, the question behind the question, and consensus failure modes](docs/tenth-man-dissent.png)
+All frames respond in the language of the question (auto-detected). Force a
+single locale with `HENGE_LOCALE=en` or `HENGE_LOCALE=es`.
 
 ---
 
 ## Models & costs
 
 | Stage              | Model                | Why                                |
-| ------------------ | -------------------- | ---------------------------------- |
+|--------------------|----------------------|------------------------------------|
 | Scoping            | Claude Haiku 4.5     | fast, cheap, ~3–5 s per call       |
 | 9 cognitive frames | Claude Sonnet 4.6    | quality reasoning, parallel        |
-| Consensus synthesis| Claude Haiku 4.5     | summarization, structured output   |
+| Consensus synthesis| Claude Haiku 4.5     | summarisation, structured output   |
 | Tenth-man dissent  | Claude Opus 4.7      | hardest reasoning, fully sequential|
 | Embeddings         | OpenAI               | `text-embedding-3-small` by default|
 
-Typical cost per full run: **~USD 0.65** (range USD 0.50–0.80 depending on token spread).
-
----
-
-## Use cases
-
-- founder & operator decisions
-- hiring / scaling / firing
-- product strategy and prioritization
-- risk analysis & pre-mortems
-- counterfactual reasoning
-- AI agent orchestration where you need a structured second opinion
+Cost per run is computed from real `usage` returned by the SDK and persisted
+under `cost_breakdown` in every `report.json`. A representative full run with
+all 10 advisors landing inside their token caps lands at roughly **USD 0.50–0.80**.
+Pricing version is recorded against the report (currently `2026-05-01`).
 
 ---
 
 ## Before you install
 
-Quick checklist so the install doesn't surprise you:
-
-- **Python ≥3.11.** macOS still ships Python 3.9. The Claude Code paste prompt detects this and installs Python 3.11.9 via pyenv automatically (no admin/sudo, but the build takes ~10 min the first time).
-- **Two API keys.** `ANTHROPIC_API_KEY` (mandatory — runs the 10 advisors) and `OPENAI_API_KEY` (embedding provider).
-- **Restart Claude Code fully after install.** Close ALL terminals running `claude`, then reopen. The MCP catalog is loaded once at startup; a running session will never pick up a freshly-registered server.
+- **Python ≥3.11.** macOS still ships Python 3.9. The Claude Code paste prompt
+  detects this and installs Python 3.11.9 via pyenv automatically (no admin/sudo,
+  but the build takes ~10 min the first time).
+- **Two API keys.** `ANTHROPIC_API_KEY` (mandatory — runs the 10 advisors)
+  and `OPENAI_API_KEY` (embedding provider).
+- **Restart Claude Code fully after install.** Close ALL terminals running
+  `claude`, then reopen. The MCP catalog is loaded once at startup; a running
+  session will never pick up a freshly-registered server.
 
 ---
 
 ## Quickstart · Claude Code (30s)
 
-Paste this prompt into Claude Code and it self-installs by running a deterministic shell script — no LLM step-following, no drift:
+Paste this prompt into Claude Code and it self-installs by running a deterministic
+shell script — no LLM step-following, no drift:
 
 ````
 Install Henge from https://github.com/ChrisPiz/Henge. Idempotent flow:
@@ -221,47 +138,71 @@ Restart Claude Code fully when it's done, then try:
 /decide should I take the new job?
 ```
 
-> **Note:** the `/decide` slash command is **Claude Code only**. In Claude Desktop and Cursor, MCP tools don't appear as slash commands — you invoke Henge by writing your question normally ("Should I quit my job to start a company?") and Claude picks up the `decide` tool from its description, or you can mention it explicitly ("use the decide tool to analyze ...").
+> **Note:** the `/decide` slash command is **Claude Code only**. In Claude
+> Desktop and Cursor, MCP tools don't appear as slash commands — you invoke
+> Henge by writing your question normally ("Should I quit my job to start a
+> company?") and Claude picks up the `decide` tool from its description, or
+> you can mention it explicitly ("use the decide tool to analyze ...").
 
-For Claude Desktop, Cursor or any other MCP host, see the [Manual install section in DEVELOPER.md](DEVELOPER.md#manual-install).
+For Claude Desktop, Cursor or any other MCP host, see the
+[Manual install section in DEVELOPER.md](DEVELOPER.md#manual-install).
+
+---
+
+## What it does not measure
+
+Henge is a structural tool with a pre-registered metric. It is **not** a
+validated decision-quality instrument. Specifically: embedding distance is
+not propositional disagreement, all ten advisors share an Anthropic backbone,
+and verdict thresholds are pre-registered defaults rather than calibrated
+against ground truth.
+
+The full list lives in [LIMITS.md](LIMITS.md). Read it before you trust the
+output for anything load-bearing.
+
+---
+
+## Use cases
+
+- founder & operator decisions
+- hiring / scaling / firing
+- product strategy and prioritisation
+- risk analysis & pre-mortems
+- counterfactual reasoning
+- AI agent orchestration where you need a structured second opinion
 
 ---
 
 ## Roadmap
 
-- numeric consensus-strength scoring
-- dissent-impact scoring
-- adaptive frame selection (only run the lenses that matter)
-- PDF / shareable web report
-- streaming results
-- multi-model support (Gemini, GPT, local)
-- local embeddings (sentence-transformers, no API key required)
-- **dissent methods** — alternative implementations of the Tenth Man role:
-  - steel-man (current default)
-  - risk analysis (planned)
-  - data-driven contradiction (planned)
+Tracked in the [issues page](https://github.com/ChrisPiz/Henge/issues). Major
+items beyond v0.5:
+
+- **v0.6** · Henge-50 outcome benchmark (50 historical decisions with known
+  outcomes), embedding token accounting, K-runs distribution mode for CFI
+  with `temperature > 0`.
+- **v0.7** · Multi-model real (Gemini / GPT in the frame pool).
+- **v0.x** · local embeddings (sentence-transformers, no API key), PDF /
+  shareable web report, streaming results, adaptive frame selection.
 
 ---
 
-## Design philosophy
+## Background
 
-- don't generate more answers → generate better structure
-- don't simulate intelligence → measure it
-- don't force dissent → earn it
+Why Henge exists, the role/method split, and why steel-man over devil's
+advocate live in [MANIFESTO.md](MANIFESTO.md).
 
----
+The methodology paper is [WHITEPAPER.md](WHITEPAPER.md).
 
-## Mental model
-
-Henge is not trying to be right.
-
-It is trying to make your thinking harder to break.
+The reproducible protocol is [METHODOLOGY.md](METHODOLOGY.md).
 
 ---
 
 ## Developer reference
 
-For Tool API, output structure, manual installs (Claude Desktop / Cursor), embeddings provider config, architecture, and troubleshooting, see **[DEVELOPER.md](DEVELOPER.md)**.
+For Tool API, output structure, manual installs (Claude Desktop / Cursor),
+embeddings provider config, architecture, and troubleshooting, see
+[DEVELOPER.md](DEVELOPER.md).
 
 ---
 

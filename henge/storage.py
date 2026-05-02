@@ -57,7 +57,7 @@ INDEX_TRANSLATIONS = {
         "verdict_aligned": "aligned",
         "verdict_fragile": "fragile consensus",
         "verdict_divided": "divided",
-        "version_label": "v0.4",
+        "version_label": "v0.5",
     },
     "es": {
         "title": "Henge · Historial de decisiones",
@@ -80,7 +80,7 @@ INDEX_TRANSLATIONS = {
         "verdict_aligned": "alineado",
         "verdict_fragile": "consenso frágil",
         "verdict_divided": "disperso",
-        "version_label": "v0.4",
+        "version_label": "v0.5",
     },
 }
 

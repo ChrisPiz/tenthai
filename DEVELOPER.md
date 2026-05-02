@@ -130,7 +130,7 @@ const phase2 = await mcp.tools.decide({
 
 ---
 
-## Output structure
+## Output structure (v0.5.0)
 
 ```jsonc
 {
@@ -148,19 +148,62 @@ const phase2 = await mcp.tools.decide({
     "response": "## §1 Facts I accept\n... ## §2 Where the consensus fails ..."
   },
   "summary": {
+    // legacy (deprecated, kept until v1.0)
     "tenth_man_distance": 0.148,
     "max_frame_distance": 0.085,
-    "consensus_state": "aligned-stable",       // or "aligned-fragile" | "divided"
+    "consensus_state": "aligned-stable",
     "consensus_fragility": "Advisors aligned — dissent sounds reasonable but consensus holds.",
     "n_frames_succeeded": 9,
     "embed_provider": "openai",
-    "embed_model": "text-embedding-3-small"
+    "embed_model": "text-embedding-3-small",
+
+    // v0.5 — Consensus Fragility Index, pre-registered in docs/cfi-spec.md
+    "cfi": 0.198,
+    "cfi_bin": "aligned-stable",        // "aligned-stable" | "aligned-fragile" | "divided"
+    "mu_9": 0.063,
+    "sigma_9": 0.018,
+    "henge_version": "0.5.0",
+    "prompts_hash": "3bb5924c03e4c761",
+
+    // present only when k_runs > 1
+    "k_runs_distribution": null
   },
-  "cost_usd": 0.65
+  "cost_breakdown": {
+    "anthropic_usd": 0.4203,
+    "embedding_usd": 0.000050,
+    "total_usd":     0.420350,
+    "pricing_version": "2026-05-01"
+  },
+  "cost_usd": 0.420350    // deprecated alias of cost_breakdown.total_usd, kept until v1.0
 }
 ```
 
-The HTML at `viz_path` ships with the disagreement map, sortable frames table, consensus card, Tenth Man dissent (built via steel-manning), and a per-run hero painting bundled inside `report_dir/assets/`.
+The persisted `report.json` adds `runtime` (model versions, temperature, prompts_hash) and `usage` (per-call token counts) blocks; see `henge/server.py` for the full payload shape. `schema_version` was bumped from `"1"` (v0.4) to `"2"` (v0.5).
+
+The HTML at `viz_path` ships with the disagreement map, sortable frames table, consensus card, Tenth Man dissent (built via steel-manning), the new CFI/σ line under the verdict card, and a per-run hero painting bundled inside `report_dir/assets/`.
+
+### K-runs mode (v0.5)
+
+```jsonc
+// call
+{ "question": "...", "context": "...", "k_runs": 5, "run_temperature": 0.7 }
+
+// response.summary.k_runs_distribution
+{
+  "k_requested": 5,
+  "k_completed": 5,
+  "run_temperature": 0.7,
+  "cfi_mean": 0.214,
+  "cfi_stddev": 0.041,
+  "cfi_ci95_half_width": 0.036,
+  "cfi_samples": [0.198, 0.272, 0.183, 0.241, 0.176],
+  "bin_distribution": { "aligned-stable": 5 },
+  "total_cost_usd": 2.08,
+  "errors": []
+}
+```
+
+K-runs > 1 requires `run_temperature > 0` and `context` (or `skip_scoping=True`); see `WHITEPAPER.md` §4 and `METHODOLOGY.md` §6.
 
 ---
 

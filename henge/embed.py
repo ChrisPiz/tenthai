@@ -7,13 +7,25 @@ MDS preserves pairwise distances faithfully, which IS what a disagreement map ne
 import hashlib
 import json
 import os
+import sys
 from pathlib import Path
 
 import numpy as np
 from scipy.spatial.distance import pdist, squareform
 from sklearn.manifold import MDS
 
-CACHE_DIR = Path(".embed_cache")
+CACHE_DIR = Path.home() / ".henge" / "embed_cache"
+
+# One-time legacy-cache notice. v0.4 used cwd-relative ./.embed_cache which leaked
+# between projects and missed on cwd changes. v0.5 moves to ~/.henge/embed_cache.
+_LEGACY_CACHE = Path(".embed_cache")
+if _LEGACY_CACHE.exists() and _LEGACY_CACHE.is_dir() and not os.environ.get("HENGE_LEGACY_CACHE_NOTICE_SHOWN"):
+    print(
+        f"⚠ Henge: legacy embed cache at {_LEGACY_CACHE.resolve()} ignored. "
+        f"v0.5 caches at {CACHE_DIR}. Safe to delete the legacy dir.",
+        file=sys.stderr,
+    )
+    os.environ["HENGE_LEGACY_CACHE_NOTICE_SHOWN"] = "1"
 
 
 def _cache_key(text: str, provider: str, model: str) -> str:
@@ -95,16 +107,35 @@ def embed_responses(texts):
     }
 
 
-def project_mds(embeddings):
+def project_mds(embeddings, n_frames=None):
     """Classical MDS over pairwise cosine distance → 2D coords.
 
-    centroid_of_9 is computed only over the first 9 embeddings (frames),
-    excluding index 9 (the tenth-man). Distances are computed in the original
-    embedding space using cosine distance — the MDS projection is for viz only.
+    Layout convention: embeddings are ordered [frame_0, ..., frame_{n-1}, tenth_man].
+    The centroid is computed over the first ``n_frames`` (excluding the tenth-man).
+    Distances are computed in the original embedding space using cosine distance —
+    the MDS projection is for visualization only.
+
+    Args:
+        embeddings: list of M vectors. Last position must be the tenth-man.
+        n_frames: number of frames at the head of ``embeddings`` (M-1 by default,
+            i.e. last entry is tenth-man, all others are frames). v0.5 supports
+            n_frames < 9 to handle partial-frame failures correctly — previously
+            failed frames were embedded as their error stub, polluting the
+            centroid.
+
+    Returns:
+        dict with ``coords_2d``, ``distance_to_centroid_of_9`` (legacy key —
+        actually centroid of n_frames), and ``n_frames``.
     """
     arr = np.array(embeddings, dtype=float)
-    if arr.shape[0] != 10:
-        raise ValueError(f"Expected 10 embeddings, got {arr.shape[0]}")
+    m = arr.shape[0]
+    if n_frames is None:
+        n_frames = m - 1
+    if n_frames < 1 or n_frames >= m:
+        raise ValueError(
+            f"n_frames must be in [1, {m - 1}] (got {n_frames}); "
+            f"last embedding is reserved for the tenth-man."
+        )
 
     cosine_distances = squareform(pdist(arr, metric="cosine"))
 
@@ -117,8 +148,8 @@ def project_mds(embeddings):
     )
     coords_2d = mds.fit_transform(cosine_distances)
 
-    centroid_of_9 = arr[:9].mean(axis=0)
-    centroid_norm = centroid_of_9 / (np.linalg.norm(centroid_of_9) + 1e-12)
+    centroid = arr[:n_frames].mean(axis=0)
+    centroid_norm = centroid / (np.linalg.norm(centroid) + 1e-12)
 
     distances = []
     for vec in arr:
@@ -130,4 +161,5 @@ def project_mds(embeddings):
     return {
         "coords_2d": coords_2d.tolist(),
         "distance_to_centroid_of_9": distances,
+        "n_frames": n_frames,
     }

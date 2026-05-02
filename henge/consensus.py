@@ -28,7 +28,8 @@ Total: headline + 3 sections (~3 paragraphs), all in the question's language."""
 
 
 async def synthesize_consensus(client, frames_responses, question):
-    """Synthesize consensus from the 9 frame responses. Returns text or None on failure.
+    """Synthesize consensus from the 9 frame responses. Returns ``(text, usage)``
+    or ``(None, None)`` on failure.
 
     Args:
         client: AsyncAnthropic instance.
@@ -36,7 +37,7 @@ async def synthesize_consensus(client, frames_responses, question):
         question: original user question.
     """
     if not frames_responses:
-        return None
+        return None, None
 
     block = "\n\n".join(
         f"### {name}\n{resp}" for name, resp in frames_responses
@@ -47,9 +48,17 @@ async def synthesize_consensus(client, frames_responses, question):
         msg = await client.messages.create(
             model=HAIKU,
             max_tokens=CONSENSUS_MAX_TOKENS,
+            temperature=0,
             system=CONSENSUS_SYSTEM,
             messages=[{"role": "user", "content": user}],
         )
-        return msg.content[0].text.strip()
     except Exception:
-        return None
+        return None, None
+
+    usage_obj = getattr(msg, "usage", None)
+    usage = {
+        "model": HAIKU,
+        "input_tokens": int(getattr(usage_obj, "input_tokens", 0) or 0),
+        "output_tokens": int(getattr(usage_obj, "output_tokens", 0) or 0),
+    }
+    return msg.content[0].text.strip(), usage

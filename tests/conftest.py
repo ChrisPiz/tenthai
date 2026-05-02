@@ -47,6 +47,10 @@ def mock_anthropic_client():
         text_part = MagicMock()
         text_part.text = response_text
         result.content = [text_part]
+        # Real Anthropic responses populate ``usage`` with token counts.
+        # Tests need explicit ints so cost accounting (pricing.total_cost)
+        # gets real numbers instead of MagicMock auto-attrs.
+        result.usage = MagicMock(input_tokens=120, output_tokens=80)
         return result
 
     client.messages.create = AsyncMock(side_effect=mock_create)

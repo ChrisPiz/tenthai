@@ -14,13 +14,25 @@ from anthropic import AsyncAnthropic
 from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 
-from .agents import run_agents, TENTH_MAN
+from . import pricing
+from .agents import (
+    OPUS,
+    PROMPTS_HASH,
+    SONNET,
+    TEMPERATURE,
+    TENTH_MAN,
+    run_agents,
+)
+from .consensus import HAIKU as CONSENSUS_HAIKU
 from .consensus import synthesize_consensus
 from .embed import embed_responses, project_mds
+from .scoping import HAIKU as SCOPING_HAIKU
 from .scoping import generate_questions
 from .storage import make_report_dir, make_report_id, write_index, write_record
 from .updater import get_update_status, update_message
-from .viz import consensus_verdict, render
+from .viz import compute_cfi, consensus_verdict, render
+
+HENGE_VERSION = "0.5.0"
 
 # Load .env from project root regardless of cwd (Claude Code may spawn subprocess elsewhere).
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -100,8 +112,62 @@ def _validate_keys_at_startup():
     print("✓ keys validated", file=sys.stderr)
 
 
+async def _compute_cfi_only(client, question, context, temperature):
+    """Lightweight K-runs companion: frames + tenth-man + embed + CFI.
+
+    Skips consensus synthesis, HTML rendering, and persistence — those are
+    only run for the primary K-runs iteration. Returns either a CFI block
+    plus per-run cost, or an error dict.
+    """
+    try:
+        results = await run_agents(client, question, context, temperature=temperature)
+    except RuntimeError as exc:
+        return {"error": "agents_failed", "reason": str(exc)}
+
+    success_indices = [i for i, (_, _, s, _) in enumerate(results) if s == "ok"]
+    texts_for_embed = [results[i][1] for i in success_indices]
+
+    embed_result = embed_responses(texts_for_embed)
+    if not embed_result["ok"]:
+        return {"error": "embed_failed", "reason": embed_result.get("reason")}
+
+    n_compact_frames = sum(1 for _, _, s, _ in results[:9] if s == "ok")
+    proj = project_mds(embed_result["embeddings"], n_frames=n_compact_frames)
+
+    distances_list = [None] * 10
+    for compact_i, orig_i in enumerate(success_indices):
+        distances_list[orig_i] = proj["distance_to_centroid_of_9"][compact_i]
+
+    frame_distances_compact = [d for d in distances_list[:9] if d is not None]
+    cfi_block = compute_cfi(distances_list[9], frame_distances_compact)
+
+    advisor_usages = [u for _, _, _, u in results]
+    cost = pricing.total_cost(
+        advisor_usages=advisor_usages,
+        scoping_usage=None,
+        consensus_usage=None,
+        embedding_model=embed_result["model"],
+        embedding_input_tokens=0,
+    )
+
+    return {
+        "cfi": cfi_block["cfi"],
+        "cfi_bin": cfi_block["cfi_bin"],
+        "mu_9": cfi_block["mu_9"],
+        "sigma_9": cfi_block["sigma_9"],
+        "tenth_distance": distances_list[9],
+        "cost_usd": cost["total_usd"],
+    }
+
+
 @mcp.tool()
-async def decide(question: str, context: str | None = None, skip_scoping: bool = False) -> dict:
+async def decide(
+    question: str,
+    context: str | None = None,
+    skip_scoping: bool = False,
+    k_runs: int = 1,
+    run_temperature: float | None = None,
+) -> dict:
     """Disagreement map: 9 advisors + 1 mandatory dissenter (tenth man).
 
     TWO PHASES:
@@ -116,24 +182,59 @@ async def decide(question: str, context: str | None = None, skip_scoping: bool =
     Runs the 9 advisors in parallel + the tenth man, returns a 2D map with
     distances, the dissenter's literal quote, and opens the HTML in a browser.
 
+    K-RUNS MODE (v0.5):
+
+    When ``k_runs > 1`` and ``run_temperature > 0`` are supplied, Henge runs
+    the pipeline K times sequentially with the given temperature, collecting
+    a CFI distribution (mean / stddev / 95% CI) so callers can characterise
+    run-to-run variance. Only the first run produces a persisted HTML report;
+    subsequent runs contribute their CFI to the distribution only. K-runs
+    requires ``context`` (or ``skip_scoping=True``) — scoping is skipped.
+
     Args:
         question: The decision or judgment question.
         context: User answers to the scoping questions, or rich initial
                  context. If empty, phase 1 is entered.
         skip_scoping: If True, skip scoping and run directly. Useful when the
                       caller decides the question already has enough context.
+        k_runs: Number of pipeline executions. Default 1 (reproducible at
+                temperature=0). Values > 1 require run_temperature.
+        run_temperature: Override temperature for K-runs > 1. Required when
+                         k_runs > 1. Ignored when k_runs == 1.
 
     Returns:
         Phase 1: {status: "needs_context", questions: [...], note, next_call_hint}
-        Phase 2: {viz_path, frames, tenth_man, summary, cost_usd}
+        Phase 2 (K=1): {viz_path, frames, tenth_man, summary, cost_breakdown, cost_usd}
+        Phase 2 (K>1): same as K=1 plus summary.k_runs_distribution
     """
     if not question or not question.strip():
         return {"error": "empty_question", "reason": "Provide a non-empty question."}
 
+    if k_runs < 1:
+        return {"error": "invalid_k_runs", "reason": "k_runs must be >= 1."}
+    if k_runs > 1:
+        if run_temperature is None or run_temperature <= 0:
+            return {
+                "error": "k_runs_requires_temperature",
+                "reason": (
+                    "k_runs > 1 needs run_temperature > 0 to produce variance. "
+                    "Pass e.g. run_temperature=0.7. Default temperature=0 is "
+                    "deterministic and a K-runs distribution would be degenerate."
+                ),
+            }
+        if not context and not skip_scoping:
+            return {
+                "error": "k_runs_requires_context",
+                "reason": (
+                    "k_runs > 1 mode skips scoping. Pass context= with the "
+                    "answers already collected, or skip_scoping=True."
+                ),
+            }
+
     client = AsyncAnthropic()
 
     if not context and not skip_scoping:
-        questions = await generate_questions(client, question)
+        questions, scoping_usage = await generate_questions(client, question)
         if questions is None:
             return {
                 "status": "scoping_failed",
@@ -159,48 +260,139 @@ async def decide(question: str, context: str | None = None, skip_scoping: bool =
             "skip_call_hint": f"decide(question={question!r}, skip_scoping=True)",
         }
 
+    primary_temperature = run_temperature if k_runs > 1 else TEMPERATURE
+
     try:
-        results = await run_agents(client, question, context)
+        results = await run_agents(client, question, context, temperature=primary_temperature)
     except RuntimeError as exc:
         return {"error": "agents_failed", "reason": str(exc)}
 
-    successful_frames = [(f, r) for f, r, s in results[:9] if s == "ok"]
-    consensus_text = await synthesize_consensus(client, successful_frames, question)
+    # results: list of (frame, response, status, usage) tuples, length 10.
+    # status "ok" → usage is dict; status "failed" → usage is None.
+    successful_frames = [(f, r) for f, r, s, _ in results[:9] if s == "ok"]
+    consensus_text, consensus_usage = await synthesize_consensus(client, successful_frames, question)
 
-    texts = [r[1] for r in results]
-    embed_result = embed_responses(texts)
+    # v0.5 fix: previously embedded ALL 10 responses, including the
+    # "[failed: ...]" stub for failed frames. That polluted the centroid and
+    # silently corrupted distances when 1-2 frames failed (8/9 minimum allows
+    # this). Now: embed only successful frames + the tenth-man, and map
+    # distances back to length-10 lists with None for failed slots.
+    success_indices = [i for i, (_, _, s, _) in enumerate(results) if s == "ok"]
+    texts_for_embed = [results[i][1] for i in success_indices]
+
+    embed_result = embed_responses(texts_for_embed)
     if not embed_result["ok"]:
         return embed_result
 
-    proj = project_mds(embed_result["embeddings"])
+    n_compact_frames = sum(1 for _, _, s, _ in results[:9] if s == "ok")
+    proj = project_mds(embed_result["embeddings"], n_frames=n_compact_frames)
 
-    cost_usd = 0.65  # rough avg; range USD 0.50-0.80 with 1500/3500 token cap + Haiku consensus + scoping
+    distances_list = [None] * 10
+    coords_list = [None] * 10
+    for compact_i, orig_i in enumerate(success_indices):
+        distances_list[orig_i] = proj["distance_to_centroid_of_9"][compact_i]
+        coords_list[orig_i] = proj["coords_2d"][compact_i]
+
+    # Cost accounting — replaces the v0.4 hardcoded 0.65. Reads usage actually
+    # reported by the SDK; embedding tokens are not yet propagated from the
+    # embed module so the embedding line item reads 0 for now (TODO v0.6).
+    advisor_usages = [u for _, _, _, u in results]
+    cost_breakdown = pricing.total_cost(
+        advisor_usages=advisor_usages,
+        scoping_usage=scoping_usage if not context and not skip_scoping else None,
+        consensus_usage=consensus_usage,
+        embedding_model=embed_result["model"],
+        embedding_input_tokens=0,
+    )
+    cost_usd = cost_breakdown["total_usd"]
+
+    # Successful-frame distances only — None entries are failed frames that
+    # were not embedded. CFI and verdict use these compact lists.
+    frame_distances_compact = [d for d in distances_list[:9] if d is not None]
+    successful_frame_pairs = [
+        (i, distances_list[i]) for i in range(9) if distances_list[i] is not None
+    ]
+    if successful_frame_pairs:
+        max_frame_idx, max_frame_distance = max(successful_frame_pairs, key=lambda x: x[1])
+        min_frame_idx, min_frame_distance = min(successful_frame_pairs, key=lambda x: x[1])
+        most_divergent_frame = results[max_frame_idx][0]
+        closest_frame = results[min_frame_idx][0]
+    else:
+        max_frame_idx = min_frame_idx = None
+        max_frame_distance = min_frame_distance = None
+        most_divergent_frame = closest_frame = None
+
+    tenth_distance = distances_list[9]
+    verdict = consensus_verdict(tenth_distance, frame_distances_compact)
+    cfi_block = compute_cfi(tenth_distance, frame_distances_compact)
+
+    # viz still expects 3-tuples (frame, response, status). Strip usage.
+    results_for_viz = [(f, r, s) for f, r, s, _ in results]
+
+    # viz expects every distance/coord populated; failed frames have None. Fill
+    # with safe defaults so the map renders without crashing — failed slots
+    # land at the centroid (origin in MDS space) and pick up the cluster mean
+    # distance. The frames table still surfaces ``status == "failed"`` so the
+    # user sees what actually happened.
+    if frame_distances_compact:
+        _mean_dist = sum(frame_distances_compact) / len(frame_distances_compact)
+    else:
+        _mean_dist = 0.0
+    distances_for_viz = [d if d is not None else _mean_dist for d in distances_list]
+    coords_for_viz = [c if c is not None else [0.0, 0.0] for c in coords_list]
 
     html = render(
         question=question,
-        results=results,
+        results=results_for_viz,
         consensus=consensus_text,
-        coords_2d=proj["coords_2d"],
-        distances=proj["distance_to_centroid_of_9"],
+        coords_2d=coords_for_viz,
+        distances=distances_for_viz,
         provider=embed_result["provider"],
         model=embed_result["model"],
         cost_estimate_usd=cost_usd,
+        cfi_data=cfi_block,
     )
 
-    # Persist the run: report.html + report.json + regenerate index.html
-    distances_list = proj["distance_to_centroid_of_9"]
-    coords_list = proj["coords_2d"]
-    frame_distances = distances_list[:9]
-    max_frame_distance = max(frame_distances)
-    min_frame_distance = min(frame_distances)
-    most_divergent_frame = results[frame_distances.index(max_frame_distance)][0]
-    closest_frame = results[frame_distances.index(min_frame_distance)][0]
-    verdict = consensus_verdict(distances_list[9], frame_distances)
+    n_frames_succeeded = sum(1 for _, _, s, _ in results[:9] if s == "ok")
+    embed_input_tokens = sum(len(t) // 4 for t in texts_for_embed)  # rough char/4 estimate
+
+    runtime_meta = {
+        "henge_version": HENGE_VERSION,
+        "temperature": TEMPERATURE,
+        "model_versions": {
+            "frames": SONNET,
+            "tenth_man": OPUS,
+            "scoping": SCOPING_HAIKU,
+            "consensus": CONSENSUS_HAIKU,
+        },
+        "embed": {
+            "provider": embed_result["provider"],
+            "model": embed_result["model"],
+        },
+        "prompts_hash": PROMPTS_HASH,
+        "n_frames_succeeded": n_frames_succeeded,
+        "n_frames_embedded": n_compact_frames,
+    }
+
+    usage_block = {
+        "per_advisor": [
+            {"frame": f, "status": s, "usage": u}
+            for f, _, s, u in results
+        ],
+        "scoping": scoping_usage if not context and not skip_scoping else None,
+        "consensus": consensus_usage,
+        "embedding": {
+            "provider": embed_result["provider"],
+            "model": embed_result["model"],
+            "n_texts": len(texts_for_embed),
+            "estimated_input_tokens": embed_input_tokens,
+        },
+    }
 
     report_id = make_report_id(question)
     report_dir = make_report_dir(report_id)
     payload = {
-        "schema_version": "1",
+        "schema_version": "2",
         "id": report_id,
         "timestamp": datetime.now().astimezone().isoformat(),
         "question": question,
@@ -214,7 +406,7 @@ async def decide(question: str, context: str | None = None, skip_scoping: bool =
                 "distance_to_centroid_of_9": distances_list[i],
                 "embedding_2d": coords_list[i],
             }
-            for i, (frame, response, status) in enumerate(results[:9])
+            for i, (frame, response, status, _) in enumerate(results[:9])
         ],
         "tenth_man": {
             "response": results[9][1],
@@ -222,20 +414,29 @@ async def decide(question: str, context: str | None = None, skip_scoping: bool =
             "embedding_2d": coords_list[9],
         },
         "summary": {
-            "tenth_man_distance": distances_list[9],
+            # legacy fields — deprecated, kept until v1.0 for compat
+            "tenth_man_distance": tenth_distance,
             "max_frame_distance": max_frame_distance,
             "min_frame_distance": min_frame_distance,
             "most_divergent_frame": most_divergent_frame,
             "closest_frame": closest_frame,
             "consensus_state": verdict["state"],
             "consensus_fragility": verdict["verdict"],
-            "n_frames_succeeded": sum(1 for _, _, s in results[:9] if s == "ok"),
+            "n_frames_succeeded": n_frames_succeeded,
+            # v0.5 — Consensus Fragility Index (pre-registered, see docs/cfi-spec.md)
+            "cfi": cfi_block["cfi"],
+            "cfi_bin": cfi_block["cfi_bin"],
+            "mu_9": cfi_block["mu_9"],
+            "sigma_9": cfi_block["sigma_9"],
         },
         "embed": {
             "provider": embed_result["provider"],
             "model": embed_result["model"],
         },
-        "cost_usd": cost_usd,
+        "runtime": runtime_meta,
+        "usage": usage_block,
+        "cost_breakdown": cost_breakdown,
+        "cost_usd": cost_usd,  # deprecated alias of cost_breakdown.total_usd, kept for compat
     }
 
     html_path, json_path = write_record(report_dir, html, payload)
@@ -266,6 +467,51 @@ async def decide(question: str, context: str | None = None, skip_scoping: bool =
             "message": update_message(update_status),
         }
 
+    # K-runs distribution. Primary run already executed at run_temperature; we
+    # run K-1 additional iterations sequentially using the same temperature
+    # and aggregate the CFI samples into mean / stddev / 95% CI. Sequential
+    # rather than parallel to be friendly to provider rate limits — K runs of
+    # ~30s each is the expected envelope.
+    k_runs_distribution = None
+    if k_runs > 1:
+        cfi_samples = [cfi_block["cfi"]] if cfi_block.get("cfi") is not None else []
+        bin_samples = [cfi_block["cfi_bin"]] if cfi_block.get("cfi_bin") else []
+        per_run_costs = [cost_usd]
+        per_run_errors = []
+        for run_idx in range(1, k_runs):
+            extra = await _compute_cfi_only(client, question, context, run_temperature)
+            if extra.get("error"):
+                per_run_errors.append({"run_idx": run_idx, **extra})
+                continue
+            if extra.get("cfi") is not None:
+                cfi_samples.append(extra["cfi"])
+                bin_samples.append(extra["cfi_bin"])
+                per_run_costs.append(extra.get("cost_usd", 0.0))
+
+        if cfi_samples:
+            n = len(cfi_samples)
+            mean = sum(cfi_samples) / n
+            sigma = (sum((x - mean) ** 2 for x in cfi_samples) / n) ** 0.5
+            ci95_half = 1.96 * sigma / (n ** 0.5) if n > 1 else 0.0
+            from collections import Counter
+            bin_counts = dict(Counter(bin_samples))
+        else:
+            mean = sigma = ci95_half = None
+            bin_counts = {}
+
+        k_runs_distribution = {
+            "k_requested": k_runs,
+            "k_completed": len(cfi_samples),
+            "run_temperature": run_temperature,
+            "cfi_mean": round(mean, 4) if mean is not None else None,
+            "cfi_stddev": round(sigma, 4) if sigma is not None else None,
+            "cfi_ci95_half_width": round(ci95_half, 4) if ci95_half is not None else None,
+            "cfi_samples": [round(x, 4) for x in cfi_samples],
+            "bin_distribution": bin_counts,
+            "total_cost_usd": round(sum(per_run_costs), 6),
+            "errors": per_run_errors,
+        }
+
     return {
         "viz_path": viz_path,
         "report_id": report_id,
@@ -279,25 +525,41 @@ async def decide(question: str, context: str | None = None, skip_scoping: bool =
             {
                 "frame": frame,
                 "status": status,
-                "distance": round(proj["distance_to_centroid_of_9"][i], 3),
+                "distance": (
+                    round(distances_list[i], 3) if distances_list[i] is not None else None
+                ),
                 "summary": _truncate(resp, 300),
             }
-            for i, (frame, resp, status) in enumerate(results[:9])
+            for i, (frame, resp, status, _) in enumerate(results[:9])
         ],
         "tenth_man": {
-            "distance": round(proj["distance_to_centroid_of_9"][9], 3),
+            "distance": round(tenth_distance, 3) if tenth_distance is not None else None,
             "response": results[9][1],  # full text
         },
         "summary": {
-            "tenth_man_distance": round(distances_list[9], 3),
-            "max_frame_distance": round(max_frame_distance, 3),
+            # legacy — deprecated, kept until v1.0
+            "tenth_man_distance": (
+                round(tenth_distance, 3) if tenth_distance is not None else None
+            ),
+            "max_frame_distance": (
+                round(max_frame_distance, 3) if max_frame_distance is not None else None
+            ),
             "consensus_state": verdict["state"],
             "consensus_fragility": verdict["verdict"],
-            "n_frames_succeeded": sum(1 for _, _, s in results[:9] if s == "ok"),
+            "n_frames_succeeded": n_frames_succeeded,
             "embed_provider": embed_result["provider"],
             "embed_model": embed_result["model"],
+            # v0.5 — CFI and runtime metadata
+            "cfi": cfi_block["cfi"],
+            "cfi_bin": cfi_block["cfi_bin"],
+            "mu_9": cfi_block["mu_9"],
+            "sigma_9": cfi_block["sigma_9"],
+            "henge_version": HENGE_VERSION,
+            "prompts_hash": PROMPTS_HASH,
+            "k_runs_distribution": k_runs_distribution,
         },
-        "cost_usd": cost_usd,
+        "cost_breakdown": cost_breakdown,
+        "cost_usd": cost_usd,  # deprecated alias, kept until v1.0
     }
 
 
