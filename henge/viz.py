@@ -1689,11 +1689,6 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
     margin-top: 24px;
     position: relative;
   }}
-  .tenth-card::before{{
-    content: "";
-    position: absolute; left: 0; top: 0; bottom: 0;
-    width: 4px; background: var(--chartreuse);
-  }}
   .tenth-top{{
     display: grid; grid-template-columns: 1fr auto;
     align-items: start; gap: 24px;
@@ -1746,7 +1741,6 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
 
   .tenth-body{{
     padding: 24px 28px;
-    max-width: 78ch;
   }}
   .tenth-body h4{{
     margin: 24px 0 8px;
