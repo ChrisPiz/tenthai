@@ -7,7 +7,7 @@ Design language (v3):
   shadow rings (no borders)
 - Single chartreuse (#d0f100) accent — used only on the tenth-man and primary
   affordances; nine-advisor consensus sits in midnight-navy
-- Type pairing: Fraunces (serif display + numerics) + DM Sans (UI) +
+- Type pairing: Fraunces (serif display + numerics) + Source Sans Pro (UI) +
   JetBrains Mono (data, labels, meta)
 
 Layout: masthead → hero (painting + 4 stats) → 01 Report (question + map +
@@ -853,7 +853,7 @@ def _build_map_svg(coords_2d, frames, distances, max_frame_dist, min_frame_dist,
     )
 
     # Nine consensus nodes
-    parts.append('<g font-family="DM Sans, sans-serif" font-size="13" fill="#1b2540">')
+    parts.append('<g font-family="Source Sans 3, Source Sans Pro, sans-serif" font-size="13" fill="#1b2540">')
     for i in range(9):
         x, y = points[i]
         frame = frames[i]
@@ -907,7 +907,7 @@ def _build_map_svg(coords_2d, frames, distances, max_frame_dist, min_frame_dist,
     label_offset = -52 if ty > cy - 60 else 64
     parts.append(
         f'<text x="{tx:.1f}" y="{ty + label_offset:.1f}" text-anchor="middle" '
-        f'font-family="DM Sans, sans-serif" font-weight="500" font-size="13" '
+        f'font-family="Source Sans 3, Source Sans Pro, sans-serif" font-weight="500" font-size="13" '
         f'fill="#1b2540" letter-spacing="2">10 · TENTH-MAN</text>'
     )
     parts.append(
@@ -1174,7 +1174,7 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
 <title>{t(locale, "page_title")}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,450;9..40,500;9..40,600&family=Fraunces:opsz,wght@9..144,400;9..144,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script>
   /* Resolve theme before first paint to avoid FOUC.
      Stored preference wins; otherwise follow system. */
@@ -1240,7 +1240,7 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
     --ring-subtle: rgba(0,39,80,0.04) 0 0 0 1px;
     --ring-rule:   rgba(0,39,80,0.06) 0 0 0 1px;
 
-    --sans:  'DM Sans', ui-sans-serif, system-ui, sans-serif;
+    --sans:  'Source Sans 3', 'Source Sans Pro', ui-sans-serif, system-ui, sans-serif;
     --serif: 'Fraunces', Georgia, serif;
     --mono:  'JetBrains Mono', ui-monospace, monospace;
 
