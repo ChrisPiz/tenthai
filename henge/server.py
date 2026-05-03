@@ -613,6 +613,17 @@ async def decide(
             }
             for v in claim_verifications
         ],
+        "meta_frame": (
+            {
+                "decision_class": meta.decision_class,
+                "urgency": meta.urgency,
+                "question_quality": meta.question_quality,
+                "suggested_reformulation": meta.suggested_reformulation,
+                "meta_recommendation": meta.meta_recommendation,
+                "reasoning": meta.reasoning,
+                "gpt5_usage": meta.gpt5_usage,
+            } if meta is not None else None
+        ),
         "summary": {
             # legacy fields — deprecated, kept until v1.0 for compat
             "tenth_man_distance": tenth_distance,
