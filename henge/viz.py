@@ -1459,6 +1459,14 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
     margin-bottom: 28px;
   }}
   .sec-head .l{{ max-width: 64ch; }}
+  .sec-head-with-meta{{ align-items: stretch; }}
+  .sec-head-with-meta .l{{ flex: 1 1 60%; }}
+  .sec-head-with-meta .r{{ flex: 1 1 38%; max-width: 460px; min-width: 280px; }}
+  .sec-head-with-meta .r .meta-card{{ margin: 0; height: 100%; }}
+  @media (max-width: 920px){{
+    .sec-head-with-meta{{ flex-direction: column; align-items: stretch; }}
+    .sec-head-with-meta .r{{ max-width: none; min-width: 0; }}
+  }}
   .sec-eyebrow{{
     display: inline-flex; align-items: center; gap: 8px;
     font-family: var(--mono); font-size: 12px;
@@ -2426,8 +2434,6 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
     </div>
   </header>
 
-  {meta_html}
-
   <section class="hero">
     <div class="hero-bg" aria-hidden="true"></div>
     <div class="hero-inner">
@@ -2457,12 +2463,13 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
   <div class="page">
 
   <section class="section">
-    <div class="sec-head">
+    <div class="sec-head sec-head-with-meta">
       <div class="l">
         <div class="sec-eyebrow"><span class="n">01</span>{t(locale, "section01_eyebrow_prefix")}{report_id}</div>
         <h2>{t(locale, "section01_h2_a")}<em>{t(locale, "section01_h2_em")}</em></h2>
         <blockquote class="question-pull">{question_safe}</blockquote>
       </div>
+      <div class="r">{meta_html}</div>
     </div>
 
     <section class="map-card">
