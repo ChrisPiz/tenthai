@@ -1113,7 +1113,10 @@ def _build_frame_card_with_flag(frame, response, status, distance, max_dist, idx
     <article class="frame{open_class}" data-frame="{html_mod.escape(frame)}">
       <div class="frame-row">
         <span class="f-idx">#{idx_str}</span>
-        <span class="f-name">{html_mod.escape(frame)}{flag_html}{chip_html}</span>
+        <span class="f-name">
+          <span class="f-name-text">{html_mod.escape(frame)}{flag_html}</span>
+          {chip_html}
+        </span>
         <span class="f-lean">{lean_html}</span>
         <span class="f-bar"><i style="width:{bar_pct:.0f}%"></i></span>
         <span class="f-d">d <b>{distance:.3f}</b></span>
@@ -2263,11 +2266,15 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
   [data-theme="dark"] .map-legend{{ color: var(--on-dark-78); }}
   [data-theme="dark"] .map-legend .legend-tenth{{ border-color: var(--on-dark); }}
 
-  /* Phase 9: model-family chip on frame cards */
+  /* Phase 9: model-family chip on frame cards. Lives on its own line under
+     the frame name so all 9 cards render with the same vertical rhythm
+     regardless of whether a closest/farthest flag is present. */
+  .f-name{{ display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }}
+  .f-name-text{{ display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }}
   .frame-model-chip{{
-    display: inline-block; padding: 2px 8px; margin-left: 8px;
+    display: inline-block; padding: 2px 8px;
     font-size: 10px; font-family: var(--mono); letter-spacing: 0.04em;
-    border-radius: 999px; vertical-align: middle;
+    border-radius: 999px;
   }}
   .frame-model-anthropic{{ background: rgba(27,37,64,0.08); color: var(--midnight-navy); }}
   .frame-model-openai{{    background: rgba(27,140,90,0.10); color: #1b8c5a; }}
