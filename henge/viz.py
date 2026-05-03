@@ -2472,7 +2472,7 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
   <header class="masthead">
     <div class="logo"><span class="mk">10</span> Henge</div>
     <div class="mast-meta">
-      <b>{t(locale, "masthead_report")} #{report_id}</b><span class="sep">·</span>{timestamp}<span class="sep">·</span>v0.4
+      <b>{t(locale, "masthead_report")} #{report_id}</b><span class="sep">·</span>{timestamp}<span class="sep">·</span>v0.6
     </div>
     <div class="mast-actions">
       <a class="mast-index-btn" href="../index.html" aria-label="{t(locale, "masthead_index_aria")}">
@@ -2631,7 +2631,7 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
 
   <footer class="colophon">
     <div>
-      <b>Henge v0.4</b><br>
+      <b>Henge v0.6</b><br>
       classical MDS · cosine<br>
       embed · {html_mod.escape(provider)}/{html_mod.escape(model)}
     </div>
