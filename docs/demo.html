@@ -503,6 +503,39 @@
     break-inside: avoid-column;
   }
 
+  /* Inline reading-guide block placed at the top of meta / consensus / tenth / informed cards */
+  .howto{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 22px;
+    margin: 14px 0 18px;
+    padding: 12px 16px;
+    border: 1px dashed var(--border-rule);
+    border-radius: 6px;
+    background: rgba(0,0,0,0.02);
+    font-family: var(--sans);
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--midnight-navy);
+  }
+  .howto > div{ min-width: 0; }
+  .howto-label{
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--storm);
+    margin: 0 0 4px;
+    display: block;
+  }
+  .howto-text{ margin: 0; color: var(--midnight-navy); opacity: 0.82; }
+  [data-theme="dark"] .howto{ background: rgba(255,255,255,0.03); border-color: var(--on-dark-border-strong); color: var(--on-dark-92); }
+  [data-theme="dark"] .howto-label{ color: var(--on-dark-78); }
+  [data-theme="dark"] .howto-text{ color: var(--on-dark-92); opacity: 0.85; }
+  @media (max-width: 720px){
+    .howto{ grid-template-columns: 1fr; gap: 10px; }
+  }
+
   /* Meta-frame audit card */
   .meta-card{
     margin: 16px 0 24px;
@@ -1406,7 +1439,7 @@
       </div>
     </div>
 
-    <section class="meta-card">  <h3>Question audit</h3>  <div class="meta-body">    <div class="meta-grid">      <div class="meta-cell meta-cell-">  <div class="meta-cell-axis">Reversibility</div>  <div class="meta-cell-value">Reversible with cost</div>  <div class="meta-cell-hint">It can be undone, but it takes months and significant capital.</div></div>      <div class="meta-cell meta-cell-">  <div class="meta-cell-axis">Urgency</div>  <div class="meta-cell-value">Weeks</div>  <div class="meta-cell-hint">Relevant state change in weeks.</div></div>      <div class="meta-cell meta-cell-">  <div class="meta-cell-axis">Question quality</div>  <div class="meta-cell-value">Well-formed</div>  <div class="meta-cell-hint">Binary/N-ary decision with clear stakes and criteria.</div></div>      <div class="meta-cell meta-cell-ok">  <div class="meta-cell-axis">Recommendation</div>  <div class="meta-cell-value">Proceed</div>  <div class="meta-cell-hint">The 9 advisors run as is.</div></div>    </div>    <div class="meta-reasoning"><p>This is a strategic portfolio decision (choose 3-4 offerings and target segment) that can be reversed, but at a cost: it involves hiring, capability building, sales and positioning that cannot be undone in &lt;30 days or at &lt;10% of the cost. It is not a definitive one-way-door, but it does have operational and commercial inertia, so it fits as reversible with cost.<br>The urgency is in weeks: the competitive edge in LATAM and the fear of falling behind suggest that delay reduces commercial opportunities, but there are no material consequences within days. The planning window requested (6-9 months) and the budget horizon (24 months) point to a decision cadence measured in weeks.<br>The question is well-formed: it bounds concrete options (A-F), asks for prioritization and ordering, sets a time horizon, and offers contextual criteria (adoption bottleneck, suggested metrics, competitive-parity driver). Although some data is missing (client tech maturity, competitive mapping), it does not prevent the 9 advisors from proposing an actionable prioritization now. Therefore, proceeding without reformulation is recommended.</p></div>  </div></section>
+    <section class="meta-card">  <h3>Question audit</h3><div class="howto"><div><span class="howto-label">What you're seeing</span><p class="howto-text">Phase 2 · gpt-5 audits your question before the 9 advisors run.</p></div><div><span class="howto-label">How to read it</span><p class="howto-text">If reversibility / urgency / question quality look off, the run short-circuits and proposes a reformulation. Green recommendation = proceed.</p></div></div>  <div class="meta-body">    <div class="meta-grid">      <div class="meta-cell meta-cell-">  <div class="meta-cell-axis">Reversibility</div>  <div class="meta-cell-value">Reversible with cost</div>  <div class="meta-cell-hint">It can be undone, but it takes months and significant capital.</div></div>      <div class="meta-cell meta-cell-">  <div class="meta-cell-axis">Urgency</div>  <div class="meta-cell-value">Weeks</div>  <div class="meta-cell-hint">Relevant state change in weeks.</div></div>      <div class="meta-cell meta-cell-">  <div class="meta-cell-axis">Question quality</div>  <div class="meta-cell-value">Well-formed</div>  <div class="meta-cell-hint">Binary/N-ary decision with clear stakes and criteria.</div></div>      <div class="meta-cell meta-cell-ok">  <div class="meta-cell-axis">Recommendation</div>  <div class="meta-cell-value">Proceed</div>  <div class="meta-cell-hint">The 9 advisors run as is.</div></div>    </div>    <div class="meta-reasoning"><p>This is a strategic portfolio decision (choose 3-4 offerings and target segment) that can be reversed, but at a cost: it involves hiring, capability building, sales and positioning that cannot be undone in &lt;30 days or at &lt;10% of the cost. It is not a definitive one-way-door, but it does have operational and commercial inertia, so it fits as reversible with cost.<br>The urgency is in weeks: the competitive edge in LATAM and the fear of falling behind suggest that delay reduces commercial opportunities, but there are no material consequences within days. The planning window requested (6-9 months) and the budget horizon (24 months) point to a decision cadence measured in weeks.<br>The question is well-formed: it bounds concrete options (A-F), asks for prioritization and ordering, sets a time horizon, and offers contextual criteria (adoption bottleneck, suggested metrics, competitive-parity driver). Although some data is missing (client tech maturity, competitive mapping), it does not prevent the 9 advisors from proposing an actionable prioritization now. Therefore, proceeding without reformulation is recommended.</p></div>  </div></section>
 
     <section class="map-card">
       <div class="map-top">
@@ -1560,7 +1593,7 @@
           <b>0.124</b>
           max · vs centroid
         </div>
-      </header>
+      </header><div class="howto"><div><span class="howto-label">What you're seeing</span><p class="howto-text">Phase 5 · the 9 advisors' synthesis — where they converge, where they tension, where they lean.</p></div><div><span class="howto-label">How to read it</span><p class="howto-text">Not a verdict — the base the Tenth Man will attack. Green marks = conclusions (what to believe). Cyan marks = actions (what to do). Toggle bottom-left to hide both.</p></div></div>
       <div class="consensus-body">
         <h3>(1) Where the nine agree</h3>
 <p>The nine frames converge on the idea that <mark class="tk-c"><strong>organizational adoption is the critical lever</strong>, not technical sophistication</mark>. All recognize that with limited budget and a confirmed bottleneck in cultural change, the offerings must maximize &quot;sustained active users&quot; and &quot;time to first value&quot; ahead of peak technical capability. There is also consensus that <mark class="tk-a"><strong>training + change management (A) and knowledge copilots (C) should be the core of the first 6-9 months</strong></mark>, because both have short cycles (1-8 weeks to value), low coupling to client data maturity, and a direct effect on measurable adoption. A third common point: <mark class="tk-a"><strong>governance/security/compliance (B) acts as an enabler in regulated enterprises</strong>, not as an entry offering, but is mandatory in parallel to keep successful pilots from getting blocked at scale</mark>. Finally, all <mark class="tk-a">discard or postpone <strong>MLOps/platform (F) and heavy predictive analytics (D)</strong> in this window</mark> because they require unknown data maturity and longer cycles that do not fit the goal of showing value in 6-9 months.</p>
@@ -1585,7 +1618,7 @@
           <b>0.135</b>
           distance · centroid
         </div>
-      </header>
+      </header><div class="howto"><div><span class="howto-label">What you're seeing</span><p class="howto-text">Phase 5a · the raw dissent. Opus 4.7 reasoning WITHOUT seeing the 9 — anticipates consensus and steel-mans against it. Its centroid distance feeds CFI.</p></div><div><span class="howto-label">How to read it</span><p class="howto-text">4 sections: facts accepted · where the consensus fails · the question behind the question · concrete failure modes. If the cross-lab card above discards much of this, it was Opus bias, not real signal.</p></div></div>
 
       <div class="tenth-body">
         <h3>Facts I accept</h3>
@@ -1608,7 +1641,7 @@
       </footer>
     </article>
 
-    <article class="informed-card" id="informed">  <header class="informed-top">    <div class="informed-tag">cross-lab</div>    <h3>Refined dissent (cross-lab)</h3>    <p class="informed-sub">gpt-5 audits Opus's blind dissent against the 9 frames.</p>  </header>  <div class="informed-body">    <p><mark class="tk-c">The biggest strategic risk in the next 6-9 months is not technical but positioning</mark>: if we lean into &quot;copilots + training&quot; as separate lines, we land in the hyperscaler-and-partner commoditization zone and erode margin. To avoid the price war and, at the same time, solve adoption, <mark class="tk-a">A must stop being sold as a standalone course and become a mandatory layer inside every bundle with habit metrics (active users by role, completed actions) and a signed time/ROI baseline</mark>. <mark class="tk-a">C does come in as a vehicle for fast value, but shielded against commoditization with three differentiators: pragmatic embedded governance (B), impact instrumentation from day 1, and verticalized accelerators (function/industry templates)</mark> that move from &quot;demo&quot; to operational habit.</p>
+    <article class="informed-card" id="informed">  <header class="informed-top">    <div class="informed-tag">cross-lab</div>    <h3>Refined dissent (cross-lab)</h3>    <p class="informed-sub">gpt-5 audits Opus's blind dissent against the 9 frames.</p>  </header><div class="howto"><div><span class="howto-label">What you're seeing</span><p class="howto-text">Phase 5b · gpt-5 (different lab) audits the blind dissent against the 9 real advisors.</p></div><div><span class="howto-label">How to read it</span><p class="howto-text">What holds (survives contact with the 9) · What's revised (directionally right, refined) · What's discarded (turns out to be Opus bias, not insight).</p></div></div>  <div class="informed-body">    <p><mark class="tk-c">The biggest strategic risk in the next 6-9 months is not technical but positioning</mark>: if we lean into &quot;copilots + training&quot; as separate lines, we land in the hyperscaler-and-partner commoditization zone and erode margin. To avoid the price war and, at the same time, solve adoption, <mark class="tk-a">A must stop being sold as a standalone course and become a mandatory layer inside every bundle with habit metrics (active users by role, completed actions) and a signed time/ROI baseline</mark>. <mark class="tk-a">C does come in as a vehicle for fast value, but shielded against commoditization with three differentiators: pragmatic embedded governance (B), impact instrumentation from day 1, and verticalized accelerators (function/industry templates)</mark> that move from &quot;demo&quot; to operational habit.</p>
 <p>On segmentation, <mark class="tk-a">let's combine speed and defensibility: &quot;land&quot; in unregulated mid-market with A+B (light) + C bundles for visible cases in 4-8 weeks, and in parallel offer B as an entry door in regulated accounts</mark>, knowing their cycles are longer. For infrastructure, <mark class="tk-a">let's avoid heavy F and prioritize a reusable thin-MLOps/landing zone (observability, basic security, standard pipelines) and cloud partnerships</mark>; enough to scale C/E without burning months of engineering. E enters as micro-automations with human-in-the-loop where C has already proven use; and D is offered selectively as an upsell when adequate data and a process owner exist, not as a general bet for the 6-9 window.</p>
 <p><mark class="tk-c">The throughline is defensibility through governance and measured impact: every deployment must ship with an agreed baseline, adoption telemetry, and audit-ready guardrails</mark>. This mitigates the parity pressure (client wants auditable ROI and low risk) without falling into commoditized offerings; it protects margin and creates stickiness (via B + telemetry + accelerators), while preserving the &quot;time-to-value&quot; the market demands.</p>    <div class="informed-grid">      <div class="informed-col">        <div class="ord">§ 01</div>        <h5>What holds</h5>        <ul class="informed-list holds"><li>The commoditization risk for C (copilots) from the hyperscaler-and-partner offensive presses margins.</li><li>A (training/change management) as a standalone SKU is a commodity; it is more defensible embedded in each engagement with metrics.</li><li>B (governance/compliance) generates stickiness and real exit barriers, especially in regulated LATAM sectors.</li><li>Under competitive parity, buyers prioritize auditable ROI and bounded risk; instrumenting baseline and traceability from the start is key.</li><li>Unmapped competition can erode prices on training offerings; differentiating requires governance frameworks and impact instrumentation.</li></ul>      </div>      <div class="informed-col">        <div class="ord">§ 02</div>        <h5>What's revised</h5>        <ul class="informed-list revised"><li>F should not be prioritized as a heavy platform; it adjusts to a reusable 'thin-MLOps/landing zone' (observability, security, and basic pipelines) backed by cloud partnerships to accelerate C/E and B without long cycles.</li><li>D is not a general 6-9 month bet; it is offered selectively after building habit with C and where there is sufficient data and a process owner, for verifiable ROI.</li><li>Segmentation: combine unregulated mid-market for speed (A+B light + C) and use B as a door in regulated accounts, recognizing longer purchase cycles in the latter.</li><li>A is not just 5-10% of scope; it requires weight and clear adoption metrics, but integrated into the bundle and not as a separate line.</li></ul>      </div>      <div class="informed-col">        <div class="ord">§ 03</div>        <h5>What's discarded</h5>        <ul class="informed-list discarded"><li>Inverting prioritization toward B+F+D as the main axis for the first 6-9 months.</li><li>Minimizing the value of C in the 6-9 month window.</li><li>Assuming that change management contributes neither margin nor defensibility when properly integrated and measured.</li></ul>      </div>    </div>  </div></article>
   </section>
