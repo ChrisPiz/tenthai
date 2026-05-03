@@ -163,6 +163,14 @@ TRANSLATIONS = {
         "tenth_d_label": "distance · centroid",
         "tenth_foot_left": "Generated under constraint · <b>steel-man mandatory</b>",
         "tenth_modes_h4": "Consensus failure modes",
+        "howto_meta_what": "Phase 2 · gpt-5 audits your question before the 9 advisors run.",
+        "howto_meta_how": "If reversibility / urgency / question quality look off, the run short-circuits and proposes a reformulation. Green recommendation = proceed.",
+        "howto_consensus_what": "Phase 5 · the 9 advisors' synthesis — where they converge, where they tension, where they lean.",
+        "howto_consensus_how": "Not a verdict — the base the Tenth Man will attack. Green marks = conclusions (what to believe). Cyan marks = actions (what to do). Toggle bottom-left to hide both.",
+        "howto_informed_what": "Phase 5b · gpt-5 (different lab) audits the blind dissent against the 9 real advisors.",
+        "howto_informed_how": "What holds (survives contact with the 9) · What's revised (directionally right, refined) · What's discarded (turns out to be Opus bias, not insight).",
+        "howto_tenth_what": "Phase 5a · the raw dissent. Opus 4.7 reasoning WITHOUT seeing the 9 — anticipates consensus and steel-mans against it. Its centroid distance feeds CFI.",
+        "howto_tenth_how": "4 sections: facts accepted · where the consensus fails · the question behind the question · concrete failure modes. If the cross-lab card above discards much of this, it was Opus bias, not real signal.",
         "section02_eyebrow": "Cognitive frames · 9 voices",
         "section02_h2_a": "The nine, ranked by ",
         "section02_h2_em": "distance to centroid",
@@ -256,6 +264,14 @@ TRANSLATIONS = {
         "tenth_d_label": "distancia · centroide",
         "tenth_foot_left": "Generado bajo restricción · <b>steel-man obligatorio</b>",
         "tenth_modes_h4": "Modos de fallo del consenso",
+        "howto_meta_what": "Fase 2 · gpt-5 audita tu pregunta antes de que corran los 9 advisors.",
+        "howto_meta_how": "Si la reversibilidad / urgencia / calidad de pregunta no cuadran, la corrida corta y propone una reformulación. Recomendación verde = procede.",
+        "howto_consensus_what": "Fase 5 · síntesis de los 9 advisors — dónde convergen, dónde tensionan, hacia dónde inclinan.",
+        "howto_consensus_how": "No es veredicto — es la base que el Décimo Hombre va a atacar. Marcas verdes = conclusiones (qué creer). Marcas cyan = acciones (qué hacer). Alterná abajo a la izquierda para ocultarlas.",
+        "howto_informed_what": "Fase 5b · gpt-5 (otro lab) audita el disenso ciego contra los 9 advisors reales.",
+        "howto_informed_how": "Lo que se sostiene (sobrevive contacto con los 9) · Lo que se revisa (parcialmente correcto, ajustado) · Lo que se descarta (era sesgo de Opus, no insight).",
+        "howto_tenth_what": "Fase 5a · el disenso crudo. Opus 4.7 razona SIN ver los 9 — anticipa el consenso y steel-mans contra él. Su distancia al centroide alimenta el CFI.",
+        "howto_tenth_how": "4 secciones: hechos aceptados · dónde falla el consenso · la pregunta detrás de la pregunta · modos de fallo concretos. Si la card cross-lab descarta mucho de esto, era sesgo de Opus, no señal real.",
         "section02_eyebrow": "Marcos cognitivos · 9 voces",
         "section02_h2_a": "Los nueve, ordenados por ",
         "section02_h2_em": "distancia al centroide",
@@ -613,6 +629,7 @@ def _meta_card_html(meta_dict, locale: str = "es") -> str:
     return (
         f'<section class="meta-card">'
         f'  <h3>{html_mod.escape(title)}</h3>'
+        f'  {_howto_html("meta", locale)}'
         f'  <div class="meta-body">'
         f'    <div class="meta-grid">'
         f'      {_cell("decision_class", decision)}'
@@ -623,6 +640,31 @@ def _meta_card_html(meta_dict, locale: str = "es") -> str:
         f'    <div class="meta-reasoning">{_md_to_html(reasoning)}</div>'
         f'  </div>'
         f'</section>'
+    )
+
+
+def _howto_html(card: str, locale: str = "es") -> str:
+    """Inline reading-guide ("Qué muestra · Cómo leerlo") for a card.
+
+    `card` is one of: meta, consensus, informed, tenth.
+    Returns "" if the localised strings are missing (legacy locales).
+    """
+    what_label = "Qué muestra" if locale == "es" else "What you're seeing"
+    how_label = "Cómo leerlo" if locale == "es" else "How to read it"
+    what_key = f"howto_{card}_what"
+    how_key = f"howto_{card}_how"
+    what = t(locale, what_key)
+    how = t(locale, how_key)
+    # t() falls back to the key itself when missing — skip render in that case.
+    if what == what_key or how == how_key:
+        return ""
+    return (
+        '<div class="howto">'
+        f'  <div><span class="howto-label">{what_label}</span>'
+        f'    <p class="howto-text">{html_mod.escape(what)}</p></div>'
+        f'  <div><span class="howto-label">{how_label}</span>'
+        f'    <p class="howto-text">{html_mod.escape(how)}</p></div>'
+        '</div>'
     )
 
 
@@ -667,6 +709,7 @@ def _informed_card_html(informed_dict, locale: str = "es") -> str:
         f'    <h3>{html_mod.escape(title)}</h3>'
         f'    <p class="informed-sub">{html_mod.escape(sub)}</p>'
         f'  </header>'
+        f'  {_howto_html("informed", locale)}'
         f'  <div class="informed-body">'
         f'    {text_html}'
         f'    <div class="informed-grid">'
@@ -1360,6 +1403,7 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
           {t(locale, "consensus_d_label_html")}
         </div>
       </header>
+      {_howto_html("consensus", locale)}
       <div class="consensus-body">
         {consensus_html}
       </div>
@@ -1880,6 +1924,39 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
     font-size: 18px; line-height: 1.35; letter-spacing: -0.18px;
     color: var(--midnight-navy);
     break-inside: avoid-column;
+  }}
+
+  /* Inline reading-guide block placed at the top of meta / consensus / tenth / informed cards */
+  .howto{{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 22px;
+    margin: 14px 0 18px;
+    padding: 12px 16px;
+    border: 1px dashed var(--border-rule);
+    border-radius: 6px;
+    background: var(--surface-soft, rgba(0,0,0,0.02));
+    font-family: var(--sans);
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--midnight-navy);
+  }}
+  .howto > div{{ min-width: 0; }}
+  .howto-label{{
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--storm);
+    margin: 0 0 4px;
+    display: block;
+  }}
+  .howto-text{{ margin: 0; color: var(--midnight-navy); opacity: 0.82; }}
+  [data-theme="dark"] .howto{{ background: rgba(255,255,255,0.03); border-color: var(--on-dark-border-strong); color: var(--on-dark-92); }}
+  [data-theme="dark"] .howto-label{{ color: var(--on-dark-78); }}
+  [data-theme="dark"] .howto-text{{ color: var(--on-dark-92); opacity: 0.85; }}
+  @media (max-width: 720px){{
+    .howto{{ grid-template-columns: 1fr; gap: 10px; }}
   }}
 
   /* Meta-frame audit card */
@@ -2855,6 +2932,8 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
           {t(locale, "tenth_d_label")}
         </div>
       </header>
+
+      {_howto_html("tenth", locale)}
 
       <div class="tenth-body">
         {tenth_response_html}
