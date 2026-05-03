@@ -18,7 +18,7 @@ OpenAI) by design, so the synthesizer's hallucinations get caught by the
 auditor instead of laundered into consensus. Validation against decision
 quality (Henge-50 benchmark) remains in flight.
 
-[Demo](https://chrispiz.github.io/Henge/demo.html) · [Paper](WHITEPAPER.md) ·
+[Demo](https://chrispiz.github.io/Henge-MCP/demo.html) · [Paper](WHITEPAPER.md) ·
 [Limits](LIMITS.md) · [Methodology](METHODOLOGY.md) · [CFI spec](docs/cfi-spec.md) ·
 [Manifesto](MANIFESTO.md) · [Developer](DEVELOPER.md)
 
