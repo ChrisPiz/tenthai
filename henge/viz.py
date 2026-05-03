@@ -429,40 +429,108 @@ def _md_to_html(text: str) -> str:
     return "\n".join(out)
 
 
+# Per-axis labels + one-line value glosses for the meta-frame card.
+# The raw enums (e.g. "two-way-with-cost") are accurate but opaque; the gloss
+# turns each into a sentence the reader actually understands.
+_META_AXIS_LABELS = {
+    "es": {
+        "decision_class":      "Reversibilidad",
+        "urgency":             "Urgencia",
+        "question_quality":    "Calidad de pregunta",
+        "meta_recommendation": "Recomendación",
+    },
+    "en": {
+        "decision_class":      "Reversibility",
+        "urgency":             "Urgency",
+        "question_quality":    "Question quality",
+        "meta_recommendation": "Recommendation",
+    },
+}
+
+_META_VALUE_GLOSS = {
+    "es": {
+        # decision_class
+        "reversible":         ("Reversible", "Se puede deshacer en <30 días con costo bajo (<10%)."),
+        "two-way-with-cost":  ("Reversible con costo", "Se deshace, pero toma meses y capital significativo."),
+        "one-way-door":       ("Puerta de un solo sentido", "Efectivamente irreversible — no hay vuelta atrás."),
+        # urgency
+        "now":                ("Ahora", "Daño material en días si no se decide."),
+        "weeks":              ("Semanas", "Cambio de estado relevante en semanas."),
+        "months":             ("Meses", "Hay margen de meses antes de forzar la mano."),
+        "fake-urgency":       ("Urgencia falsa", "La urgencia es percibida; la situación no la justifica."),
+        # question_quality
+        "well-formed":        ("Bien formada", "Decisión binaria/N-ária con stakes y criterios claros."),
+        "proxy-for-other-question":          ("Proxy de otra", "Es una pregunta-pantalla; la real está debajo."),
+        "exploration-disguised-as-decision": ("Exploración disfrazada", "Aún se está aprendiendo, no decidiendo."),
+        # meta_recommendation
+        "proceed":               ("Procede", "Los 9 advisors corren tal como está."),
+        "reformulate":           ("Reformular", "Hay una versión más afilada — léela y vuelve."),
+        "postpone":              ("Postergar", "Falta info que se puede conseguir barata antes de decidir."),
+        "this-is-not-a-decision": ("No es decisión", "Es una pregunta de exploración/explicación, no de commit."),
+        "unknown":            ("?", "Sin clasificación."),
+    },
+    "en": {
+        "reversible":         ("Reversible", "Undoable within 30 days at <10% of the cost."),
+        "two-way-with-cost":  ("Reversible w/ cost", "Reversible but takes months and meaningful capital."),
+        "one-way-door":       ("One-way door", "Effectively irreversible — no take-backs."),
+        "now":                ("Now", "Material harm within days if not decided."),
+        "weeks":              ("Weeks", "Meaningful state change in weeks."),
+        "months":             ("Months", "Months of runway before being forced."),
+        "fake-urgency":       ("Fake urgency", "User-felt; the situation does not actually warrant it."),
+        "well-formed":        ("Well-formed", "Binary/N-ary decision with clear stakes and criteria."),
+        "proxy-for-other-question":          ("Proxy for another", "Stand-in for a deeper unspoken question."),
+        "exploration-disguised-as-decision": ("Exploration in disguise", "Still gathering information, not deciding."),
+        "proceed":               ("Proceed", "The 9 advisors should run as-is."),
+        "reformulate":           ("Reformulate", "A sharper version exists — read it and come back."),
+        "postpone":              ("Postpone", "Missing info that can be gathered cheaply first."),
+        "this-is-not-a-decision": ("Not a decision", "Asks for explanation/exploration, not a commit."),
+        "unknown":            ("?", "Unclassified."),
+    },
+}
+
+# Tone class per recommendation — used to color the recommendation cell.
+_REC_TONE = {
+    "proceed":               "ok",
+    "reformulate":           "warn",
+    "postpone":              "warn",
+    "this-is-not-a-decision": "stop",
+}
+
+
 def _meta_card_html(meta_dict, locale: str = "es") -> str:
     """Render the meta-frame audit card. ``meta_dict`` may be None (legacy reports)."""
     if not meta_dict:
         return ""
-    decision = meta_dict.get("decision_class", "unknown")
-    urgency = meta_dict.get("urgency", "unknown")
-    quality = meta_dict.get("question_quality", "unknown")
-    rec = meta_dict.get("meta_recommendation", "proceed")
+    decision = str(meta_dict.get("decision_class", "unknown"))
+    urgency  = str(meta_dict.get("urgency", "unknown"))
+    quality  = str(meta_dict.get("question_quality", "unknown"))
+    rec      = str(meta_dict.get("meta_recommendation", "proceed"))
     reasoning = (meta_dict.get("reasoning") or "").strip()
 
-    rec_label = {
-        "proceed":               "Procede" if locale == "es" else "Proceed",
-        "reformulate":           "Reformular" if locale == "es" else "Reformulate",
-        "postpone":              "Postergar" if locale == "es" else "Postpone",
-        "this-is-not-a-decision": "No es decisión" if locale == "es" else "Not a decision",
-    }.get(rec, rec)
+    axis = _META_AXIS_LABELS.get(locale, _META_AXIS_LABELS["en"])
+    gloss = _META_VALUE_GLOSS.get(locale, _META_VALUE_GLOSS["en"])
+
+    def _cell(axis_key: str, value: str, tone: str = "") -> str:
+        label, hint = gloss.get(value, gloss.get("unknown", ("?", "")))
+        return (
+            f'<div class="meta-cell meta-cell-{html_mod.escape(tone)}">'
+            f'  <div class="meta-cell-axis">{html_mod.escape(axis[axis_key])}</div>'
+            f'  <div class="meta-cell-value">{html_mod.escape(label)}</div>'
+            f'  <div class="meta-cell-hint">{html_mod.escape(hint)}</div>'
+            f'</div>'
+        )
 
     title = "Auditoría de la pregunta" if locale == "es" else "Question audit"
-
-    safe_decision = html_mod.escape(str(decision))
-    safe_urgency = html_mod.escape(str(urgency))
-    safe_quality = html_mod.escape(str(quality))
-    safe_rec_label = html_mod.escape(rec_label)
-    safe_rec = html_mod.escape(str(rec))
-    safe_title = html_mod.escape(title)
+    rec_tone = _REC_TONE.get(rec, "")
 
     return (
         f'<section class="meta-card">'
-        f'  <h3>{safe_title}</h3>'
-        f'  <div class="meta-tags">'
-        f'    <span class="tag tag-decision tag-{safe_decision}">{safe_decision}</span>'
-        f'    <span class="tag tag-urgency tag-{safe_urgency}">{safe_urgency}</span>'
-        f'    <span class="tag tag-quality tag-{safe_quality}">{safe_quality}</span>'
-        f'    <span class="tag tag-rec tag-{safe_rec}">{safe_rec_label}</span>'
+        f'  <h3>{html_mod.escape(title)}</h3>'
+        f'  <div class="meta-grid">'
+        f'    {_cell("decision_class", decision)}'
+        f'    {_cell("urgency", urgency)}'
+        f'    {_cell("question_quality", quality)}'
+        f'    {_cell("meta_recommendation", rec, tone=rec_tone)}'
         f'  </div>'
         f'  <div class="meta-reasoning">{_md_to_html(reasoning)}</div>'
         f'</section>'
@@ -1728,15 +1796,44 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
     background: var(--surface-glass-soft);
     box-shadow: var(--ring-rule);
   }}
-  .meta-card h3{{ margin: 0 0 10px; font-family: var(--sans); font-size: 12px; font-weight: 600; color: var(--storm); text-transform: uppercase; letter-spacing: 0.06em; }}
-  .meta-tags{{ display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }}
-  .meta-card .tag{{ display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 500; background: var(--chartreuse-10); color: var(--midnight-navy); border: 1px solid var(--chartreuse-25); font-family: var(--sans); }}
-  .meta-card .tag-rec{{ background: var(--chartreuse-25); border-color: var(--chartreuse-55); }}
+  .meta-card h3{{ margin: 0 0 12px; font-family: var(--sans); font-size: 12px; font-weight: 600; color: var(--storm); text-transform: uppercase; letter-spacing: 0.06em; }}
+  .meta-grid{{
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+    margin-bottom: 14px;
+  }}
+  .meta-cell{{
+    padding: 10px 12px; border-radius: 10px;
+    background: rgba(255,255,255,0.55);
+    border: 1px solid var(--border-subtle);
+    font-family: var(--sans);
+  }}
+  .meta-cell-axis{{
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--storm); margin-bottom: 4px;
+  }}
+  .meta-cell-value{{
+    font-size: 14px; font-weight: 600; color: var(--midnight-navy);
+    line-height: 1.2; margin-bottom: 4px;
+  }}
+  .meta-cell-hint{{
+    font-size: 12px; line-height: 1.4; color: var(--storm);
+  }}
+  .meta-cell-ok{{    background: rgba(0,150,80,0.10);  border-color: rgba(0,150,80,0.28); }}
+  .meta-cell-ok .meta-cell-value{{ color: #047a47; }}
+  .meta-cell-warn{{  background: var(--chartreuse-14); border-color: var(--chartreuse-32); }}
+  .meta-cell-warn .meta-cell-value{{ color: var(--midnight-navy); }}
+  .meta-cell-stop{{  background: rgba(200,40,40,0.08); border-color: rgba(200,40,40,0.28); }}
+  .meta-cell-stop .meta-cell-value{{ color: #b32424; }}
   .meta-reasoning{{ font-size: 14px; line-height: 1.55; color: var(--storm); font-family: var(--sans); }}
   .meta-reasoning p{{ margin: 0 0 10px; }}
   [data-theme="dark"] .meta-card{{ background: var(--surface-glass-08); border-color: var(--on-dark-border-strong); }}
   [data-theme="dark"] .meta-card h3{{ color: var(--on-dark-78); }}
-  [data-theme="dark"] .meta-card .tag{{ background: var(--chartreuse-14); color: var(--on-dark); border-color: var(--chartreuse-32); }}
+  [data-theme="dark"] .meta-cell{{ background: rgba(0,0,0,0.20); border-color: var(--on-dark-border-strong); }}
+  [data-theme="dark"] .meta-cell-value{{ color: var(--on-dark); }}
+  [data-theme="dark"] .meta-cell-hint{{ color: var(--on-dark-78); }}
+  [data-theme="dark"] .meta-cell-ok{{    background: rgba(0,150,80,0.18);  border-color: rgba(0,150,80,0.40); }}
+  [data-theme="dark"] .meta-cell-warn{{  background: var(--chartreuse-14); border-color: var(--chartreuse-32); }}
+  [data-theme="dark"] .meta-cell-stop{{  background: rgba(200,40,40,0.18); border-color: rgba(200,40,40,0.40); }}
   [data-theme="dark"] .meta-reasoning{{ color: var(--on-dark-92); }}
 
   /* Tenth-man feature card */
