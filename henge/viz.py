@@ -2063,7 +2063,7 @@ def render(question, results, coords_2d, distances, provider, model, cost_estima
   .map-legend{{
     display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
     font-size: 12px; font-family: var(--mono); color: var(--storm);
-    margin: 8px 0 0; letter-spacing: 0.04em;
+    margin: 8px 0 0; padding: 8px 28px 0; letter-spacing: 0.04em;
   }}
   .map-legend .legend-dot{{
     display: inline-block; width: 10px; height: 10px; border-radius: 50%;
