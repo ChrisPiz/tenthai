@@ -55,7 +55,7 @@ El resultado no es una respuesta única. Es un **mapa de tensiones**: dónde hay
 
 ---
 
-[Demo](https://chrispiz.github.io/Henge-MCP/demo.es.html) · [Paper](WHITEPAPER.md) ·
+[Demo — oferta de trabajo](https://chrispiz.github.io/Henge-MCP/docs/demo-job.html) · [Demo — portafolio IA](https://chrispiz.github.io/Henge-MCP/demo.es.html) · [Paper](WHITEPAPER.md) ·
 [Limits](LIMITS.md) · [Methodology](METHODOLOGY.md) · [CFI spec](docs/cfi-spec.md) ·
 [Manifesto](MANIFESTO.md) · [Developer](DEVELOPER.md)
 

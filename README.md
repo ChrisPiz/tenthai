@@ -54,7 +54,7 @@ The result is not a single answer. It's a **tension map**: where there is solid 
 
 ---
 
-[Demo](https://chrispiz.github.io/Henge-MCP/demo.html) · [Paper](WHITEPAPER.md) ·
+[Demo — job offer](https://chrispiz.github.io/Henge-MCP/docs/demo-job.html) · [Demo — AI services](https://chrispiz.github.io/Henge-MCP/demo.html) · [Paper](WHITEPAPER.md) ·
 [Limits](LIMITS.md) · [Methodology](METHODOLOGY.md) · [CFI spec](docs/cfi-spec.md) ·
 [Manifesto](MANIFESTO.md) · [Developer](DEVELOPER.md)
 

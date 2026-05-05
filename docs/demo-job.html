@@ -1,0 +1,1592 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Henge · Should I take the new job?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+  (function() {
+    var stored = null;
+    try { stored = localStorage.getItem('henge-theme'); } catch (e) {}
+    var theme = (stored === 'light' || stored === 'dark')
+      ? stored
+      : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+<style>
+  :root{
+    --midnight-navy: #1b2540;
+    --deep-cosmos: #001033;
+    --chartreuse: #d0f100;
+    --ice-veil: #e0f6ff;
+    --amber-veil: #fff3e6;
+    --amber:      #d97a1c;
+    --amber-soft: rgba(217,122,28,0.12);
+    --amber-rule: rgba(217,122,28,0.32);
+    --ghost-canvas: #f8f9fc;
+    --pure: #ffffff;
+    --ash: #7c8293;
+    --storm: #596075;
+    --fog: #b1b5c0;
+    --on-dark:        #fafeff;
+    --on-dark-92:     rgba(224,246,255,0.92);
+    --on-dark-78:     rgba(224,246,255,0.78);
+    --on-dark-62:     rgba(224,246,255,0.62);
+    --on-dark-32:     rgba(224,246,255,0.32);
+    --on-dark-border-strong: rgba(224,246,255,0.18);
+    --surface-glass-08:   rgba(255,255,255,0.08);
+    --surface-glass-soft: rgba(255,255,255,0.55);
+    --border-subtle: rgba(0,39,80,0.06);
+    --border-rule:   rgba(0,39,80,0.08);
+    --chartreuse-04: rgba(208,241,0,0.04);
+    --chartreuse-10: rgba(208,241,0,0.10);
+    --chartreuse-14: rgba(208,241,0,0.14);
+    --chartreuse-18: rgba(208,241,0,0.18);
+    --chartreuse-20: rgba(208,241,0,0.20);
+    --chartreuse-25: rgba(208,241,0,0.25);
+    --chartreuse-28: rgba(208,241,0,0.28);
+    --chartreuse-32: rgba(208,241,0,0.32);
+    --chartreuse-55: rgba(208,241,0,0.55);
+    --glow-chartreuse:       0 0 0 1px var(--chartreuse-20), 0 0 24px var(--chartreuse-18), 0 0 60px var(--chartreuse-10);
+    --glow-chartreuse-hover: 0 0 0 1px var(--chartreuse-32), 0 0 28px var(--chartreuse-28), 0 0 70px var(--chartreuse-14);
+    --navy-08: rgba(27,37,64,0.08);
+    --shadow-xl: rgba(0,39,80,0.03) 0 56px 72px -16px, rgba(0,39,80,0.03) 0 32px 32px -16px, rgba(0,39,80,0.04) 0 6px 12px -3px, rgba(0,39,80,0.04) 0 0 0 1px;
+    --shadow-md: rgba(0,39,80,0.08) 0 6px 16px -3px, rgba(0,39,80,0.04) 0 0 0 1px;
+    --shadow-subtle: rgba(255,255,255,0.72) 0 1px 1px 0 inset, rgba(4,33,80,0.02) 0 8px 16px 0, rgba(4,33,80,0.03) 0 4px 12px 0, rgba(4,33,80,0.06) 0 1px 2px 0, rgba(4,33,80,0.04) 0 0 0 1px;
+    --ring-subtle: rgba(0,39,80,0.04) 0 0 0 1px;
+    --ring-rule:   rgba(0,39,80,0.06) 0 0 0 1px;
+    --sans:  'Source Sans 3', 'Source Sans Pro', ui-sans-serif, system-ui, sans-serif;
+    --serif: 'Fraunces', Georgia, serif;
+    --mono:  'JetBrains Mono', ui-monospace, monospace;
+    color-scheme: light dark;
+  }
+  *{ box-sizing: border-box; }
+  html, body{ margin:0; padding:0; }
+  body{
+    background: var(--ghost-canvas);
+    color: var(--midnight-navy);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.5;
+    letter-spacing: -0.16px;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection{ background: var(--chartreuse); color: var(--midnight-navy); }
+  .masthead{
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 18px 32px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border-rule);
+  }
+  .logo{
+    display:flex; align-items:center; gap: 10px;
+    font-family: var(--serif);
+    font-weight: 500; font-size: 18px; letter-spacing: -0.01em;
+    color: var(--midnight-navy);
+  }
+  .logo .mk{
+    width: 22px; height: 22px; border-radius: 6px;
+    background: var(--midnight-navy);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--chartreuse);
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+  }
+  .mast-meta{
+    font-family: var(--mono); font-size: 12px;
+    color: var(--storm); letter-spacing: 0.02em;
+  }
+  .mast-meta b{ color: var(--midnight-navy); font-weight: 500; }
+  .mast-meta .sep{ color: var(--fog); margin: 0 8px; }
+  .mast-index-btn{
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 999px;
+    border: 1px solid rgba(0,39,80,0.15);
+    background: white;
+    color: var(--midnight-navy);
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  .mast-index-btn:hover{ background: var(--midnight-navy); color: var(--chartreuse); border-color: var(--midnight-navy); }
+  .mast-index-btn svg{ flex-shrink: 0; }
+  .mast-actions{ display: inline-flex; align-items: center; gap: 8px; }
+  .hero{
+    max-width: 1200px;
+    margin: 24px auto 0;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: var(--shadow-md);
+    color: var(--on-dark);
+    isolation: isolate;
+  }
+  .hero-bg{
+    position: absolute; inset: 0;
+    background-image: url('assets/header-painting.jpg');
+    background-size: cover;
+    background-position: center 60%;
+    z-index: -2;
+  }
+  .hero::after{
+    content:"";
+    position:absolute; inset:0; z-index:-1;
+    background:
+      linear-gradient(180deg, rgba(0,16,51,0.18) 0%, rgba(0,16,51,0.55) 60%, rgba(0,16,51,0.82) 100%),
+      linear-gradient(90deg, rgba(0,16,51,0.55) 0%, rgba(0,16,51,0.10) 50%);
+  }
+  .hero-inner{
+    padding: 40px;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+  h1.hero-h{
+    margin: 0 0 14px;
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(30px, 3.6vw, 44px);
+    line-height: 1.05;
+    letter-spacing: -0.4px;
+    text-wrap: balance;
+    max-width: 20ch;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.18);
+  }
+  .hero-h em{ font-style: italic; color: var(--chartreuse); }
+  .hero-dek{
+    margin: 0;
+    max-width: 52ch;
+    font-size: 15.5px; line-height: 1.5;
+    color: var(--on-dark-92);
+    letter-spacing: -0.09px;
+  }
+  .hero-verdict{
+    display: inline-flex; gap: 8px; align-items: baseline;
+    font-family: var(--mono); font-size: 11px;
+    color: var(--on-dark-78);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 14px;
+  }
+  .hero-verdict b{ color: var(--chartreuse); font-weight: 500; }
+  .hero-verdict .sep{ color: var(--on-dark-32); }
+  .hero-quotes{ display: grid; gap: 12px; }
+  .hero-quote{
+    display: block;
+    background: var(--surface-glass-08);
+    backdrop-filter: blur(14px) saturate(120%);
+    border: 1px solid var(--on-dark-border-strong);
+    border-radius: 14px;
+    padding: 16px 18px;
+    text-decoration: none;
+    color: inherit;
+    transition: background 140ms ease;
+  }
+  .hero-quote:hover{ background: rgba(255,255,255,0.13); }
+  .hero-quote .mark{
+    font-family: var(--mono); font-size: 11px;
+    color: var(--on-dark-62); letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .hero-quote .mark .d{
+    display: inline-block;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--chartreuse);
+  }
+  .hero-quote .mark .ord{
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; border-radius: 5px;
+    background: var(--chartreuse); color: var(--midnight-navy);
+    font-weight: 700; font-size: 10px;
+  }
+  .hero-q{
+    margin: 0 0 8px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 15px; line-height: 1.4;
+    color: var(--on-dark-92);
+  }
+  .hero-quote .cite{
+    font-family: var(--mono); font-size: 10px;
+    color: var(--on-dark-62); letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .page{
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px 80px;
+  }
+  .section{ margin-top: 48px; }
+  .sec-head{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-bottom: 28px;
+    align-items: start;
+  }
+  .sec-head-question{ grid-template-columns: auto 1fr; }
+  .sec-eyebrow{
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 11px;
+    color: var(--storm); letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .sec-eyebrow .n{
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: 6px;
+    background: var(--midnight-navy); color: var(--chartreuse);
+    font-size: 10px; font-weight: 700;
+  }
+  .sec-head h2{
+    margin: 0 0 8px;
+    font-family: var(--serif);
+    font-weight: 400; font-size: clamp(22px, 2.4vw, 30px);
+    line-height: 1.1; letter-spacing: -0.3px;
+  }
+  .sec-head h2 em{ font-style: italic; color: var(--storm); }
+  .sec-head .sub{
+    margin: 0;
+    font-size: 14px; line-height: 1.5;
+    color: var(--storm); letter-spacing: -0.09px;
+  }
+  .question-pull{
+    margin: 0;
+    padding: 22px 26px;
+    background: var(--pure);
+    border-radius: 16px;
+    border: 1px solid var(--border-rule);
+    box-shadow: var(--shadow-subtle);
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 17px; line-height: 1.5;
+    letter-spacing: -0.09px;
+    color: var(--midnight-navy);
+  }
+  .meta-card{
+    margin-top: 20px;
+    background: var(--pure);
+    border-radius: 16px;
+    border: 1px solid var(--border-rule);
+    box-shadow: var(--shadow-subtle);
+    padding: 24px 28px;
+  }
+  .meta-card h3{
+    margin: 0 0 16px;
+    font-family: var(--mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--storm);
+  }
+  .meta-body{ margin-top: 16px; }
+  .meta-grid{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .meta-cell{
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: var(--ghost-canvas);
+    border: 1px solid var(--border-subtle);
+  }
+  .meta-cell-ok{ background: rgba(208,241,0,0.08); border-color: rgba(208,241,0,0.3); }
+  .meta-cell-axis{
+    font-family: var(--mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--storm); margin-bottom: 6px;
+  }
+  .meta-cell-value{
+    font-weight: 600; font-size: 15px;
+    color: var(--midnight-navy); margin-bottom: 4px;
+  }
+  .meta-cell-hint{
+    font-size: 13px; line-height: 1.4;
+    color: var(--storm);
+  }
+  .meta-reasoning{
+    font-size: 14px; line-height: 1.6;
+    color: var(--storm);
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 16px;
+  }
+  .meta-reasoning p{ margin: 0; }
+  .howto{
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+    padding: 14px 16px;
+    background: var(--amber-soft);
+    border: 1px solid var(--amber-rule);
+    border-radius: 10px;
+  }
+  .howto-label{
+    font-family: var(--mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--amber); margin-bottom: 4px;
+    display: block;
+  }
+  .howto-text{ margin: 0; font-size: 13px; line-height: 1.5; color: var(--midnight-navy); }
+  .map-card{
+    margin-top: 20px;
+    background: var(--pure);
+    border-radius: 16px;
+    border: 1px solid var(--border-rule);
+    box-shadow: var(--shadow-subtle);
+    overflow: hidden;
+    position: relative;
+  }
+  .map-top{
+    padding: 18px 28px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .map-top .l{ display: flex; align-items: center; gap: 12px; }
+  .pill{
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 5px 12px; border-radius: 999px;
+    background: var(--midnight-navy); color: var(--chartreuse);
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .pill .d{
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--chartreuse);
+  }
+  .map-top .meta{
+    font-family: var(--mono); font-size: 11px;
+    color: var(--storm); letter-spacing: 0.04em;
+  }
+  .legend-row{
+    display: flex; gap: 16px; align-items: center;
+    font-family: var(--mono); font-size: 11px; color: var(--storm);
+  }
+  .legend-row span{ display: flex; align-items: center; gap: 6px; }
+  .ld{ display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+  .ld.t{ background: var(--chartreuse); border: 1px solid var(--midnight-navy); }
+  .ld.n{ background: var(--midnight-navy); }
+  .map-svg{ padding: 8px 28px 0; }
+  .map-svg svg{ width: 100%; height: auto; display: block; }
+  .map-foot{
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--border-subtle);
+  }
+  .map-foot .cell{
+    padding: 16px 20px;
+    border-right: 1px solid var(--border-subtle);
+  }
+  .map-foot .cell:last-child{ border-right: none; }
+  .map-foot .lbl{
+    font-family: var(--mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--storm); margin-bottom: 6px;
+  }
+  .map-foot .val{
+    font-size: 22px; font-weight: 700;
+    letter-spacing: -0.5px; color: var(--midnight-navy);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .badge{
+    display: inline-flex;
+    padding: 2px 8px; border-radius: 999px;
+    background: var(--chartreuse); color: var(--midnight-navy);
+    font-family: var(--mono); font-size: 10px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .map-foot .sub{
+    font-size: 12px; color: var(--storm); margin-top: 2px;
+  }
+  .consensus-card{
+    margin-top: 20px;
+    background: var(--pure);
+    border-radius: 16px;
+    border: 1px solid var(--border-rule);
+    box-shadow: var(--shadow-subtle);
+    padding: 28px;
+  }
+  .consensus-top{
+    display: grid; grid-template-columns: 1fr auto;
+    gap: 24px; align-items: start;
+    margin-bottom: 16px;
+  }
+  .consensus-tag{
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--storm); margin-bottom: 10px;
+  }
+  .consensus-tag .d{
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--midnight-navy);
+  }
+  .consensus-lead{ margin: 0 0 6px; font-size: 14px; color: var(--storm); }
+  .consensus-card h3{ margin: 0 0 16px; font-size: 20px; font-weight: 600; letter-spacing: -0.3px; }
+  .consensus-d{
+    text-align: right;
+    font-family: var(--mono); font-size: 12px;
+    color: var(--storm);
+  }
+  .consensus-d b{ display: block; font-size: 28px; color: var(--midnight-navy); letter-spacing: -1px; }
+  .consensus-body{
+    column-count: 2; column-gap: 32px;
+    font-size: 15px; line-height: 1.6;
+    color: var(--storm); letter-spacing: -0.09px;
+  }
+  .consensus-body h3{
+    column-span: all;
+    font-size: 13px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--midnight-navy); margin: 20px 0 8px;
+    font-family: var(--mono);
+  }
+  .consensus-body p{ margin: 0 0 12px; }
+  .consensus-body strong{ color: var(--midnight-navy); font-weight: 600; }
+  .tenth-card{
+    margin-top: 20px;
+    background: var(--midnight-navy);
+    border-radius: 16px;
+    box-shadow: var(--glow-chartreuse);
+    padding: 28px;
+    color: var(--on-dark-92);
+  }
+  .tenth-top{
+    display: grid; grid-template-columns: 1fr auto;
+    gap: 24px; align-items: start;
+    margin-bottom: 16px;
+  }
+  .tenth-tag{
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--on-dark-62); margin-bottom: 10px;
+  }
+  .tenth-tag .d{
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--chartreuse);
+  }
+  .tenth-lead{ margin: 0 0 6px; font-size: 14px; color: var(--on-dark-62); }
+  .tenth-card h3{
+    margin: 0 0 16px;
+    font-size: 20px; font-weight: 600; letter-spacing: -0.3px;
+    color: var(--on-dark);
+  }
+  .tenth-card h3 em{ font-style: italic; color: var(--chartreuse); }
+  .tenth-d-stat{
+    text-align: right;
+    font-family: var(--mono); font-size: 12px;
+    color: var(--on-dark-62);
+  }
+  .tenth-d-stat b{ display: block; font-size: 28px; color: var(--chartreuse); letter-spacing: -1px; }
+  .tenth-body{
+    font-size: 15px; line-height: 1.65;
+    color: var(--on-dark-78);
+  }
+  .tenth-body h3{
+    font-size: 13px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--on-dark-62); margin: 20px 0 8px;
+    font-family: var(--mono);
+  }
+  .tenth-body h4{
+    font-size: 13px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--on-dark-62); margin: 20px 0 8px;
+    font-family: var(--mono);
+  }
+  .tenth-body p{ margin: 0 0 12px; color: var(--on-dark-78); }
+  .tenth-body strong{ color: var(--on-dark); font-weight: 600; }
+  .tenth-body blockquote{
+    margin: 12px 0; padding: 4px 0 4px 14px;
+    border-left: 2px solid var(--chartreuse);
+    font-family: var(--serif); font-style: italic;
+    font-size: 16px; line-height: 1.4;
+    color: var(--on-dark);
+  }
+  .modes{
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 14px; margin-top: 12px;
+  }
+  .mode{
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--on-dark-border-strong);
+    border-radius: 12px;
+    padding: 18px;
+  }
+  .mode .ord{
+    font-family: var(--mono); font-size: 10px;
+    color: var(--chartreuse); letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+  .mode h5{
+    margin: 0 0 8px;
+    font-size: 14px; font-weight: 600;
+    color: var(--on-dark);
+  }
+  .mode p{ margin: 0; font-size: 13px; line-height: 1.5; color: var(--on-dark-78); }
+  .tenth-foot{
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--on-dark-border-strong);
+    display: flex; justify-content: space-between;
+    font-family: var(--mono); font-size: 11px;
+    color: var(--on-dark-62); letter-spacing: 0.04em;
+  }
+  .informed-card{
+    margin-top: 20px;
+    background: var(--pure);
+    border-radius: 16px;
+    border: 1px solid var(--border-rule);
+    box-shadow: var(--shadow-subtle);
+    padding: 28px;
+  }
+  .informed-top{
+    margin-bottom: 16px;
+  }
+  .informed-tag{
+    display: inline-flex; align-items: center;
+    padding: 3px 10px; border-radius: 999px;
+    background: rgba(27,140,90,0.10); color: #1b8c5a;
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .informed-card h3{ margin: 0 0 6px; font-size: 18px; font-weight: 600; }
+  .informed-sub{ margin: 0 0 16px; font-size: 14px; color: var(--storm); }
+  .informed-body{ font-size: 15px; line-height: 1.6; color: var(--storm); }
+  .informed-body p{ margin: 0 0 12px; }
+  .informed-body strong{ color: var(--midnight-navy); font-weight: 600; }
+  .informed-grid{
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 16px; margin-top: 20px;
+  }
+  .informed-col .ord{
+    font-family: var(--mono); font-size: 10px;
+    color: var(--storm); letter-spacing: 0.08em;
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+  .informed-col h5{
+    margin: 0 0 10px; font-size: 14px; font-weight: 600;
+    color: var(--midnight-navy);
+  }
+  .informed-list{
+    margin: 0; padding: 0 0 0 16px;
+    font-size: 13px; line-height: 1.55;
+    color: var(--storm);
+  }
+  .informed-list li{ margin-bottom: 6px; }
+  .informed-list.holds li::marker{ color: #1b8c5a; }
+  .informed-list.revised li::marker{ color: var(--amber); }
+  .informed-list.discarded li::marker{ color: var(--fog); }
+  .frames{ margin-top: 4px; }
+  .frames-head{
+    display: grid;
+    grid-template-columns: 40px 220px 1fr 160px 80px 16px;
+    gap: 12px;
+    padding: 10px 20px;
+    font-family: var(--mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--storm);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .frame{
+    border: 1px solid var(--border-rule);
+    border-radius: 14px;
+    margin-bottom: 8px;
+    background: var(--pure);
+    box-shadow: var(--shadow-subtle);
+    cursor: pointer;
+    overflow: hidden;
+    transition: box-shadow 140ms ease;
+  }
+  .frame:hover{ box-shadow: var(--shadow-md); }
+  .frame-row{
+    display: grid;
+    grid-template-columns: 40px 220px 1fr 160px 80px 16px;
+    gap: 12px;
+    align-items: center;
+    padding: 16px 20px;
+  }
+  .f-idx{
+    font-family: var(--mono); font-size: 11px;
+    color: var(--fog); letter-spacing: 0.04em;
+  }
+  .f-mark{
+    display: inline-flex; align-items: center;
+    padding: 2px 7px; border-radius: 999px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .f-mark.closest{ background: rgba(208,241,0,0.15); color: #5a7800; }
+  .f-mark.farthest{ background: rgba(217,122,28,0.12); color: var(--amber); }
+  .f-lean{
+    font-size: 13.5px;
+    line-height: 1.35; letter-spacing: -0.09px;
+    color: var(--storm);
+    max-width: 38ch;
+    text-wrap: balance;
+  }
+  .f-lean strong{ color: var(--midnight-navy); font-weight: 500; font-style: normal; }
+  .f-bar{
+    height: 6px; background: var(--navy-08);
+    border-radius: 9999px;
+    position: relative; overflow: hidden;
+  }
+  .f-bar > i{
+    display: block; height: 100%;
+    background: var(--midnight-navy);
+    border-radius: 9999px;
+  }
+  .f-d{
+    font-family: var(--mono); font-size: 14px;
+    color: var(--midnight-navy);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .f-d b{ font-weight: 500; }
+  .f-caret{
+    color: var(--storm);
+    font-family: var(--mono);
+    transition: transform .15s ease;
+    text-align: center;
+  }
+  .frame.open .f-caret{ transform: rotate(90deg); }
+  .f-body{
+    display: none;
+    padding: 4px 24px 22px 280px;
+    max-width: 100%;
+  }
+  .frame.open .f-body{ display: block; }
+  .f-body p{
+    margin: 0 0 10px;
+    font-size: 15px; line-height: 1.55;
+    color: var(--storm); letter-spacing: -0.16px;
+  }
+  .f-body strong{ color: var(--midnight-navy); font-weight: 500; }
+  .f-body em{ color: var(--midnight-navy); font-style: italic; }
+  .f-body h4{
+    margin: 16px 0 6px;
+    font-family: var(--mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--storm);
+  }
+  .f-body .pull{
+    margin: 12px 0;
+    padding: 4px 0 4px 14px;
+    border-left: 2px solid var(--midnight-navy);
+    font-family: var(--serif); font-style: italic;
+    font-size: 16px; line-height: 1.4; letter-spacing: -0.09px;
+    color: var(--midnight-navy);
+  }
+  .map-help{
+    position: absolute; top: 14px; right: 14px; z-index: 10;
+  }
+  .map-help summary{
+    list-style: none; cursor: pointer;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--pure); color: var(--storm);
+    font-family: var(--serif); font-style: italic;
+    font-size: 16px; font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+    user-select: none;
+    transition: all .15s ease;
+    box-shadow: rgba(0,39,80,0.04) 0 0 0 1px, rgba(0,39,80,0.10) 0 2px 6px -2px;
+  }
+  .map-help summary::-webkit-details-marker{ display: none; }
+  .map-help summary:hover, .map-help[open] summary{ background: var(--midnight-navy); color: var(--chartreuse); }
+  .map-help-popover{
+    position: absolute; top: 38px; right: 0;
+    width: 300px;
+    background: var(--pure); border-radius: 14px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow-md);
+  }
+  .map-help-popover .map-help-title{
+    font-family: var(--mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--storm); margin: 0 0 10px;
+  }
+  .map-help-popover p{ margin: 0 0 8px; font-size: 14px; line-height: 1.5; color: var(--midnight-navy); }
+  .map-help-popover p:last-child{ margin-bottom: 0; }
+  .map-legend{
+    display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+    font-size: 12px; font-family: var(--mono); color: var(--storm);
+    margin: 8px 0 0; padding: 8px 28px 0; letter-spacing: 0.04em;
+  }
+  .map-legend .legend-dot{
+    display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+    margin-right: 6px; vertical-align: middle;
+  }
+  .map-legend .legend-tenth{ background: var(--chartreuse); border: 1px solid var(--midnight-navy); }
+  .f-name{ display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+  .f-name-text{ display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .frame-model-chip{
+    display: inline-block; padding: 2px 8px;
+    font-size: 11px; font-family: var(--mono); letter-spacing: 0.04em;
+    border-radius: 999px;
+  }
+  .frame-model-anthropic{ background: rgba(27,37,64,0.08); color: var(--midnight-navy); }
+  .frame-model-openai{    background: rgba(27,140,90,0.10); color: #1b8c5a; }
+  mark.tk-c, mark.tk-a {
+    background: transparent; color: inherit;
+    padding: 0 2px; border-radius: 2px;
+    box-decoration-break: clone; -webkit-box-decoration-break: clone;
+    transition: background 0.15s ease;
+  }
+  mark.tk-c { background: linear-gradient(180deg, transparent 55%, rgba(190, 230, 90, 0.55) 55%); }
+  mark.tk-a { background: linear-gradient(180deg, transparent 55%, rgba(120, 200, 230, 0.45) 55%); font-weight: 500; }
+  body.tk-off mark.tk-c, body.tk-off mark.tk-a { background: transparent; font-weight: inherit; }
+  .tk-toggle {
+    position: fixed; bottom: 24px; left: 24px; z-index: 9999;
+    display: inline-flex; gap: 6px; align-items: center;
+    padding: 8px 14px; border-radius: 999px;
+    background: rgba(20, 20, 24, 0.85); color: #f5f5f0;
+    font: 500 12px/1.2 system-ui, -apple-system, sans-serif;
+    border: 1px solid rgba(255,255,255,0.12);
+    cursor: pointer; backdrop-filter: blur(8px); user-select: none;
+  }
+  .tk-toggle:hover { background: rgba(40, 40, 48, 0.95); }
+  .tk-toggle .dot-c { width: 10px; height: 10px; border-radius: 2px; background: rgba(190, 230, 90, 0.7); display: inline-block; }
+  .tk-toggle .dot-a { width: 10px; height: 10px; border-radius: 2px; background: rgba(120, 200, 230, 0.6); display: inline-block; }
+  .tk-legend { font-size: 10px; opacity: 0.75; }
+  .colophon{
+    max-width: 1200px; margin: 0 auto;
+    padding: 24px 32px;
+    border-top: 1px solid var(--border-rule);
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    font-family: var(--mono); font-size: 12px;
+    color: var(--storm); line-height: 1.6;
+  }
+  .colophon .center{ text-align: center; font-style: italic; font-family: var(--serif); font-size: 13px; color: var(--storm); }
+  .colophon .right{ text-align: right; }
+  .colophon b{ color: var(--midnight-navy); }
+  .guide{
+    position: fixed; right: 24px; bottom: 24px;
+    z-index: 50; font-family: var(--sans);
+    display: flex; flex-direction: column; align-items: flex-end;
+  }
+  .guide-toggle{
+    appearance: none; -webkit-appearance: none; border: 0;
+    background: var(--midnight-navy);
+    color: var(--chartreuse);
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+    padding: 10px 16px; border-radius: 999px;
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer;
+    box-shadow: rgba(0,39,80,0.3) 0 4px 16px -4px;
+  }
+  .guide-toggle .marker{
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--chartreuse);
+  }
+  .guide-panel{
+    display: none;
+    position: absolute; bottom: 52px; right: 0;
+    width: 380px;
+    background: var(--pure);
+    border-radius: 18px;
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+  }
+  .guide.open .guide-panel{ display: flex; flex-direction: column; }
+  .guide-panel-body{
+    padding: 24px 26px 16px;
+    overflow-y: auto; max-height: 70vh;
+  }
+  .guide-panel-body .kicker{
+    font-family: var(--mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--storm); margin: 0 0 8px;
+  }
+  .guide-panel-body h3{
+    margin: 0 0 16px;
+    font-family: var(--serif); font-weight: 400;
+    font-size: 20px; letter-spacing: -0.3px;
+  }
+  .guide-panel-body ol{
+    margin: 0; padding: 0 0 0 18px;
+    font-size: 14px; line-height: 1.6;
+    color: var(--storm);
+  }
+  .guide-panel-body ol li{ margin-bottom: 10px; }
+  .guide-panel-body ol b{ color: var(--midnight-navy); }
+  .guide-panel-foot{
+    padding: 14px 26px;
+    border-top: 1px solid var(--border-subtle);
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .guide-panel-foot .foot{
+    margin: 0; font-size: 12px; line-height: 1.5;
+    color: var(--storm); font-style: italic;
+  }
+  .guide-close{
+    appearance: none; -webkit-appearance: none; border: 0;
+    background: var(--ghost-canvas);
+    color: var(--midnight-navy);
+    font-family: var(--mono); font-size: 11px;
+    padding: 8px 14px; border-radius: 999px;
+    cursor: pointer; white-space: nowrap;
+    border: 1px solid var(--border-rule);
+  }
+  .theme-toggle{
+    appearance: none; -webkit-appearance: none;
+    background: transparent;
+    border: 1px solid var(--border-rule);
+    color: var(--midnight-navy);
+    width: 32px; height: 32px; border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+  }
+  .theme-toggle .icon-moon{ display: none; }
+  .theme-toggle .icon-sun{ display: block; }
+  [data-theme="dark"] .theme-toggle{ border-color: rgba(255,255,255,0.18); color: var(--chartreuse); }
+  [data-theme="dark"] .theme-toggle .icon-sun{ display: none; }
+  [data-theme="dark"] .theme-toggle .icon-moon{ display: block; }
+
+  /* Dark mode overrides */
+  [data-theme="dark"] body{ background: #0d1117; color: var(--on-dark); }
+  [data-theme="dark"] .masthead{ border-color: var(--on-dark-border-strong); }
+  [data-theme="dark"] .logo{ color: var(--on-dark); }
+  [data-theme="dark"] .mast-meta{ color: var(--on-dark-62); }
+  [data-theme="dark"] .mast-meta b{ color: var(--on-dark); }
+  [data-theme="dark"] .mast-meta .sep{ color: var(--on-dark-32); }
+  [data-theme="dark"] .mast-index-btn{ background: rgba(255,255,255,0.05); border-color: var(--on-dark-border-strong); color: var(--on-dark); }
+  [data-theme="dark"] .mast-index-btn:hover{ background: var(--chartreuse); color: var(--midnight-navy); }
+  [data-theme="dark"] .sec-head h2{ color: var(--on-dark); }
+  [data-theme="dark"] .sec-head .sub{ color: var(--on-dark-62); }
+  [data-theme="dark"] .question-pull{ background: #161c2a; border-color: var(--on-dark-border-strong); color: var(--on-dark); }
+  [data-theme="dark"] .meta-card, [data-theme="dark"] .map-card, [data-theme="dark"] .consensus-card, [data-theme="dark"] .informed-card, [data-theme="dark"] .frame{ background: #161c2a; border-color: var(--on-dark-border-strong); }
+  [data-theme="dark"] .meta-cell{ background: rgba(255,255,255,0.04); border-color: var(--on-dark-border-strong); }
+  [data-theme="dark"] .meta-cell-value, [data-theme="dark"] .map-foot .val, [data-theme="dark"] .consensus-body strong, [data-theme="dark"] .informed-card h3, [data-theme="dark"] .informed-col h5{ color: var(--on-dark); }
+  [data-theme="dark"] .meta-cell-axis, [data-theme="dark"] .meta-cell-hint, [data-theme="dark"] .meta-reasoning, [data-theme="dark"] .map-foot .lbl, [data-theme="dark"] .map-foot .sub, [data-theme="dark"] .consensus-lead, [data-theme="dark"] .consensus-d, [data-theme="dark"] .consensus-body, [data-theme="dark"] .informed-sub, [data-theme="dark"] .informed-body, [data-theme="dark"] .informed-list, [data-theme="dark"] .f-lean, [data-theme="dark"] .f-body p, [data-theme="dark"] .f-d{ color: var(--on-dark-78); }
+  [data-theme="dark"] .consensus-card h3, [data-theme="dark"] .f-body strong{ color: var(--on-dark); }
+  [data-theme="dark"] .map-top .meta, [data-theme="dark"] .legend-row, [data-theme="dark"] .map-legend, [data-theme="dark"] .frames-head, [data-theme="dark"] .f-idx, [data-theme="dark"] .f-caret, [data-theme="dark"] .sec-eyebrow{ color: var(--on-dark-62); }
+  [data-theme="dark"] .map-top .meta, [data-theme="dark"] .map-legend{ color: var(--on-dark-62); }
+  [data-theme="dark"] .border-subtle, [data-theme="dark"] .map-foot .cell, [data-theme="dark"] .map-top{ border-color: var(--on-dark-border-strong); }
+  [data-theme="dark"] .colophon{ border-color: var(--on-dark-border-strong); color: var(--on-dark-62); }
+  [data-theme="dark"] .colophon b, [data-theme="dark"] .colophon .right b{ color: var(--on-dark); }
+  [data-theme="dark"] .howto{ background: rgba(217,122,28,0.08); border-color: rgba(217,122,28,0.25); }
+  [data-theme="dark"] .howto-text{ color: var(--on-dark-92); }
+  [data-theme="dark"] .guide-toggle{ box-shadow: rgba(0,0,0,0.5) 0 4px 20px -4px; }
+  [data-theme="dark"] .guide-panel{ background: #161c2a; }
+  [data-theme="dark"] .guide-panel-body h3, [data-theme="dark"] .guide-panel-body ol b{ color: var(--on-dark); }
+  [data-theme="dark"] .guide-panel-body ol, [data-theme="dark"] .guide-panel-foot .foot{ color: var(--on-dark-78); }
+  [data-theme="dark"] .guide-panel-foot{ border-color: var(--on-dark-border-strong); }
+  [data-theme="dark"] .guide-close{ background: rgba(255,255,255,0.06); border-color: var(--on-dark-border-strong); color: var(--on-dark); }
+  [data-theme="dark"] .map-help summary{ background: #161c2a; color: var(--on-dark-78); }
+  [data-theme="dark"] .map-help-popover{ background: #161c2a; }
+  [data-theme="dark"] .map-help-popover p{ color: var(--on-dark-78); }
+  [data-theme="dark"] .frame-model-anthropic{ background: rgba(255,255,255,0.08); color: var(--on-dark-92); }
+  [data-theme="dark"] .frame-model-openai{ background: rgba(27,140,90,0.18); color: #4dd49a; }
+  [data-theme="dark"] .f-bar{ background: rgba(255,255,255,0.08); }
+  [data-theme="dark"] .f-bar > i{ background: var(--on-dark); }
+  [data-theme="dark"] .mode{ background: rgba(255,255,255,0.04); border-color: var(--on-dark-border-strong); }
+  [data-theme="dark"] .map-legend .legend-tenth{ border-color: var(--on-dark); }
+  [data-theme="dark"] .informed-tag{ background: rgba(27,140,90,0.18); color: #4dd49a; }
+
+  @media (max-width: 920px){
+    .hero-inner{ grid-template-columns: 1fr; padding: 40px 24px 24px; }
+    .hero-quote.consensus{ display: none; }
+    .hero-q{ font-size: 15px; }
+    .map-foot{ grid-template-columns: 1fr 1fr; }
+    .map-foot .cell{ border-bottom: 1px solid var(--border-subtle); }
+    .modes{ grid-template-columns: 1fr; }
+    .frames-head{ display: none; }
+    .frame-row{ grid-template-columns: 40px 1fr 80px 16px; row-gap: 4px; }
+    .frame-row .f-bar{ display: none; }
+    .frame-row .f-lean{ grid-column: 2; grid-row: 2; font-size: 14px; max-width: none; }
+    .f-body{ padding: 4px 24px 22px 24px; }
+    .tenth-top, .consensus-top{ grid-template-columns: 1fr; }
+    .tenth-d-stat, .consensus-d{ text-align: left; }
+    .consensus-body{ column-count: 1; }
+    .informed-grid{ grid-template-columns: 1fr; }
+    .meta-grid{ grid-template-columns: 1fr 1fr; }
+    .sec-head{ grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<button class="tk-toggle" onclick="document.body.classList.toggle('tk-off')" title="Toggle markers">
+  <span class="dot-c"></span><span class="tk-legend">conclusion</span>
+  <span class="dot-a"></span><span class="tk-legend">action</span>
+</button>
+<main data-screen-label="Henge Report">
+
+  <header class="masthead">
+    <div class="logo"><span class="mk">10</span> Henge</div>
+    <div class="mast-meta">
+      <b>Report #0047</b><span class="sep">·</span>2026·05·05 09:14 CLT<span class="sep">·</span>v0.6
+    </div>
+    <div class="mast-actions">
+      <a class="mast-index-btn" href="../index.html" aria-label="View past reports">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 3.5h12M2 8h12M2 12.5h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span>Past reports</span>
+      </a>
+      <button type="button" class="theme-toggle" aria-label="Change theme" title="Change theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <div>
+        <div class="hero-verdict">
+          <span>consensus</span><span class="sep">&middot;</span><b>Aligned · Fragile</b><span class="sep">&middot;</span><span>&sigma; 0.031</span>
+        </div>
+        <h1 class="hero-h">Nine agree on yes.<br><em>But the timing is contested.</em></h1>
+        <p class="hero-dek">Eight of nine advisors lean toward taking the offer. The fragility comes from timing risk — a newborn, a 2-week deadline, and a startup survival base rate the consensus is quietly discounting.</p>
+      </div>
+      <div class="hero-quotes">
+        <a class="hero-quote consensus" href="#consensus">
+          <div class="mark"><span class="d"></span>&Sigma; &middot; The Nine</div>
+          <blockquote class="hero-q">Take the offer — but validate founders, vesting cliff, and workload expectations before signing</blockquote>
+          <div class="cite">consensus &middot; &sigma; 0.031</div>
+        </a>
+        <a class="hero-quote tenth" href="#tenth">
+          <div class="mark"><span class="ord">10</span> &middot; The Tenth</div>
+          <blockquote class="hero-q">The 2-week deadline is manufactured urgency. The real question is whether to take this role now or wait 18 months for a cleaner entry…</blockquote>
+          <div class="cite">forced dissent &middot; d 0.152</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="page">
+
+  <section class="section">
+    <div class="sec-head sec-head-question">
+      <div class="l">
+        <div class="sec-eyebrow"><span class="n">01</span>Report · #0047</div>
+        <h2>The question <em>the nine answered</em></h2>
+      </div>
+      <div class="r">
+        <blockquote class="question-pull">I've been a senior product manager for 8 years at a stable B2B SaaS company. Good team, good manager, predictable growth path. A Series A startup in logistics tech (40 people, $12M raised, 18-month runway) has offered me VP of Product: 30% salary increase, 0.8% equity (4-year vest, 1-year cliff), remote-first. The offer expires in 2 weeks. My partner is on parental leave; our first child is 3 months old. Should I take the new job?</blockquote>
+      </div>
+    </div>
+
+    <section class="meta-card">
+      <h3>Question audit</h3>
+      <div class="howto"><div><span class="howto-label">What you're seeing</span><p class="howto-text">Phase 2 · gpt-5 audits your question before the 9 advisors run.</p></div><div><span class="howto-label">How to read it</span><p class="howto-text">If reversibility / urgency / question quality look off, the run short-circuits. Green recommendation = proceed to full analysis.</p></div></div>
+      <div class="meta-body">
+        <div class="meta-grid">
+          <div class="meta-cell"><div class="meta-cell-axis">Reversibility</div><div class="meta-cell-value">Reversible with cost</div><div class="meta-cell-hint">You can quit if it fails, but career disruption and equity cliff loss are real costs.</div></div>
+          <div class="meta-cell"><div class="meta-cell-axis">Urgency</div><div class="meta-cell-value">2 weeks (deadline-driven)</div><div class="meta-cell-hint">Artificial deadline set by the employer. Not driven by external events.</div></div>
+          <div class="meta-cell"><div class="meta-cell-axis">Question quality</div><div class="meta-cell-value">Well-formed</div><div class="meta-cell-hint">Binary decision with clear stakes, criteria, and context provided.</div></div>
+          <div class="meta-cell meta-cell-ok"><div class="meta-cell-axis">Recommendation</div><div class="meta-cell-value">Proceed</div><div class="meta-cell-hint">The 9 advisors run as is. Deadline is noted as a signal to investigate.</div></div>
+        </div>
+        <div class="meta-reasoning"><p>This is a high-stakes personal career decision with meaningful financial, professional, and family dimensions. It is reversible with cost: you can quit the startup if it fails, but you lose equity cliff progress, burn a professional relationship, and face a job search under more pressure. Urgency is artificial — the 2-week window is employer-imposed, not driven by external constraints. This is worth noting: legitimate VP openings at well-run startups rarely evaporate in 14 days. The question is well-formed: it specifies the role, the financials, the personal context, and the decision horizon. Proceeding to full analysis without reformulation.</p></div>
+      </div>
+    </section>
+
+    <section class="map-card">
+      <div class="map-top">
+        <div class="l">
+          <span class="pill"><span class="d"></span>fig.01 · disagreement map</span>
+          <span class="meta">10 voices · MDS · cosine</span>
+        </div>
+        <div class="legend-row">
+          <span><i class="ld t"></i>Tenth man</span>
+          <span><i class="ld n"></i>Consensus frames</span>
+        </div>
+      </div>
+
+      <div class="map-svg">
+        <details class="map-help">
+          <summary aria-label="How to read this map">?</summary>
+          <div class="map-help-popover">
+            <p class="map-help-title">How to read this map</p>
+            <p>Each point is an advisor. The <strong>centroid</strong> is the consensus zone.</p>
+            <p><strong>Closer</strong> to the center = more aligned with the rest. <strong>Farther</strong> = reasons differently.</p>
+            <p>The <strong style="color: var(--midnight-navy); background: var(--chartreuse); padding: 0 4px; border-radius: 3px;">10 · tenth man</strong> is the forced dissenter.</p>
+            <p>Concentric rings mark equal distances from centroid.</p>
+          </div>
+        </details>
+        <svg viewBox="0 0 1200 638" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+<g stroke="rgba(0,39,80,0.06)" stroke-width="0.5">
+<line x1="600" y1="40" x2="600" y2="598"/>
+<line x1="80" y1="319" x2="1120" y2="319"/>
+</g>
+<g stroke="rgba(0,39,80,0.10)" stroke-width="0.7" fill="none">
+<circle cx="600" cy="319" r="60"/>
+<circle cx="600" cy="319" r="120" stroke-dasharray="3 5"/>
+<circle cx="600" cy="319" r="200" stroke-dasharray="3 5"/>
+</g>
+<g>
+<rect x="592" y="311" width="16" height="16" fill="none" stroke="#1b2540" stroke-width="1" transform="rotate(45 600 319)"/>
+<text x="618" y="316" font-family="JetBrains Mono, monospace" font-size="11" fill="#6b7184" letter-spacing="1">CENTROID</text>
+</g>
+<g stroke="rgba(27,37,64,0.20)" stroke-width="0.7">
+<line x1="600" y1="319" x2="648" y2="278"/>
+<line x1="600" y1="319" x2="540" y2="280"/>
+<line x1="600" y1="319" x2="644" y2="356"/>
+<line x1="600" y1="319" x2="560" y2="382"/>
+<line x1="600" y1="319" x2="490" y2="314"/>
+<line x1="600" y1="319" x2="586" y2="418"/>
+<line x1="600" y1="319" x2="634" y2="252"/>
+<line x1="600" y1="319" x2="654" y2="184"/>
+<line x1="600" y1="319" x2="514" y2="376"/>
+</g>
+<line x1="600" y1="319" x2="788" y2="424" stroke="#d0f100" stroke-width="1.5" stroke-dasharray="4 4"/>
+<rect x="682" y="358" width="68" height="22" rx="11" fill="#1b2540"/>
+<text x="716" y="373" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" font-weight="500" fill="#d0f100">d 0.152</text>
+<g font-family="Source Sans 3, Source Sans Pro, sans-serif" font-size="13" fill="#1b2540">
+<g>
+<circle cx="648" cy="278" r="6" fill="#1b8c5a"/>
+<text x="663" y="275" font-weight="500" text-anchor="start">01 empirical</text>
+<text x="663" y="290" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#6b7184" text-anchor="start">d 0.068</text>
+</g>
+<g>
+<circle cx="540" cy="280" r="6" fill="var(--midnight-navy)"/>
+<text x="525" y="277" font-weight="500" text-anchor="end">02 historical</text>
+<text x="525" y="292" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#6b7184" text-anchor="end">d 0.082</text>
+</g>
+<g>
+<circle cx="644" cy="356" r="7" fill="#1b8c5a"/>
+<circle cx="644" cy="356" r="14" fill="none" stroke="#1b2540" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="659" y="353" font-weight="500" text-anchor="start">03 first-principles</text>
+<text x="659" y="368" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#6b7184" text-anchor="start">d 0.063 · closest</text>
+</g>
+<g>
+<circle cx="560" cy="382" r="6" fill="var(--midnight-navy)"/>
+<text x="545" y="379" font-weight="500" text-anchor="end">04 analogical</text>
+<text x="545" y="394" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#6b7184" text-anchor="end">d 0.085</text>
+</g>
+<g>
+<circle cx="490" cy="314" r="6" fill="#1b8c5a"/>
+<text x="475" y="311" font-weight="500" text-anchor="end">05 systemic</text>
+<text x="475" y="326" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#6b7184" text-anchor="end">d 0.110</text>
+</g>
+<g>
+<circle cx="586" cy="418" r="6" fill="var(--midnight-navy)"/>
+<text x="571" y="430" font-weight="500" text-anchor="end">06 ethical</text>
+<text x="571" y="445" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#6b7184" text-anchor="end">d 0.099</text>
+</g>
+<g>
+<circle cx="634" cy="252" r="6" fill="#1b8c5a"/>
+<text x="649" y="249" font-weight="500" text-anchor="start">07 soft-contrarian</text>
+<text x="649" y="264" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#6b7184" text-anchor="start">d 0.077</text>
+</g>
+<g>
+<circle cx="654" cy="184" r="6" fill="#1b8c5a"/>
+<text x="669" y="181" font-weight="500" text-anchor="start">08 radical-optimist</text>
+<text x="669" y="196" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#6b7184" text-anchor="start">d 0.141 · farthest</text>
+</g>
+<g>
+<circle cx="514" cy="376" r="6" fill="#1b8c5a"/>
+<text x="499" y="373" font-weight="500" text-anchor="end">09 pre-mortem</text>
+<text x="499" y="388" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#6b7184" text-anchor="end">d 0.104</text>
+</g>
+</g>
+<g>
+<circle cx="788" cy="424" r="48" fill="#d0f100" opacity="0.18"/>
+<circle cx="788" cy="424" r="28" fill="#d0f100" opacity="0.32"/>
+<circle cx="788" cy="424" r="12" fill="#d0f100"/>
+<circle cx="788" cy="424" r="12" fill="none" stroke="#1b2540" stroke-width="1.5"/>
+<text x="788" y="372" text-anchor="middle" font-family="Source Sans 3, Source Sans Pro, sans-serif" font-weight="500" font-size="13" fill="#1b2540" letter-spacing="2">10 · TENTH-MAN</text>
+<text x="788" y="388" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#1b2540">steel-man dissent</text>
+</g>
+<g font-family="JetBrains Mono, monospace" font-size="10" fill="#7c8293" letter-spacing="1">
+<text x="80" y="615">MDS-1 →</text>
+<text x="600" y="34" text-anchor="middle">↑ MDS-2</text>
+</g>
+        </svg>
+        <div class="map-legend"><span class="legend-dot" style="background: var(--midnight-navy);"></span>Anthropic &nbsp; <span class="legend-dot" style="background: #1b8c5a;"></span>OpenAI &nbsp; <span class="legend-dot legend-tenth"></span>Tenth-man (blind)</div>
+      </div>
+
+      <div class="map-foot">
+        <div class="cell">
+          <div class="lbl">Tenth · d</div>
+          <div class="val">0.152<span class="badge">tenth</span></div>
+          <div class="sub">forced to disagree</div>
+        </div>
+        <div class="cell">
+          <div class="lbl">Closest</div>
+          <div class="val">0.063</div>
+          <div class="sub">first-principles</div>
+        </div>
+        <div class="cell">
+          <div class="lbl">Most divergent (of the 9)</div>
+          <div class="val">0.141</div>
+          <div class="sub">radical-optimist</div>
+        </div>
+        <div class="cell">
+          <div class="lbl">Internal spread</div>
+          <div class="val">0.031</div>
+          <div class="sub">&sigma; across the 9 frames</div>
+        </div>
+      </div>
+    </section>
+
+    <article class="consensus-card" id="consensus">
+      <header class="consensus-top">
+        <div>
+          <div class="consensus-tag"><span class="d"></span>The consensus of the 9 · ALIGNED · FRAGILE</div>
+          <p class="consensus-lead">What the nine agree on, in one line:</p>
+          <h3>Take the offer — but do your due diligence on founders and vesting before you sign</h3>
+        </div>
+        <div class="consensus-d">
+          <b>0.141</b>
+          max · vs centroid
+        </div>
+      </header>
+      <div class="howto"><div><span class="howto-label">What you're seeing</span><p class="howto-text">Phase 5 · the 9 advisors' synthesis — where they converge, where they tension.</p></div><div><span class="howto-label">How to read it</span><p class="howto-text">Not a verdict — the base the Tenth Man attacks. Green marks = conclusions (what to believe). Cyan marks = actions (what to do). Toggle bottom-left to hide both.</p></div></div>
+      <div class="consensus-body">
+        <h3>(1) Where the nine agree</h3>
+        <p>The nine converge on a conditional yes. <mark class="tk-c">The salary premium — 30% — is real and immediate and justifies the move <strong>on its own terms, independent of the equity</strong></mark>. Eight years at senior PM level in a stable company carries real risk: skills plateau, relevance decay, and limited upside. The startup offers genuine growth — a VP title, executive exposure, and a compressed learning curve that the current path cannot replicate in the same timeframe.</p>
+        <p>There is also consensus that <mark class="tk-a"><strong>the equity should be treated as a free option, not a primary motivator</strong></mark>. 0.8% pre-dilution in a Series A logistics startup is not nothing — but it is probabilistic. The salary and title are the actual compensation; equity is the asymmetric upside that makes the risk worth taking, not the reason to take it.</p>
+        <h3>(2) Internal tension</h3>
+        <p>The main fault line is <strong>timing</strong>. The systemic, ethical, and pre-mortem frames all flag the newborn period as a compounding risk factor: VP roles at early-stage startups carry unpredictable demands, and the first year of a child's life is already high-cognitive-load for both parents. Several frames note that performing below your capability in the first 90 days of a VP role — because you're running on fragmented sleep — can set a trajectory that's hard to recover from.</p>
+        <p>A secondary tension exists around <strong>the 2-week deadline</strong>. The historical and ethical frames both treat this as a yellow flag: well-run companies with genuine openings don't typically collapse offers in 14 days. Founders who impose artificial urgency on executive candidates may apply similar pressure internally.</p>
+        <h3>(3) Net lean</h3>
+        <p><mark class="tk-c">Net lean: take the offer, but treat the negotiation as a final due-diligence step.</mark> <mark class="tk-a"><strong>Before signing: (1) have one honest conversation with the founders about realistic work expectations during your first 90 days</strong> — not as a test, but to calibrate; (2) <strong>confirm the vesting cliff terms</strong> in writing and understand what happens to unvested equity if the company is acquired in year 1; (3) <strong>ask for 3 weeks, not 2</strong>, and note how they respond — a good founding team grants the extension without friction.</mark></p>
+        <p>If all three checks pass, the consensus says go. The salary makes the math work. The title opens a career trajectory. The equity is a reasonable bet on your own judgment about the market and the team.</p>
+      </div>
+    </article>
+
+    <article class="tenth-card" id="tenth">
+      <header class="tenth-top">
+        <div>
+          <div class="tenth-tag"><span class="d"></span>Tenth Man · forced dissenter · method: steel-man</div>
+          <p class="tenth-lead">The strongest argument of the forced dissenter against the nine:</p>
+          <h3>Why the nine <em>might be wrong</em></h3>
+        </div>
+        <div class="tenth-d-stat">
+          <b>0.152</b>
+          distance · centroid
+        </div>
+      </header>
+      <div class="howto" style="background:rgba(208,241,0,0.08);border-color:rgba(208,241,0,0.25);"><div><span class="howto-label" style="color:rgba(208,241,0,0.7);">What you're seeing</span><p class="howto-text">Phase 5a · the raw dissent. Opus 4.7 reasoning WITHOUT seeing the 9 — anticipates consensus and steel-mans against it.</p></div><div><span class="howto-label" style="color:rgba(208,241,0,0.7);">How to read it</span><p class="howto-text">4 sections: facts accepted · where the consensus fails · the question behind the question · concrete failure modes. If the cross-lab card above discards much of this, it was Opus bias, not real signal.</p></div></div>
+
+      <div class="tenth-body">
+        <h3>Facts I accept</h3>
+        <p>I accept the stated facts: 8 years as senior PM at a stable B2B SaaS company; Series A logistics startup, 40 people, $12M raised, 18-month runway; VP of Product offer with 30% salary increase, 0.8% equity on a 4-year vest with a 1-year cliff; 2-week deadline; newborn at home, partner on parental leave. I also accept that the current job carries real stagnation risk and that a VP title represents genuine career progression. I anticipate the consensus of the 9 will converge on something like: <strong>take the offer because the salary increase is real, the title is a step up, the equity is asymmetric upside, and 8 years at one level is a risk in itself</strong>. That consensus is coherent. Here is where it fails.</p>
+
+        <h3>Where the consensus fails</h3>
+        <p><mark class="tk-c">The consensus is making two quiet errors simultaneously: it is <strong>treating the 2-week deadline as a constraint to work within</strong>, and it is <strong>discounting the newborn timing as a personal issue rather than a professional one</strong>. Both are structural mistakes, not just cautions.</mark></p>
+        <p>On the deadline: a 2-week exploding offer for a VP of Product at a 40-person Series A startup is not a market norm. Recruiting at the executive level typically involves weeks of mutual diligence. A founder who sets a 14-day ultimatum on a VP hire is either running a competitive process they haven't disclosed (in which case you have less information than you think), or applying pressure tactics that will reappear once you're inside. Neither scenario is neutral information. The consensus treats this as a negotiating detail; the dissenter treats it as a signal about operating culture.</p>
+        <p>On timing: the consensus will note the newborn risk but fold it into "personal circumstances." <mark class="tk-c">That framing is wrong. The first 90 days in a VP role at an early-stage startup is one of the highest-stakes professional periods you can enter — you are setting your authority, your relationship with the founders, your roadmap, and your team's trust. <strong>Entering that window while running a significant sleep deficit and co-managing a high-demand family transition is not a personal inconvenience. It is a structural performance risk.</strong></mark> A VP who underdelivers in their first quarter for reasons outside the job rarely recovers their full credibility.</p>
+
+        <h3>The question behind the question</h3>
+        <p>The real question is not "should I take this specific job now?" but <strong>"should I make a VP move during the newborn period, or wait 12–18 months for a cleaner entry?"</strong> Reframed that way, the answer is less obvious. The logistics-tech VP market is not disappearing. Series A companies in this space will continue raising and hiring. If this specific company is worth joining, there is a reasonable probability that a similar or superior opportunity will exist in 18 months — when you have more leverage (the parenting intensity has reduced), more information (you'll know whether this startup has PMF), and a negotiating position that isn't manufactured urgency.</p>
+        <blockquote>The opportunity cost of waiting is not "this job." It is "a VP role 18 months from now." That is a much smaller cost than the consensus implies.</blockquote>
+        <p><mark class="tk-a">The conditions under which the dissenter is wrong: if the founding team is genuinely exceptional and unlikely to hire a VP of Product for another 2 years; if the logistics-tech market has a short window where early VP credentials compound significantly; if your current company has a specific near-term risk (acquisition, layoffs) that makes the status quo less stable than stated. <strong>If none of these conditions hold, the dissenter wins.</strong></mark></p>
+
+        <h4>§ 4 · Consensus failure modes</h4>
+        <div class="modes">
+          <div class="mode">
+            <div class="ord">§ 01</div>
+            <h5>Underperformance in the credibility window</h5>
+            <p>VP authority is established in the first 60–90 days. Sleep deprivation + high stakes = higher error rate, slower synthesis, and reactive rather than strategic decision-making. A single misread of product direction in Q1 can define how founders and team see you for years.</p>
+          </div>
+          <div class="mode">
+            <div class="ord">§ 02</div>
+            <h5>Deadline as culture signal</h5>
+            <p>Founders who apply 2-week pressure on executive hires often apply similar urgency internally. If the operating cadence is "decide fast under pressure," and you're already cognitively taxed from parenting, the compound effect on judgment quality is non-trivial.</p>
+          </div>
+          <div class="mode">
+            <div class="ord">§ 03</div>
+            <h5>Equity cliff loss on early exit</h5>
+            <p>If the role underdelivers in either direction — you leave, or they restructure — before the 1-year cliff, the 0.8% equity goes to zero. You will have taken the performance risk of a startup VP role with the downside of a salaried employee who quit early.</p>
+          </div>
+        </div>
+      </div>
+      <footer class="tenth-foot">
+        <span>Generated under constraint · <b>steel-man mandatory</b></span>
+        <span>embed <b>openai/text-embedding-3-large</b> · ~USD 1.18</span>
+      </footer>
+    </article>
+
+    <article class="informed-card" id="informed">
+      <header class="informed-top">
+        <div class="informed-tag">cross-lab</div>
+        <h3>Refined dissent (cross-lab)</h3>
+        <p class="informed-sub">gpt-5 audits Opus's blind dissent against the 9 frames.</p>
+      </header>
+      <div class="howto"><div><span class="howto-label">What you're seeing</span><p class="howto-text">Phase 5b · gpt-5 (different lab) audits the blind dissent against the 9 real advisors.</p></div><div><span class="howto-label">How to read it</span><p class="howto-text">What holds (survives contact with the 9) · What's revised (directionally right, refined) · What's discarded (Opus bias, not insight).</p></div></div>
+      <div class="informed-body">
+        <p><mark class="tk-c">The timing argument is the strongest element of the dissent and survives contact with the 9. <strong>Entering a VP role in the first year of a child's life is a structural performance risk, not a personal one</strong></mark> — this is undersold by the consensus, which treats it as a caution rather than a variable that materially affects the probability of success in the role. The first-90-days credibility window is real at any company; at a 40-person Series A it is amplified because the team is small enough that the VP's early output is directly visible to everyone.</p>
+        <p>The <strong>deadline-as-culture-signal</strong> argument also holds, in a refined form. A 2-week exploding offer for an executive hire is not a norm; it warrants a direct conversation with the founders, not just a negotiating tactic. <mark class="tk-a"><strong>Ask for 3 weeks explicitly and frame it as "I take this decision seriously, and I want to do it right." The response tells you something real about how the founders operate under time pressure.</strong></mark></p>
+        <div class="informed-grid">
+          <div class="informed-col">
+            <div class="ord">§ 01</div>
+            <h5>What holds</h5>
+            <ul class="informed-list holds">
+              <li>The newborn timing is a structural performance risk, not just a personal inconvenience — it affects VP credibility-window execution.</li>
+              <li>The 2-week deadline is anomalous for executive hiring and warrants investigation, not just negotiation.</li>
+              <li>The real alternative is not "no VP role ever" but "a similar role in 18 months with better information and lower cognitive load."</li>
+              <li>Equity cliff risk on early exit is real and asymmetrically bad if the role fails in year 1.</li>
+            </ul>
+          </div>
+          <div class="informed-col">
+            <div class="ord">§ 02</div>
+            <h5>What's revised</h5>
+            <ul class="informed-list revised">
+              <li>The dissent overstates the market's replaceability of this specific opportunity — some founding teams are genuinely rare, and "wait 18 months" carries its own career cost if this team executes.</li>
+              <li>The sleep-deprivation argument is real but not disqualifying — many excellent executives have made major moves with young children. The mitigation is to negotiate explicit expectations, not to defer.</li>
+              <li>The 2-week deadline may reflect investor pressure or a competitive process, not founder character — it warrants asking, not assuming.</li>
+            </ul>
+          </div>
+          <div class="informed-col">
+            <div class="ord">§ 03</div>
+            <h5>What's discarded</h5>
+            <ul class="informed-list discarded">
+              <li>The framing that waiting is strictly better — current job carries real stagnation risk that compounds with time.</li>
+              <li>The implied suggestion that no VP move should happen during year 1 of parenting — too absolute; context and support structures matter.</li>
+              <li>Treating the 18-month alternative as equivalent in upside — this specific team and timing may not recur.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="section">
+    <div class="sec-head">
+      <div class="l">
+        <div class="sec-eyebrow"><span class="n">02</span>Cognitive frames · 9 voices</div>
+        <h2>The nine, ordered by <em>distance to centroid</em></h2>
+        <p class="sub">Each frame brings a lens: empirical, systemic, historical, analogical. The closer to the centroid, the more it represents the consensus. The farther, the more it reasons alone.</p>
+      </div>
+    </div>
+
+    <section class="frames">
+      <div class="frames-head">
+        <span>Idx</span>
+        <span>Frame</span>
+        <span>Verdict</span>
+        <span>Distance</span>
+        <span style="text-align:right;">d</span>
+        <span></span>
+      </div>
+
+    <article class="frame open" data-frame="first-principles">
+      <div class="frame-row">
+        <span class="f-idx">#03</span>
+        <span class="f-name">
+          <span class="f-name-text">first-principles <span class="f-mark closest">closest</span></span>
+          <span class="frame-model-chip frame-model-openai">openai/gpt-5</span>
+        </span>
+        <span class="f-lean">The salary is certain. The equity is probabilistic. The title is leverage. Take it — but validate the founders first.</span>
+        <span class="f-bar"><i style="width:45%"></i></span>
+        <span class="f-d">d <b>0.063</b></span>
+        <span class="f-caret">›</span>
+      </div>
+      <div class="f-body">
+        <h4>Core atoms</h4>
+        <p>Strip away the narrative — "exciting opportunity," "Series A," "logistics tech" — and reduce to what is physically, financially, and logically true.</p>
+        <p><strong>Atom 1: you trade time for money and growth.</strong> The new role offers 30% more money. That is immediate and certain. It also offers a VP title, which is a credential that changes the class of opportunities available to you permanently, not just while you hold it. Both have compounding value.</p>
+        <p><strong>Atom 2: the equity is a probability distribution, not a number.</strong> 0.8% pre-dilution at Series A, in a company with 18 months of runway, in a sector with a median exit well below unicorn territory, is not zero — but it is also not a retirement plan. The expected value depends on: probability of reaching Series B (roughly 35–50% for Series A in this vintage), dilution through future rounds (typically 40–60% by exit), and ultimate exit multiple. In a median scenario, this is a five-figure outcome. In a good scenario, six figures. In an exceptional scenario, more. <mark class="tk-c">Treat the equity as a call option on your own judgment about the team. If you believe in the founders and market, the option has real value. If you are uncertain on either, the option's value approaches the salary premium.</mark></p>
+        <p><strong>Atom 3: the first-principles question is not "is this a good startup?" but "do you have an edge in evaluating this startup?"</strong> You've talked to the founders. You've reviewed the product and market. If your assessment is "yes, I believe in this," that belief is information. If your assessment is "I don't know, the role seems good," that is a different decision with different expected value.</p>
+        <h4>Conclusion</h4>
+        <p><mark class="tk-a">Take the offer if and only if: (1) you have formed a genuine view on the founders and market, not just attraction to the role and salary; (2) the vesting cliff terms are confirmed in writing; (3) your partner is genuinely aligned, not just accepting. All three are necessary. None alone is sufficient.</mark></p>
+      </div>
+    </article>
+
+    <article class="frame" data-frame="empirical">
+      <div class="frame-row">
+        <span class="f-idx">#01</span>
+        <span class="f-name">
+          <span class="f-name-text">empirical</span>
+          <span class="frame-model-chip frame-model-openai">openai/gpt-5</span>
+        </span>
+        <span class="f-lean">Base rates favor caution — but the salary premium clears the hurdle independently of equity.</span>
+        <span class="f-bar"><i style="width:48%"></i></span>
+        <span class="f-d">d <b>0.068</b></span>
+        <span class="f-caret">›</span>
+      </div>
+      <div class="f-body">
+        <h4>Numbers I'm using as anchor</h4>
+        <p>— Series A to Series B conversion rate: approximately 35–45% across vintages; higher in logistics/supply-chain given post-pandemic infrastructure investment, but still sub-50% [industry-data].<br>
+        — VP of Product tenure at Series A companies: median 2.1 years; 30% exit before cliff [study].<br>
+        — Equity dilution from Series A to exit: typically 40–60% through B, C, and secondary rounds [industry-data]. At 0.8% pre-dilution, realistic post-dilution at exit: 0.35–0.48%.<br>
+        — Logistics-tech median exit (acquisition or IPO) in LATAM/emerging markets: $40–120M range for sub-100-person companies [assumption]. At 0.4%, that is $160k–$480k, pre-tax, at median.<br>
+        — 30% salary increase compounding over 4 years: if base was $100k, the delta is ~$30k/year, or $120k in salary premium before any equity event [calculation].</p>
+        <h4>What the data imply</h4>
+        <p>The salary premium alone, at $30k/year over 4 years, yields $120k in incremental compensation even if the equity goes to zero. That is a positive expected-value trade on the financial dimension alone, before the title and growth components. <mark class="tk-c">The equity is not the reason to take the job — it is the reason the math tilts further in your favor if the company succeeds.</mark></p>
+        <p>The base rate risk is real: 55–65% of Series A companies do not reach Series B. But this is an average. The question is where this specific company sits in the distribution — and you have more information than the base rate does. Your diligence on the team, market, and product is the alpha over the population average.</p>
+        <h4>Conclusion</h4>
+        <p><mark class="tk-a">Salary premium clears the financial hurdle independently. Take the offer. Negotiate the deadline extension as a signal-gathering mechanism. Do not overweight equity in your internal calculus — it is upside, not compensation.</mark></p>
+      </div>
+    </article>
+
+    <article class="frame" data-frame="soft-contrarian">
+      <div class="frame-row">
+        <span class="f-idx">#07</span>
+        <span class="f-name">
+          <span class="f-name-text">soft-contrarian</span>
+          <span class="frame-model-chip frame-model-openai">openai/gpt-5</span>
+        </span>
+        <span class="f-lean">The framing of "stability" in your current role is hiding a slower, quieter risk.</span>
+        <span class="f-bar"><i style="width:55%"></i></span>
+        <span class="f-d">d <b>0.077</b></span>
+        <span class="f-caret">›</span>
+      </div>
+      <div class="f-body">
+        <h4>Unexamined assumption</h4>
+        <p>The question is framed as: stable job (safe) vs. startup VP (risky). That framing is carrying a hidden assumption — that the current job is the low-risk option.</p>
+        <h4>Surgical reframe</h4>
+        <p>Eight years as a senior PM at a single company is not stability — it is <em>familiar risk</em>. The risks are slower and harder to see: skills plateau, market relevance decay, hiring market stigma ("why did they stay so long?"), and concentration of professional identity in one employer's fate. If that company gets acquired, downsizes, or pivots away from your domain, you are a mid-career PM with an 8-year single-employer resume competing against PMs who have shipped at multiple companies and contexts.</p>
+        <p><mark class="tk-c">The startup is risky in a visible, legible way. The current job is risky in an invisible, compounding way. The invisible risk is not smaller — it is just harder to assign a probability to.</mark></p>
+        <h4>What the reframe makes visible</h4>
+        <p>— A VP title at a startup, even if the company fails in 3 years, permanently changes your trajectory. You become a "been a VP" candidate, which opens a category of roles unavailable to you now.<br>
+        — The newborn-timing concern cuts both ways: the current job's "stability" is also about to be tested by parental demands. Neither role is exempt from that constraint. The startup at least offers flexibility (remote-first, no commute) that a traditional office environment doesn't.</p>
+        <h4>Caveat</h4>
+        <p>This reframe can be used to rationalize almost any jump. The test is: <mark class="tk-a">if the startup fails in 18 months and you have to job-search again, will you be better or worse positioned than you are today? If the answer is "better, because of the VP title and the learning," the reframe is valid. If the answer is "worse, because I'll have a short tenure and a failed company on my resume," the reframe is doing too much work.</mark></p>
+      </div>
+    </article>
+
+    <article class="frame" data-frame="historical">
+      <div class="frame-row">
+        <span class="f-idx">#02</span>
+        <span class="f-name">
+          <span class="f-name-text">historical</span>
+          <span class="frame-model-chip frame-model-anthropic">anthropic/opus-4-7</span>
+        </span>
+        <span class="f-lean">The pattern is: moves made under artificial time pressure are more often regretted than celebrated.</span>
+        <span class="f-bar"><i style="width:58%"></i></span>
+        <span class="f-d">d <b>0.082</b></span>
+        <span class="f-caret">›</span>
+      </div>
+      <div class="f-body">
+        <h4>Precedents</h4>
+        <p><strong>1. Mid-career VP moves at Series A (documented patterns, 2015–2025).</strong> VP of Product roles at early-stage startups have a bimodal outcome distribution: either they become defining career moments, or they end in less than 18 months with the company either pivoting away from the original product thesis or the VP and founders misaligning on direction. The differentiating variable in retrospective accounts is consistently <em>founder quality and alignment on product vision</em>, not market size or salary. Companies with strong founders who have shipped before, have a clear hypothesis, and give the VP real authority tend to generate the positive outcomes. [industry-data]</p>
+        <p><strong>2. Exploding offers in executive hiring.</strong> A consistent pattern in talent markets: 2-week exploding offers for senior individual contributors are common; for C-suite and VP-level hires, they are anomalous. The historical pattern in strong hiring markets is that executive candidates are given 3–4 weeks minimum because the mutual diligence benefits the employer as much as the candidate. When exploding deadlines appear at VP level, the documented reasons include: (a) competitive process the company doesn't want to reveal, (b) internal pressure from investors or board to close quickly, or (c) a founder operating style that equates speed with decisiveness. None of these is inherently disqualifying, but all warrant a direct question. [industry-data]</p>
+        <p><strong>3. Career moves in the first year of parenting.</strong> Surveyed retrospectively, professionals who made major career transitions (new employer, significant role change) during the first 12 months of their first child's life report higher-than-baseline regret rates at 3 years, primarily citing the inability to be fully present in either domain. The caveat: many also report that the move ultimately worked out — the regret was about the process, not the outcome. [study, CI wide]</p>
+        <h4>Pattern</h4>
+        <p>What works: VP moves made with at least 4 weeks of diligence, clear founder alignment on product authority, and a genuine support structure for the personal transition. What fails repeatedly: moves made under time pressure where the candidate substituted the urgency of the deadline for the diligence of the decision.</p>
+        <h4>Conclusion</h4>
+        <p><mark class="tk-a">Ask for 3 weeks. Use that time to have one honest conversation with each founder about their product vision, their last hire that didn't work out, and what they expect from a VP in the first 90 days. Those conversations are more predictive than the salary number or the equity percentage.</mark> <mark class="tk-c">If they grant the extension, that's a positive signal. If they don't, treat it as the most important data point you have about what working there will feel like.</mark></p>
+      </div>
+    </article>
+
+    <article class="frame" data-frame="analogical">
+      <div class="frame-row">
+        <span class="f-idx">#04</span>
+        <span class="f-name">
+          <span class="f-name-text">analogical</span>
+          <span class="frame-model-chip frame-model-anthropic">anthropic/sonnet-4-6</span>
+        </span>
+        <span class="f-lean">Career moves are portfolio rebalancing. The bet is justified — if you have domain conviction.</span>
+        <span class="f-bar"><i style="width:60%"></i></span>
+        <span class="f-d">d <b>0.085</b></span>
+        <span class="f-caret">›</span>
+      </div>
+      <div class="f-body">
+        <h4>Analogy 1: Portfolio rebalancing</h4>
+        <p>Your current position is a diversified portfolio: stable income, optionality, predictable growth, low volatility. The startup offer is a concentrated bet: higher expected return, higher variance, correlated to the specific outcome of one company.</p>
+        <p>In finance, concentration bets are justified when you have an <em>edge</em> over the market. Your edge here is: 8 years of product experience in B2B SaaS, direct access to the founders and their thinking, and your own read on the logistics-tech market. The population of investors betting on this startup (Series A VCs) has general pattern-matching; you have domain-specific signal. <mark class="tk-c">If your conviction on this founding team and market is higher than average — meaning you've done the work and not just felt the pull of a flattering offer — the concentration bet is rational.</mark></p>
+        <h4>Analogy 2: Surgeon entering the operating room</h4>
+        <p>A surgeon who begins an operation does not stop halfway through. The medical community has a strong norm: if you are not in the right state to begin, don't begin — but once you begin, you commit. The equivalent here: <mark class="tk-a"><strong>if you take this role, take it fully.</strong> The worst outcome is joining with ambivalence and underinvesting because you're still second-guessing the decision. Decide before you sign, not after.</mark></p>
+        <h4>Where the analogies break</h4>
+        <p>Portfolio theory assumes you can hold the position for the full investment horizon. You cannot fully control your tenure at a startup — founders can restructure, pivot, or run out of runway. The analogy breaks where your "position" depends on external variables you cannot hedge.</p>
+      </div>
+    </article>
+
+    <article class="frame" data-frame="ethical">
+      <div class="frame-row">
+        <span class="f-idx">#06</span>
+        <span class="f-name">
+          <span class="f-name-text">ethical</span>
+          <span class="frame-model-chip frame-model-anthropic">anthropic/sonnet-4-6</span>
+        </span>
+        <span class="f-lean">The real ethical tension is with your partner, not your employer. Resolve that one first.</span>
+        <span class="f-bar"><i style="width:70%"></i></span>
+        <span class="f-d">d <b>0.099</b></span>
+        <span class="f-caret">›</span>
+      </div>
+      <div class="f-body">
+        <h4>Stakeholders and what is owed to them</h4>
+        <p><strong>Your partner:</strong> On parental leave, co-managing a 3-month-old, with reduced income and reduced flexibility. A VP role at a startup carries unpredictable hours and significant cognitive load. The implicit contract of the parental period — that both parents are available at reduced professional intensity — is being altered unilaterally if you take this. That is not a dealbreaker, but it requires explicit renegotiation, not assumption. <mark class="tk-c">The ethical obligation here is not to ask for permission but to be honest about what you expect the workload to look like and give your partner a genuine choice in the decision.</mark></p>
+        <p><strong>Your current team:</strong> 8 years of relationships. Leaving mid-cycle is normal professional behavior and carries no ethical weight on its own. The relevant question is whether there is a specific commitment — a project, a direct report who relies on you — where departure in 2 weeks creates real harm. If yes, negotiate a longer notice period. If no, this obligation is discharged with a professional transition.</p>
+        <p><strong>The new team:</strong> You owe them your full capability in the role. If you have reason to believe you cannot bring that — because of personal context, because of ambivalence about the decision — entering the role is the problem, not the exit conditions.</p>
+        <h4>Conclusion</h4>
+        <p><mark class="tk-a">Before evaluating the job on its professional merits: have the explicit conversation with your partner about realistic expectations for your availability in the first 6 months. Not "I'll try to be home by 7" — but "this role will probably look like X hours per week and here is what I need from you to make it work, and here is what I'm offering in return." That conversation is the real due diligence.</mark></p>
+      </div>
+    </article>
+
+    <article class="frame" data-frame="pre-mortem">
+      <div class="frame-row">
+        <span class="f-idx">#09</span>
+        <span class="f-name">
+          <span class="f-name-text">pre-mortem</span>
+          <span class="frame-model-chip frame-model-openai">openai/gpt-5</span>
+        </span>
+        <span class="f-lean">12 months in, you're gone. The most common reason: founders and VP misaligned on product authority.</span>
+        <span class="f-bar"><i style="width:74%"></i></span>
+        <span class="f-d">d <b>0.104</b></span>
+        <span class="f-caret">›</span>
+      </div>
+      <div class="f-body">
+        <h4>Failure narrative at T+12m</h4>
+        <p>You joined 11 months ago. You're about to leave before your equity cliff. The most common scenarios, ranked by base rate:</p>
+        <p><strong>(a) Founder-VP misalignment on product authority.</strong> The founders said "VP of Product" but meant "senior PM who executes on our vision." You expected strategic input on roadmap; they expected implementation fidelity. This is the most common VP of Product failure mode at Series A. It is invisible in the offer stage and surfaces between months 3 and 6.</p>
+        <p><strong>(b) Company didn't reach PMF.</strong> The product thesis was wrong or the market moved. The company pivoted, your role dissolved or significantly changed, and the version of the job you signed up for no longer exists. This is a market/timing risk, not a personal failure, but the outcome is the same.</p>
+        <p><strong>(c) Personal capacity failure.</strong> The role demanded more than you could give in year 1 of parenting. You underdelivered relative to the founders' expectations. The trust eroded. The relationship broke before you had a chance to demonstrate your real capability.</p>
+        <p><strong>(d) Runway ran out.</strong> 18-month runway means 18 months of buffer at current burn. If Series B doesn't close in 12–14 months, the company starts making cuts. VP roles go early.</p>
+        <h4>Early warning signals</h4>
+        <p>— Founders making product decisions without you in the first 60 days.<br>
+        — No clear definition of what "success looks like for you in 6 months" before you sign.<br>
+        — Equity cliff terms that are not in writing before your start date.<br>
+        — Partner reporting sustained unsustainability in month 2.</p>
+        <h4>What would have changed the outcome</h4>
+        <p><mark class="tk-a">Before signing: ask the founders to describe the last major product decision they made and how it was made. Ask them what they wish their previous VP had done differently. Ask who makes the final call on roadmap priorities when there is disagreement. The answers to those three questions predict founder-VP alignment better than any other signal available at the offer stage.</mark></p>
+      </div>
+    </article>
+
+    <article class="frame" data-frame="systemic">
+      <div class="frame-row">
+        <span class="f-idx">#05</span>
+        <span class="f-name">
+          <span class="f-name-text">systemic</span>
+          <span class="frame-model-chip frame-model-openai">openai/gpt-5</span>
+        </span>
+        <span class="f-lean">The timing is the variable. Two high-demand systems activating simultaneously have non-linear effects.</span>
+        <span class="f-bar"><i style="width:78%"></i></span>
+        <span class="f-d">d <b>0.110</b></span>
+        <span class="f-caret">›</span>
+      </div>
+      <div class="f-body">
+        <h4>Loops at play</h4>
+        <p><strong>R1 (performance → credibility → authority):</strong> Early VP success at a startup creates compounding authority — founders delegate more, team trusts more, roadmap influence grows. This reinforcing loop makes the first 90 days disproportionately high-leverage.</p>
+        <p><strong>B1 (cognitive load → decision quality → performance):</strong> Sleep deprivation and sustained context-switching (infant needs + VP demands) create a balancing loop that limits decision quality. The higher the cognitive load, the lower the signal-to-noise on both fronts simultaneously.</p>
+        <p><strong>B2 (partner load → relationship tension → further load):</strong> If your partner absorbs additional childcare load to enable your VP ramp, and that load is unsustainable, relationship tension emerges as a second-order effect that further reduces your cognitive capacity at work.</p>
+        <h4>Second-order effects</h4>
+        <p>Two reinforcing loops (career upside) and two balancing loops (cognitive and relational constraint) are activating at the same time. <mark class="tk-c">This is not a linear risk model — the constraint loops can overwhelm the reinforcing loops if the timing is particularly dense. The question is not "can this work in theory" but "what are the specific support structures that make it work in practice."</mark></p>
+        <h4>Slow variables</h4>
+        <p>— Partner's own professional trajectory and recovery from parental leave.<br>
+        — Childcare infrastructure: night coverage, nanny, family support network.<br>
+        — Company's actual culture vs. stated culture on workload expectations.<br>
+        — Your own recovery rate from disrupted sleep (highly individual).</p>
+        <h4>Conclusion</h4>
+        <p><mark class="tk-a">Map the support structures before signing, not after. Specifically: what is the concrete childcare plan for your first 90 days? Who handles nights? What is the backup? If that plan is solid, the systemic risk is manageable. If it is "we'll figure it out," the B1 and B2 loops become the dominant variables in the system.</mark></p>
+      </div>
+    </article>
+
+    <article class="frame" data-frame="radical-optimist">
+      <div class="frame-row">
+        <span class="f-idx">#08</span>
+        <span class="f-name">
+          <span class="f-name-text">radical-optimist <span class="f-mark farthest">farthest</span></span>
+          <span class="frame-model-chip frame-model-openai">openai/gpt-5</span>
+        </span>
+        <span class="f-lean">If this company succeeds, everything compounds: credential, equity, network, and the next role.</span>
+        <span class="f-bar"><i style="width:100%"></i></span>
+        <span class="f-d">d <b>0.141</b></span>
+        <span class="f-caret">›</span>
+      </div>
+      <div class="f-body">
+        <h4>10× upside path</h4>
+        <p>Acknowledged premises: 8 years as senior PM, VP offer with 30% salary increase and 0.8% equity, newborn at home, 2-week deadline.</p>
+        <p>The 10× scenario: the logistics-tech startup finds product-market fit in year 1, closes Series B in 18 months, and reaches acquisition or IPO in years 4–6. Your 0.8% equity, post-dilution at roughly 0.4%, on a $300M exit = $1.2M pre-tax. But the equity is the least of it. <strong>The credential is what compounds.</strong> A VP of Product title at a Series A company that reached Series B and beyond is a different category of candidate. You become hireable as VP at Series B/C companies, as CPO at Series A, and as an advisor or angel in the ecosystem. Each of those channels compounds further.</p>
+        <h4>Unlock conditions</h4>
+        <p>— The founders have shipped before and have a genuine product thesis, not just a deck.<br>
+        — The logistics-tech market has a real wedge this company is exploiting, not a crowded space where they're the 12th entrant.<br>
+        — You have genuine conviction on both, based on work you've done, not based on how flattering the offer feels.<br>
+        — Your partner is fully aligned and you have real support infrastructure for the newborn period.</p>
+        <h4>Adjacent opportunities unlocked</h4>
+        <p>Even in a company-failed scenario: a VP of Product title at a well-regarded Series A startup that failed gracefully (product didn't work, not misconduct) is still a significant credential upgrade. <mark class="tk-c">The worst realistic outcome — company fails at 18 months before your cliff — leaves you in a better hiring position than you are today, with a better story to tell, at a 30% salary premium for the period you were there.</mark></p>
+        <p><mark class="tk-a">The asymmetry here is real and it runs in one direction: the upside scenarios are life-changing; the downside scenarios are professionally recoverable. Take the bet.</mark></p>
+      </div>
+    </article>
+
+    </section>
+  </section>
+
+  <footer class="colophon">
+    <div>
+      <b>Henge v0.6</b><br>
+      classical MDS · cosine<br>
+      embed · openai/text-embedding-3-large
+    </div>
+    <div class="center">
+      «Nine lean yes — the tenth demands you earn it with diligence.»
+    </div>
+    <div class="right">
+      <b>~USD 1.18</b><br>
+      2026·05·05 09:14 CLT<br>
+      report&nbsp;<b>#0047</b>
+    </div>
+  </footer>
+
+  </div>
+</main>
+
+<aside class="guide" id="guide" aria-label="How to read this report">
+  <div class="guide-panel" role="dialog" aria-labelledby="guide-title">
+    <div class="guide-panel-body">
+      <p class="kicker">Reading guide</p>
+      <h3 id="guide-title">How to approach <em>this report</em></h3>
+      <ol>
+        <li><b>Start with the consensus, not the tenth.</b> It's what the 9 advisors believe in common — the anchor of the decision.</li>
+        <li><b>The 9 advisors are not votes.</b> They are different lenses on the same problem. Read the differences between them, not just the majority.</li>
+        <li><b>The tenth is audit, not recommendation.</b> Its role is to attack the consensus to test whether it holds. Sounding convincing is its job, not a signal that it's right.</li>
+        <li><b>Isolate the tenth's attacks, not its verdict.</b> Keep the questions it opens and evaluate each one against your reality.</li>
+        <li><b>Watch the metrics.</b> High fragility + high tenth distance = weak consensus, dissent weighs more. Low fragility = robust consensus, dissent is rhetorical.</li>
+        <li><b>Apply the asymmetric test.</b> If the tenth names a risk you recognize as real in your life, add it even if you don't change sides.</li>
+        <li><b>You decide.</b> No advisor knows your full context. The report exposes tensions; the choice is yours.</li>
+        <li><b>Map points are colored by model family.</b> Blue = Anthropic, green = OpenAI. Divergence from a single family may be style, not real disagreement.</li>
+      </ol>
+    </div>
+    <div class="guide-panel-foot">
+      <p class="foot">The consensus protects against the obvious error. The tenth protects against the shared error. You need both lenses — and neither replaces your judgment.</p>
+      <button type="button" class="guide-close" onclick="document.getElementById('guide').classList.remove('open')">Close</button>
+    </div>
+  </div>
+  <button type="button" class="guide-toggle" onclick="document.getElementById('guide').classList.toggle('open')" aria-expanded="false">
+    <span class="marker"></span>
+    How to read this?
+  </button>
+</aside>
+
+<script>
+  document.querySelectorAll('.frame').forEach(f => {
+    f.addEventListener('click', () => f.classList.toggle('open'));
+  });
+  (function(){
+    var g = document.getElementById('guide');
+    var btn = g.querySelector('.guide-toggle');
+    btn.addEventListener('click', function(){
+      btn.setAttribute('aria-expanded', g.classList.contains('open') ? 'true' : 'false');
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && g.classList.contains('open')){
+        g.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  })();
+  (function(){
+    var btn = document.querySelector('.theme-toggle');
+    if (!btn) return;
+    btn.addEventListener('click', function(){
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('henge-theme', next); } catch (e) {}
+    });
+    if (window.matchMedia) {
+      var mq = window.matchMedia('(prefers-color-scheme: dark)');
+      var handler = function(e){
+        var stored = null;
+        try { stored = localStorage.getItem('henge-theme'); } catch(_){}
+        if (stored === 'light' || stored === 'dark') return;
+        document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+      };
+      if (mq.addEventListener) mq.addEventListener('change', handler);
+      else if (mq.addListener) mq.addListener(handler);
+    }
+  })();
+</script>
+</body>
+</html>
