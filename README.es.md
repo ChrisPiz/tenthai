@@ -7,20 +7,53 @@ obligatorio construido por *steel-manning*, expuesto como servidor MCP.
 
 ![Henge](docs/header-v2.jpg)
 
-Henge corre tu decisión a través de nueve lentes cognitivas en paralelo y
-luego obliga a un décimo asesor — el **Décimo Hombre** — a construir el
-caso *steel-man* más fuerte posible contra cualquier consenso al que lleguen
-los nueve. Persiste un registro JSON + un reporte HTML editorial en disco y
-expone un veredicto tri-estado guiado por el **Consensus Fragility Index
-(CFI)**.
+---
 
-**Reclamo (v0.6.0).** Dado un protocolo pre-registrado con `temperature=0`,
-la misma pregunta produce el mismo bin de CFI a través de las corridas,
-módulo el ruido numérico de la inicialización de MDS. v0.6 divide la
-corrida entre dos labs (Anthropic + OpenAI) por diseño, así las
-alucinaciones del sintetizador las atrapa el auditor en lugar de que se
-laven dentro del consenso. La validación contra calidad de decisión
-(benchmark Henge-50) sigue pendiente.
+## ¿Qué es Henge?
+
+Imagina que tenés una decisión importante. En vez de preguntarle a una sola persona, le preguntás a **nueve asesores** al mismo tiempo. Cada uno piensa distinto:
+
+- Uno mira los **números y la evidencia**
+- Otro busca **casos parecidos en el pasado**
+- Otro razona **desde cero, sin supuestos**
+- Otro busca **analogías de otros mundos** (biología, milicia, finanzas)
+- Otro mira el **sistema completo** y sus efectos en cadena
+- Otro pone los **dilemas éticos** sobre la mesa
+- Otro **lleva la contra** con buena fe
+- Otro busca el **mejor escenario posible** si todo sale 10× mejor
+- Otro imagina **cómo podría salir mal** en 12 meses
+
+Los nueve responden en paralelo y se mide qué tan de acuerdo están entre sí. Si coinciden mucho, hay consenso. Si se dispersan, la decisión es más frágil de lo que parece.
+
+### El décimo: el disidente obligatorio
+
+Hay un **décimo asesor obligado a estar en desacuerdo**, pero no por capricho. Su trabajo es construir el mejor argumento posible *en contra* del consenso, sin haber leído lo que dijeron los otros nueve. Razona por su cuenta, anticipa hacia dónde van a converger los demás, y ataca esa conclusión con el argumento más sólido que pueda construir.
+
+¿Por qué ciego? Porque si leyera primero a los nueve, terminaría criticando detalles. Al razonar en paralelo, su disenso es genuino: viene de otra dirección, no es una reacción.
+
+Esto se llama **steel-man**: atacar la versión más fuerte del argumento contrario, no la más débil. Lo opuesto a un hombre de paja.
+
+### El onceavo: el árbitro de otro laboratorio
+
+El décimo es un modelo de Anthropic. El **onceavo es un modelo de OpenAI** — otra empresa, otro entrenamiento, otra forma de pensar. Su trabajo es leer al décimo y separar su disenso en tres montones:
+
+- **Lo que se sostiene** → resistió el contraste con los nueve, es señal real
+- **Lo que se ajusta** → tenía razón en la dirección, pero hay que refinarlo
+- **Lo que se descarta** → era sesgo del propio modelo, no un hallazgo
+
+Es como tener un disidente brillante y, además, un editor de otra escuela que separa sus ideas valiosas de sus manías personales.
+
+### Antes de todo, un filtro
+
+Antes incluso de activar a los nueve, hay un **auditor que revisa la pregunta**. Evalúa tres cosas: ¿la decisión se puede deshacer? ¿qué tan urgente es? ¿está bien planteada? Si la pregunta está mal formulada, corta el proceso y propone reformularla — evita gastar ~USD 1.00/corrida en preguntas que no merecen la respuesta completa.
+
+### Por qué importa
+
+Una sola opinión, por buena que sea, tiene puntos ciegos. Nueve opiniones diversas reducen los puntos ciegos individuales, pero pueden compartir un **error común** (todos los expertos del mismo gremio tienden a equivocarse igual). El décimo está diseñado para atacar ese error común. Y el onceavo, al venir de otra "familia" de pensamiento, evita que el décimo simplemente reemplace un sesgo por otro.
+
+El resultado no es una respuesta única. Es un **mapa de tensiones**: dónde hay acuerdo sólido, dónde hay grietas, qué riesgos reales podrías estar pasando por alto. La decisión final sigue siendo tuya — pero la tomás con los ojos mucho más abiertos.
+
+---
 
 [Demo](https://chrispiz.github.io/Henge-MCP/demo.es.html) · [Paper](WHITEPAPER.md) ·
 [Limits](LIMITS.md) · [Methodology](METHODOLOGY.md) · [CFI spec](docs/cfi-spec.md) ·
@@ -33,7 +66,47 @@ laven dentro del consenso. La validación contra calidad de decisión
 
 ---
 
-## Qué hace
+## Quickstart · Claude Code (30s)
+
+Pegá este prompt en Claude Code y se auto-instala corriendo un script
+shell determinístico — sin que el LLM siga pasos, sin drift:
+
+````
+Install Henge from https://github.com/ChrisPiz/Henge-MCP. Idempotent flow:
+
+1. Clone shallow (or pull if already there):
+   git clone --single-branch --depth 1 https://github.com/ChrisPiz/Henge-MCP.git ~/Henge \
+     || (cd ~/Henge && git pull --ff-only)
+
+2. cd ~/Henge && cp -n .env.example .env
+
+3. Ask me for ANTHROPIC_API_KEY and OPENAI_API_KEY one at a time. When I paste each one, update the matching line in ~/Henge/.env in-place. Confirm only the LENGTH back to me ("got it, 108 chars") — never echo the value to the chat or any other tool.
+
+4. Run the setup script — it handles Python ≥3.11 (with a 15-minute pyenv install fallback if missing), the venv, the editable install, the cross-cwd sanity check, key validation, MCP registration for every host installed (Claude Code, Claude Desktop, Cursor), and the /decide slash command:
+   cd ~/Henge && ./setup
+
+5. When the script prints "✓ Henge installed.", tell me to fully quit Claude Code (close ALL terminals running `claude`) and reopen, then try `/decide should I take the new job?`.
+````
+
+Reiniciá Claude Code completamente cuando termine, y después probá:
+
+```
+/decide ¿debería aceptar el nuevo trabajo?
+```
+
+> **Nota:** el slash command `/decide` es **solo de Claude Code**. En
+> Claude Desktop y Cursor, las tools MCP no aparecen como slash commands
+> — invocás Henge escribiendo tu pregunta normalmente ("¿debería renunciar
+> para fundar una empresa?") y Claude levanta la tool `decide` desde su
+> descripción, o podés mencionarla explícitamente ("usá la tool decide
+> para analizar...").
+
+Para Claude Desktop, Cursor o cualquier otro host MCP, ver la
+[sección de Manual install en DEVELOPER.md](DEVELOPER.md#manual-install).
+
+---
+
+## Pipeline
 
 ```
 pregunta
@@ -195,46 +268,6 @@ embeddings al inicio, así una cuenta sin acceso falla ruidosamente al boot
 en lugar de 60s adentro de una llamada `/decide`. El schema sube a `0.6`;
 el lookup legacy `henge.pricing.total_cost` se mantiene para compatibilidad
 hacia atrás hasta v0.7.
-
----
-
-## Quickstart · Claude Code (30s)
-
-Pegá este prompt en Claude Code y se auto-instala corriendo un script
-shell determinístico — sin que el LLM siga pasos, sin drift:
-
-````
-Install Henge from https://github.com/ChrisPiz/Henge-MCP. Idempotent flow:
-
-1. Clone shallow (or pull if already there):
-   git clone --single-branch --depth 1 https://github.com/ChrisPiz/Henge-MCP.git ~/Henge \
-     || (cd ~/Henge && git pull --ff-only)
-
-2. cd ~/Henge && cp -n .env.example .env
-
-3. Ask me for ANTHROPIC_API_KEY and OPENAI_API_KEY one at a time. When I paste each one, update the matching line in ~/Henge/.env in-place. Confirm only the LENGTH back to me ("got it, 108 chars") — never echo the value to the chat or any other tool.
-
-4. Run the setup script — it handles Python ≥3.11 (with a 15-minute pyenv install fallback if missing), the venv, the editable install, the cross-cwd sanity check, key validation, MCP registration for every host installed (Claude Code, Claude Desktop, Cursor), and the /decide slash command:
-   cd ~/Henge && ./setup
-
-5. When the script prints "✓ Henge installed.", tell me to fully quit Claude Code (close ALL terminals running `claude`) and reopen, then try `/decide should I take the new job?`.
-````
-
-Reiniciá Claude Code completamente cuando termine, y después probá:
-
-```
-/decide ¿debería aceptar el nuevo trabajo?
-```
-
-> **Nota:** el slash command `/decide` es **solo de Claude Code**. En
-> Claude Desktop y Cursor, las tools MCP no aparecen como slash commands
-> — invocás Henge escribiendo tu pregunta normalmente ("¿debería renunciar
-> para fundar una empresa?") y Claude levanta la tool `decide` desde su
-> descripción, o podés mencionarla explícitamente ("usá la tool decide
-> para analizar...").
-
-Para Claude Desktop, Cursor o cualquier otro host MCP, ver la
-[sección de Manual install en DEVELOPER.md](DEVELOPER.md#manual-install).
 
 ---
 
