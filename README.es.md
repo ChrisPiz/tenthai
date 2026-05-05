@@ -108,56 +108,7 @@ Para Claude Desktop, Cursor o cualquier otro host MCP, ver la
 
 ## Pipeline
 
-```
-pregunta
-   ↓
-┌─ fase 1 · scoping ─────────────────────────────────────┐
-│ preguntas base       (Haiku 4.5)                       │
-│ barrido adversarial  (gpt-5, cross-lab)                │
-│ → 4–7 preguntas, 2–4 desafiando supuestos ocultos      │
-│   dentro de la pregunta misma                          │
-└────────────────────────────────────────────────────────┘
-   ↓ respuestas del usuario
-┌─ fase 2 · meta-frame ──────────────────────────────────┐
-│ clasificar (gpt-5, cross-lab)                          │
-│ → decision_class · urgency · question_quality          │
-│   · meta_recommendation                                │
-│ si proxy / exploración / urgencia falsa:               │
-│   corto-circuito con suggested_reformulation           │
-│   (ahorra ~USD 1.00/corrida)                           │
-└────────────────────────────────────────────────────────┘
-   ↓
-┌─ fase 3 · contexto canónico ───────────────────────────┐
-│ canonicaliza respuestas  (Opus 4.7)                    │
-│ → resumen ejecutivo apretado + inconsistencias         │
-│   marcadas, mostrado a los 9 asesores                  │
-└────────────────────────────────────────────────────────┘
-   ↓
-┌─ fase 4 · 9 marcos en paralelo ────────────────────────┐
-│ 6× gpt-5 + 2× Sonnet 4.6 + 1× Opus 4.7                 │
-│ ↓                                                      │
-│ embeddings (text-embedding-3-large)                    │
-│ ↓                                                      │
-│ MDS clásico + coseno                                   │
-└────────────────────────────────────────────────────────┘
-   ↓
-┌─ fase 5 · síntesis + disenso dual ─────────────────────┐
-│ consenso             (Haiku 4.5)                       │
-│ décimo hombre ciego  (Opus 4.7, sin ver a los 9)       │
-│ décimo hombre informado (gpt-5, cross-lab — ve los 9   │
-│                          + ciego, devuelve what_holds /│
-│                          what_revised / what_discarded)│
-└────────────────────────────────────────────────────────┘
-   ↓
-┌─ fase 6 · verificación de claims ──────────────────────┐
-│ extrae claims        (Sonnet 4.6)                      │
-│ verifica cada uno    (gpt-5, cross-lab)                │
-│ → strong / moderate / weak / unsupported               │
-│   los claims alucinados del consenso salen en rojo     │
-└────────────────────────────────────────────────────────┘
-   ↓
-mapa de disenso + reporte (HTML + JSON)
-```
+![Pipeline — Henge vs. discusión de 10 agentes](docs/henge_vs_debate_github_palette_es.svg)
 
 Se lee como uno de tres estados pre-registrados (definición completa de
 bins en [`docs/cfi-spec.md`](docs/cfi-spec.md)):

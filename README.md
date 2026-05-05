@@ -101,56 +101,7 @@ For Claude Desktop, Cursor or any other MCP host, see the
 
 ## Pipeline
 
-```
-question
-   ↓
-┌─ phase 1 · scoping ────────────────────────────────────┐
-│ base questions      (Haiku 4.5)                        │
-│ adversarial sweep   (gpt-5, cross-lab)                 │
-│ → 4–7 questions, 2–4 of them challenging hidden        │
-│   assumptions in the question itself                   │
-└────────────────────────────────────────────────────────┘
-   ↓ user answers
-┌─ phase 2 · meta-frame ─────────────────────────────────┐
-│ classify (gpt-5, cross-lab)                            │
-│ → decision_class · urgency · question_quality          │
-│   · meta_recommendation                                │
-│ if proxy / exploration / fake-urgency:                 │
-│   short-circuit with suggested_reformulation           │
-│   (saves ~$1.00/run)                                   │
-└────────────────────────────────────────────────────────┘
-   ↓
-┌─ phase 3 · canonical context ──────────────────────────┐
-│ canonicalize answers   (Opus 4.7)                      │
-│ → tight executive summary + flagged inconsistencies    │
-│   shown to all 9 advisors                              │
-└────────────────────────────────────────────────────────┘
-   ↓
-┌─ phase 4 · 9 frames in parallel ───────────────────────┐
-│ 6× gpt-5 + 2× Sonnet 4.6 + 1× Opus 4.7                 │
-│ ↓                                                      │
-│ embeddings (text-embedding-3-large)                    │
-│ ↓                                                      │
-│ classical MDS + cosine                                 │
-└────────────────────────────────────────────────────────┘
-   ↓
-┌─ phase 5 · synthesis + dual dissent ───────────────────┐
-│ consensus           (Haiku 4.5)                        │
-│ tenth-man blind     (Opus 4.7, no view of the 9)       │
-│ tenth-man informed  (gpt-5, cross-lab — sees the 9     │
-│                      + blind, returns what_holds /     │
-│                      what_revised / what_discarded)    │
-└────────────────────────────────────────────────────────┘
-   ↓
-┌─ phase 6 · claim verification ─────────────────────────┐
-│ extract claims      (Sonnet 4.6)                       │
-│ verify each         (gpt-5, cross-lab)                 │
-│ → strong / moderate / weak / unsupported               │
-│   hallucinated consensus claims surface in red         │
-└────────────────────────────────────────────────────────┘
-   ↓
-disagreement map + report (HTML + JSON)
-```
+![Pipeline — Henge vs. 10-agent debate](docs/henge_vs_debate_github_palette.svg)
 
 Reads as one of three pre-registered states (full bin definition in
 [`docs/cfi-spec.md`](docs/cfi-spec.md)):
