@@ -2,23 +2,57 @@
 
 > **Read this in:** [English](README.md) · [Español](README.es.md)
 
-**Structured Dissent Protocol** — 9 cognitive frames + 1 mandatory steel-man
-dissenter, exposed as an MCP server.
+**Structured Dissent Protocol** — 9 cognitive frames + 1 mandatory steel-man dissenter, exposed as an MCP server.
 
 ![Henge](docs/header-v2.jpg)
 
-Henge runs your decision through nine cognitive lenses in parallel, then
-forces a tenth advisor — the **Tenth Man** — to build the strongest possible
-steel-man case against whatever consensus the nine reach. It persists a JSON
-record + an editorial HTML report on disk and surfaces a single tri-state
-verdict driven by the **Consensus Fragility Index (CFI)**.
+---
 
-**Claim (v0.6.0).** Given a pre-registered protocol with `temperature=0`,
-the same question produces the same CFI bin across runs, modulo numerical
-noise from MDS init. v0.6 splits the run across two labs (Anthropic +
-OpenAI) by design, so the synthesizer's hallucinations get caught by the
-auditor instead of laundered into consensus. Validation against decision
-quality (Henge-50 benchmark) remains in flight.
+## What is Henge?
+
+Imagine you have an important decision. Instead of asking one person, you ask **nine advisors** simultaneously — each with a different way of thinking:
+
+- One looks at **numbers and evidence**
+- One finds **historical precedents** — what happened the last 3–5 times
+- One reasons **from scratch, no assumptions**
+- One finds **analogies from other domains** (biology, military, finance)
+- One maps the **full system** and its chain effects
+- One surfaces the **ethical tensions**
+- One **pushes back in good faith**
+- One imagines **what unlocks if everything goes 10×**
+- One assumes **failure in 12 months and describes how**
+
+All nine respond in parallel. Their agreement is measured. High convergence means consensus. High dispersion means the decision is more fragile than it looks.
+
+### The tenth: the mandatory dissenter
+
+There is a **tenth advisor required to disagree** — not arbitrarily, but constructively. Their job: build the strongest possible argument *against* the consensus, without having read what the other nine said. They reason independently, anticipate where the nine will converge, and attack that conclusion with the best case they can build.
+
+Why blind? If they read the nine first, they'd end up criticizing details. Reasoning in parallel, their dissent is genuine — it comes from a different direction, not as a reaction.
+
+This is called **steel-man**: attacking the strongest version of the opposing argument, not the weakest. The opposite of a straw man.
+
+### The eleventh: the cross-lab auditor
+
+The tenth is an Anthropic model. The **eleventh is an OpenAI model** — different company, different training, different reasoning patterns. Its job: read the tenth and sort their dissent into three piles:
+
+- **What holds** → survived contrast with the nine; real signal
+- **What's revised** → right direction, needs refinement
+- **What's discarded** → model-specific bias, not a finding
+
+A brilliant dissenter, plus an editor from a different school who separates valuable ideas from personal quirks.
+
+### Before all of this: a filter
+
+Before the nine activate, an **auditor reviews the question itself**. It checks: is this decision reversible? how urgent is it? is the question well-formed? If poorly framed, it stops the process and proposes a reformulation — saving ~$1.00/run on questions that don't merit a full analysis.
+
+### Why it matters
+
+A single opinion, however good, has blind spots. Nine diverse opinions reduce individual blind spots — but can share a **common error** (experts from the same field tend to fail the same way). The tenth is designed to attack that common error. The eleventh, coming from a different reasoning "family," keeps the tenth from just replacing one bias with another.
+
+The result is not a single answer. It's a **tension map**: where there is solid consensus, where there are cracks, what risks you might be overlooking. The final decision is still yours — but you make it with much clearer eyes.
+
+---
 
 [Demo](https://chrispiz.github.io/Henge-MCP/demo.html) · [Paper](WHITEPAPER.md) ·
 [Limits](LIMITS.md) · [Methodology](METHODOLOGY.md) · [CFI spec](docs/cfi-spec.md) ·
@@ -26,7 +60,46 @@ quality (Henge-50 benchmark) remains in flight.
 
 ---
 
-## What it does
+## Quickstart · Claude Code (30s)
+
+Paste this prompt into Claude Code and it self-installs by running a deterministic
+shell script — no LLM step-following, no drift:
+
+````
+Install Henge from https://github.com/ChrisPiz/Henge. Idempotent flow:
+
+1. Clone shallow (or pull if already there):
+   git clone --single-branch --depth 1 https://github.com/ChrisPiz/Henge-MCP.git ~/Henge \
+     || (cd ~/Henge && git pull --ff-only)
+
+2. cd ~/Henge && cp -n .env.example .env
+
+3. Ask me for ANTHROPIC_API_KEY and OPENAI_API_KEY one at a time. When I paste each one, update the matching line in ~/Henge/.env in-place. Confirm only the LENGTH back to me ("got it, 108 chars") — never echo the value to the chat or any other tool.
+
+4. Run the setup script — it handles Python ≥3.11 (with a 15-minute pyenv install fallback if missing), the venv, the editable install, the cross-cwd sanity check, key validation, MCP registration for every host installed (Claude Code, Claude Desktop, Cursor), and the /decide slash command:
+   cd ~/Henge && ./setup
+
+5. When the script prints "✓ Henge installed.", tell me to fully quit Claude Code (close ALL terminals running `claude`) and reopen, then try `/decide should I take the new job?`.
+````
+
+Restart Claude Code fully when it's done, then try:
+
+```
+/decide should I take the new job?
+```
+
+> **Note:** the `/decide` slash command is **Claude Code only**. In Claude
+> Desktop and Cursor, MCP tools don't appear as slash commands — you invoke
+> Henge by writing your question normally ("Should I quit my job to start a
+> company?") and Claude picks up the `decide` tool from its description, or
+> you can mention it explicitly ("use the decide tool to analyze ...").
+
+For Claude Desktop, Cursor or any other MCP host, see the
+[Manual install section in DEVELOPER.md](DEVELOPER.md#manual-install).
+
+---
+
+## Pipeline
 
 ```
 question
@@ -85,6 +158,13 @@ Reads as one of three pre-registered states (full bin definition in
 - **aligned-stable** — the nine cluster tightly and CFI < 0.33
 - **aligned-fragile** — the nine cluster tightly but CFI ≥ 0.33
 - **divided** — `σ` across the nine ≥ 0.03, no real consensus to attack
+
+**Claim (v0.6.0).** Given a pre-registered protocol with `temperature=0`,
+the same question produces the same CFI bin across runs, modulo numerical
+noise from MDS init. v0.6 splits the run across two labs (Anthropic +
+OpenAI) by design, so the synthesizer's hallucinations get caught by the
+auditor instead of laundered into consensus. Validation against decision
+quality (Henge-50 benchmark) remains in flight.
 
 ---
 
@@ -184,45 +264,6 @@ Everything else is automatic — the startup validator pings gpt-5 and
 embeddings up front, so a missing-access account fails loudly at boot
 instead of 60s into a `/decide` call. Schema bumps to `0.6`; the legacy
 `henge.pricing.total_cost` lookup is kept for back-compat through v0.7.
-
----
-
-## Quickstart · Claude Code (30s)
-
-Paste this prompt into Claude Code and it self-installs by running a deterministic
-shell script — no LLM step-following, no drift:
-
-````
-Install Henge from https://github.com/ChrisPiz/Henge. Idempotent flow:
-
-1. Clone shallow (or pull if already there):
-   git clone --single-branch --depth 1 https://github.com/ChrisPiz/Henge-MCP.git ~/Henge \
-     || (cd ~/Henge && git pull --ff-only)
-
-2. cd ~/Henge && cp -n .env.example .env
-
-3. Ask me for ANTHROPIC_API_KEY and OPENAI_API_KEY one at a time. When I paste each one, update the matching line in ~/Henge/.env in-place. Confirm only the LENGTH back to me ("got it, 108 chars") — never echo the value to the chat or any other tool.
-
-4. Run the setup script — it handles Python ≥3.11 (with a 15-minute pyenv install fallback if missing), the venv, the editable install, the cross-cwd sanity check, key validation, MCP registration for every host installed (Claude Code, Claude Desktop, Cursor), and the /decide slash command:
-   cd ~/Henge && ./setup
-
-5. When the script prints "✓ Henge installed.", tell me to fully quit Claude Code (close ALL terminals running `claude`) and reopen, then try `/decide should I take the new job?`.
-````
-
-Restart Claude Code fully when it's done, then try:
-
-```
-/decide should I take the new job?
-```
-
-> **Note:** the `/decide` slash command is **Claude Code only**. In Claude
-> Desktop and Cursor, MCP tools don't appear as slash commands — you invoke
-> Henge by writing your question normally ("Should I quit my job to start a
-> company?") and Claude picks up the `decide` tool from its description, or
-> you can mention it explicitly ("use the decide tool to analyze ...").
-
-For Claude Desktop, Cursor or any other MCP host, see the
-[Manual install section in DEVELOPER.md](DEVELOPER.md#manual-install).
 
 ---
 
